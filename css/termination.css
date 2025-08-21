@@ -85,11 +85,11 @@
   .termination-message {
     font-size: var(--font-size-large);
   }
-  
+
   .consequences ul {
     text-align: center;
   }
-  
+
   .consequences li {
     text-align: left;
   }

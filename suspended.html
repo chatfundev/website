@@ -21,7 +21,7 @@
           <p>time remaining:</p>
           <div class="countdown" id="countdown">calculating...</div>
         </div>
-        
+
         <div class="reason">
           <p>please review our community guidelines and return when your suspension is lifted.</p>
         </div>
@@ -36,27 +36,27 @@
       // Get the expires timestamp from URL parameter
       const urlParams = new URLSearchParams(window.location.search);
       const expiresTimestamp = urlParams.get('expires');
-      
+
       if (!expiresTimestamp) {
         document.getElementById('countdown').textContent = 'invalid suspension data';
       } else {
         const expiresDate = new Date(parseInt(expiresTimestamp) * 1000);
-        
+
         function updateCountdown() {
           const now = new Date();
           const timeLeft = expiresDate - now;
-          
+
           if (timeLeft <= 0) {
             // Suspension expired, redirect to app
             window.location.href = 'app.html';
             return;
           }
-          
+
           const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
           const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
           const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
           const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-          
+
           let countdownText = '';
           if (days > 0) {
             countdownText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
@@ -67,10 +67,10 @@
           } else {
             countdownText = `${seconds}s`;
           }
-          
+
           document.getElementById('countdown').textContent = countdownText;
         }
-        
+
         // Update countdown immediately and then every second
         updateCountdown();
         setInterval(updateCountdown, 1000);
