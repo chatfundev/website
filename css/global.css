@@ -1,0 +1,28 @@
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--container-max-width);
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+/* Container override for login and register pages */
+.container.form-container {
+  max-width: var(--form-container-max-width);
+}

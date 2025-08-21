@@ -1,0 +1,72 @@
+/* Form Styles */
+.form-group {
+  margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+  display: block;
+  color: var(--text-color);
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-base);
+  text-align: left;
+}
+
+.form-group input {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-group input::placeholder {
+  color: var(--text-secondary);
+}
+
+.form-group select {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.form-group select option {
+  background-color: var(--surface-color);
+  color: var(--text-color);
+}
+
+.login-button {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--background-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color var(--transition-duration) ease;
+}
+
+.login-button:hover {
+  background-color: var(--primary-hover);
+}

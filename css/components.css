@@ -1,0 +1,97 @@
+/* Button Styles */
+.buttons {
+  display: flex;
+  gap: var(--spacing-lg);
+  justify-content: center;
+  margin-bottom: var(--spacing-xxxl);
+}
+
+.btn {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--background-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background-color var(--transition-duration) ease;
+}
+
+.btn:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn.secondary {
+  background-color: var(--surface-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.btn.secondary:hover {
+  background-color: var(--surface-hover);
+}
+
+.btn.danger {
+  background-color: var(--danger-color);
+  border: 2px solid var(--danger-color);
+  color: white;
+}
+
+.btn.danger:hover {
+  background-color: transparent;
+  border: 2px solid var(--danger-hover);
+  transition: border-color var(--transition-duration-slow) ease;
+}
+
+/* Checkbox Styles */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-sm) 0;
+  cursor: pointer;
+}
+
+.checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--surface-color);
+  cursor: pointer;
+  position: relative;
+  transition: all var(--transition-duration) ease;
+}
+
+.checkbox:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.checkbox:hover {
+  border-color: var(--primary-color);
+}
+
+.checkbox:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.checkbox-label {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  user-select: none;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+}

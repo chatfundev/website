@@ -1,0 +1,30 @@
+/* Header Styles */
+.header {
+  text-align: center;
+  margin-bottom: var(--spacing-xxxl);
+}
+
+.header h1 {
+  color: var(--primary-color);
+  font-size: var(--font-size-xxl);
+  font-weight: normal;
+  margin-bottom: var(--spacing-md);
+}
+
+/* Header override for login and register pages */
+.header.form-header h1 {
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-xs);
+}
+
+.header p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-large);
+  margin-bottom: var(--spacing-xxxl);
+}
+
+/* Header paragraph override for login and register pages */
+.header.form-header p {
+  font-size: var(--font-size-base);
+  margin-bottom: 0;
+}

@@ -1,0 +1,40 @@
+/* CSS Variables */
+:root {
+  /* Colors */
+  --primary-color: #ff9500;
+  --primary-hover: #ffb84d;
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --background-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --text-secondary: #808080;
+  --surface-color: #2d2d2d;
+  --surface-hover: #404040;
+  --border-color: #404040;
+
+  /* Typography */
+  --font-family: 'Courier New', monospace;
+  --font-size-base: 14px;
+  --font-size-large: 16px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 32px;
+
+  /* Spacing */
+  --spacing-xs: 8px;
+  --spacing-sm: 12px;
+  --spacing-md: 16px;
+  --spacing-lg: 20px;
+  --spacing-xl: 24px;
+  --spacing-xxl: 30px;
+  --spacing-xxxl: 40px;
+
+  /* Layout */
+  --container-max-width: 500px;
+  --form-container-max-width: 400px;
+  --features-max-width: 300px;
+  --border-radius: 4px;
+
+  /* Transitions */
+  --transition-duration: 0.2s;
+  --transition-duration-slow: 0.4s;
+}

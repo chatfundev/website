@@ -1,0 +1,28 @@
+/* Features Section (Index page) */
+.features {
+  text-align: left;
+  max-width: var(--features-max-width);
+  margin: 0 auto;
+}
+
+.features h3 {
+  color: var(--primary-color);
+  font-size: var(--font-size-large);
+  margin-bottom: var(--spacing-md);
+}
+
+.features ul {
+  list-style: none;
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  line-height: 1.6;
+}
+
+.features li {
+  margin-bottom: var(--spacing-xs);
+}
+
+.features li::before {
+  content: "• ";
+  color: var(--primary-color);
+}
