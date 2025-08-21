@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const userRole = 'admin'; // Can be 'user', 'mod', or 'admin'
   const currentUsername = document.getElementById('username').textContent;
 
-  if (userRole === 'mod' || userRole === 'admin') {
+  if (userRole === 'mod') {
     document.querySelector('.mod-only').style.display = 'flex';
   }
 

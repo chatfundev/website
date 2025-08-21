@@ -1,0 +1,69 @@
+/* Suspension Page Styles */
+.suspension-message {
+  color: var(--danger-color);
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  margin-top: var(--spacing-sm);
+}
+
+.suspension-info {
+  margin: var(--spacing-xxxl) 0;
+  padding: var(--spacing-xl);
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.countdown-container {
+  margin-bottom: var(--spacing-xl);
+}
+
+.countdown-container p {
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-sm);
+  font-size: var(--font-size-base);
+}
+
+.countdown {
+  font-size: var(--font-size-xxl);
+  font-weight: bold;
+  color: var(--danger-color);
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+  background-color: var(--background-color);
+  padding: var(--spacing-md);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--danger-color);
+  display: inline-block;
+  min-width: 200px;
+}
+
+.reason {
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+}
+
+.reason p {
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.redirect-info {
+  margin-top: var(--spacing-xl);
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .countdown {
+    font-size: var(--font-size-xl);
+    min-width: 150px;
+    letter-spacing: 1px;
+  }
+  
+  .suspension-message {
+    font-size: var(--font-size-large);
+  }
+}

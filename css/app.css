@@ -788,8 +788,3 @@
   border-color: var(--danger-color);
   background-color: rgba(220, 53, 69, 0.05);
 }
-
-/* Hidden by default - will be shown based on user permissions */
-.admin-only-action {
-  display: none;
-}
