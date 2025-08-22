@@ -200,15 +200,15 @@ document.addEventListener('DOMContentLoaded', function () {
   // Report message functionality
   reportMenuItem.addEventListener('click', function () {
     contextMenu.style.display = 'none';
-    
+
     // Populate the report modal with message information
     document.getElementById('reportedUsername').textContent = currentMessageAuthor;
     const messageContent = currentMessageElement.querySelector('.message-text').textContent;
     document.getElementById('reportedMessageContent').textContent = messageContent;
-    
+
     // Reset the form
     resetReportForm();
-    
+
     reportModal.style.display = 'flex';
   });
 
@@ -393,12 +393,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('input[name="reportReason"]').forEach(radio => {
       radio.checked = false;
     });
-    
+
     // Clear description
     const descriptionTextarea = document.getElementById('reportDescription');
     descriptionTextarea.value = '';
     updateCharacterCount();
-    
+
     // Disable submit button
     document.getElementById('submitReport').disabled = true;
   }
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('submitReport').addEventListener('click', function () {
     const selectedReason = document.querySelector('input[name="reportReason"]:checked');
     const description = document.getElementById('reportDescription').value;
-    
+
     if (!selectedReason) {
       return; // Should not happen due to button being disabled
     }
@@ -460,11 +460,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const originalText = submitButton.innerHTML;
     submitButton.innerHTML = '<i class="fas fa-check"></i> Report Sent';
     submitButton.disabled = true;
-    
+
     setTimeout(() => {
       submitButton.innerHTML = originalText;
       closeModal(reportModal);
-      
+
       // You could show a success toast here
       console.log('Report has been sent to moderators for review.');
     }, 1500);
