@@ -4,17 +4,39 @@
   margin-bottom: var(--spacing-xxxl);
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.logo-image {
+  height: 48px;
+  width: 48px;
+}
+
 .header h1 {
   color: var(--primary-color);
   font-size: var(--font-size-xxl);
   font-weight: normal;
-  margin-bottom: var(--spacing-md);
+  margin: 0;
 }
 
 /* Header override for login and register pages */
+.header.form-header .logo-container {
+  margin-bottom: var(--spacing-xs);
+}
+
+.header.form-header .logo-image {
+  height: 36px;
+  width: 36px;
+}
+
 .header.form-header h1 {
   font-size: var(--font-size-xl);
-  margin-bottom: var(--spacing-xs);
+  margin: 0;
 }
 
 .header p {
