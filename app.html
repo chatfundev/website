@@ -372,6 +372,9 @@
 
     <!-- Context Menu -->
     <div id="messageContextMenu" class="context-menu">
+      <div class="context-menu-item" id="reportMessage">
+        <i class="fas fa-flag"></i> Report
+      </div>
       <div class="context-menu-item" id="deleteMessage">
         <i class="fas fa-trash"></i> Delete Message
       </div>
@@ -397,6 +400,129 @@
       </div>
     </div>
 
+    <!-- Report Message Modal -->
+    <div id="reportModal" class="modal">
+      <div class="modal-content report-modal">
+        <div class="modal-header">
+          <h3><i class="fas fa-flag report-icon"></i> Report Message</h3>
+          <span class="modal-close" id="reportModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="report-info">
+            <div class="reported-user">
+              <span class="report-label">Reporting message from:</span>
+              <span class="reported-username" id="reportedUsername"></span>
+            </div>
+            <div class="reported-message">
+              <span class="report-label">Message content:</span>
+              <div class="message-preview" id="reportedMessageContent"></div>
+            </div>
+          </div>
+          
+          <div class="report-form">
+            <div class="form-section">
+              <label class="form-label required">Reason for reporting</label>
+              <div class="reason-options">
+                <div class="reason-option">
+                  <input type="radio" id="spam" name="reportReason" value="spam" class="radio-input">
+                  <label for="spam" class="radio-label">
+                    <div class="radio-content">
+                      <i class="fas fa-exclamation-triangle reason-icon spam-icon"></i>
+                      <div class="reason-text">
+                        <span class="reason-title">Spam</span>
+                        <span class="reason-description">Unwanted repetitive content</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                
+                <div class="reason-option">
+                  <input type="radio" id="harassment" name="reportReason" value="harassment" class="radio-input">
+                  <label for="harassment" class="radio-label">
+                    <div class="radio-content">
+                      <i class="fas fa-user-slash reason-icon harassment-icon"></i>
+                      <div class="reason-text">
+                        <span class="reason-title">Harassment</span>
+                        <span class="reason-description">Bullying or targeting someone</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                
+                <div class="reason-option">
+                  <input type="radio" id="inappropriate" name="reportReason" value="inappropriate" class="radio-input">
+                  <label for="inappropriate" class="radio-label">
+                    <div class="radio-content">
+                      <i class="fas fa-ban reason-icon inappropriate-icon"></i>
+                      <div class="reason-text">
+                        <span class="reason-title">Inappropriate Content</span>
+                        <span class="reason-description">Offensive or unsuitable material</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                
+                <div class="reason-option">
+                  <input type="radio" id="misinformation" name="reportReason" value="misinformation" class="radio-input">
+                  <label for="misinformation" class="radio-label">
+                    <div class="radio-content">
+                      <i class="fas fa-info-circle reason-icon misinformation-icon"></i>
+                      <div class="reason-text">
+                        <span class="reason-title">Misinformation</span>
+                        <span class="reason-description">False or misleading information</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+                
+                <div class="reason-option">
+                  <input type="radio" id="other" name="reportReason" value="other" class="radio-input">
+                  <label for="other" class="radio-label">
+                    <div class="radio-content">
+                      <i class="fas fa-ellipsis-h reason-icon other-icon"></i>
+                      <div class="reason-text">
+                        <span class="reason-title">Other</span>
+                        <span class="reason-description">Something else not listed above</span>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <label for="reportDescription" class="form-label">Additional details (optional)</label>
+              <textarea 
+                id="reportDescription" 
+                name="reportDescription" 
+                placeholder="Provide more context about why you're reporting this message..."
+                maxlength="500"
+                rows="4"
+              ></textarea>
+              <div class="character-count">
+                <span id="descriptionCount">0</span>/500
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <div class="report-disclaimer">
+                <i class="fas fa-shield-alt disclaimer-icon"></i>
+                <div class="disclaimer-text">
+                  <p>Your report will be reviewed by our moderation team. False reports may result in action against your account.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelReport">Cancel</button>
+          <button class="btn primary report-submit" id="submitReport" disabled>
+            <i class="fas fa-paper-plane"></i> Submit Report
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- User Actions Modal -->
     <div id="userActionsModal" class="modal">
       <div class="modal-content">
@@ -406,7 +532,7 @@
         </div>
         <div class="modal-body">
           <div class="user-action-info">
-            <p>User: <span id="targetUsername"></span></p>
+            <p>Taking action on user: <span id="targetUsername"></span></p>
           </div>
           <div class="action-buttons">
             <div class="action-section">
@@ -420,8 +546,8 @@
                 </label>
                 <div class="action-duration">
                   <div class="form-group">
-                    <label for="muteDuration">duration</label>
-                    <select id="muteDuration" name="muteDuration" required>
+                    <label for="muteDuration">Duration</label>
+                    <select id="muteDuration" name="muteDuration">
                       <option value="5">5 minutes</option>
                       <option value="30">30 minutes</option>
                       <option value="60">1 hour</option>
@@ -430,8 +556,8 @@
                     </select>
                   </div>
                   <div class="form-group">
-                    <label for="muteReason">reason</label>
-                    <input type="text" id="muteReason" name="muteReason" placeholder="enter reason" required>
+                    <label for="muteReason">Reason</label>
+                    <input type="text" id="muteReason" name="muteReason" placeholder="Enter mute reason...">
                   </div>
                 </div>
               </div>
@@ -444,8 +570,8 @@
                 </label>
                 <div class="action-reason">
                   <div class="form-group">
-                    <label for="warnReason">reason</label>
-                    <input type="text" id="warnReason" name="warnReason" placeholder="enter reason" required>
+                    <label for="warnReason">Reason</label>
+                    <input type="text" id="warnReason" name="warnReason" placeholder="Enter warning reason...">
                   </div>
                 </div>
               </div>
@@ -458,8 +584,17 @@
                 </label>
                 <div class="action-reason">
                   <div class="form-group">
-                    <label for="banReason">reason</label>
-                    <input type="text" id="banReason" name="banReason" placeholder="enter reason" required>
+                    <label for="banReason">Reason</label>
+                    <input type="text" id="banReason" name="banReason" placeholder="Enter ban reason...">
+                  </div>
+                  <div class="form-group">
+                    <label for="banDuration">Duration</label>
+                    <select id="banDuration" name="banDuration">
+                      <option value="1440">24 hours</option>
+                      <option value="10080">7 days</option>
+                      <option value="43200">30 days</option>
+                      <option value="0">Permanent</option>
+                    </select>
                   </div>
                 </div>
               </div>

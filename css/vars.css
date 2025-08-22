@@ -3,10 +3,16 @@
   /* Colors */
   --primary-color: #ff9500;
   --primary-hover: #ffb84d;
+  --primary-color-rgb: 255, 149, 0;
   --danger-color: #dc3545;
   --danger-hover: #c82333;
+  --success-color: #2ecc71;
+  --success-hover: #27ae60;
+  --warning-color: #f39c12;
+  --warning-hover: #e67e22;
   --background-color: #1e1e1e;
   --text-color: #d4d4d4;
+  --text-primary: #d4d4d4;
   --text-secondary: #808080;
   --surface-color: #2d2d2d;
   --surface-hover: #404040;
@@ -14,6 +20,7 @@
 
   /* Typography */
   --font-family: 'Courier New', monospace;
+  --font-size-sm: 12px;
   --font-size-base: 14px;
   --font-size-large: 16px;
   --font-size-xl: 24px;
@@ -33,6 +40,7 @@
   --form-container-max-width: 400px;
   --features-max-width: 300px;
   --border-radius: 4px;
+  --border-radius-lg: 12px;
 
   /* Transitions */
   --transition-duration: 0.2s;
