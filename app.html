@@ -33,6 +33,7 @@
       <!-- Sidebar -->
       <div class="sidebar">
         <nav class="sidebar-nav">
+          <!-- Main navigation items -->
           <div class="nav-item active" data-tab="chat">
             <span class="nav-icon"><i class="fas fa-comments"></i></span>
             <span class="nav-text">chat</span>
@@ -49,15 +50,23 @@
             <span class="nav-icon"><i class="fas fa-box"></i></span>
             <span class="nav-text">items</span>
           </div>
-          <!-- Mod/Admin sections (hidden by default) -->
-          <div class="nav-item mod-only" data-tab="mod-dash" style="display: none;">
-            <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
-            <span class="nav-text">mod dash</span>
+
+          <!-- Separator and Mod/Admin sections -->
+          <div class="nav-separator"></div>
+          <div class="nav-item mod-only" data-tab="reports" style="display: none;">
+            <span class="nav-icon"><i class="fas fa-flag"></i></span>
+            <span class="nav-text">reports</span>
           </div>
-          <div class="nav-item admin-only" data-tab="admin-dash" style="display: none;">
+          <div class="nav-item admin-only" data-tab="server-stats" style="display: none;">
+            <span class="nav-icon"><i class="fas fa-server"></i></span>
+            <span class="nav-text">server stats</span>
+          </div>
+          <div class="nav-item admin-only" data-tab="other-admin-stuff" style="display: none;">
             <span class="nav-icon"><i class="fas fa-tools"></i></span>
-            <span class="nav-text">admin dash</span>
+            <span class="nav-text">admin tools</span>
           </div>
+
+          <!-- Settings at bottom with separator -->
           <div class="nav-item settings" data-tab="settings">
             <span class="nav-icon"><i class="fas fa-cog"></i></span>
             <span class="nav-text">settings</span>
@@ -183,7 +192,7 @@
           <div class="tab-header">
             <h2>items</h2>
             <div class="currency-info">
-              <span>💰 coins: 250</span>
+              <span><i class="fas fa-coins" style="color: gold;"></i> coins: 250</span>
             </div>
           </div>
           <div class="items-grid">
@@ -214,10 +223,10 @@
           </div>
         </div>
 
-        <!-- Mod Dashboard Tab -->
-        <div class="tab-content" id="mod-dash">
+        <!-- Reports Tab (for mods+) -->
+        <div class="tab-content" id="reports">
           <div class="tab-header">
-            <h2>moderator dashboard</h2>
+            <h2>reports</h2>
           </div>
           <div class="mod-tools">
             <div class="tool-section">
@@ -261,14 +270,14 @@
           </div>
         </div>
 
-        <!-- Admin Dashboard Tab -->
-        <div class="tab-content" id="admin-dash">
+        <!-- Server Stats Tab (for admins) -->
+        <div class="tab-content" id="server-stats">
           <div class="tab-header">
-            <h2>administrator dashboard</h2>
+            <h2>server stats</h2>
           </div>
           <div class="admin-tools">
             <div class="tool-section">
-              <h3>server stats</h3>
+              <h3>server statistics</h3>
               <div class="stats-grid">
                 <div class="stat-item">
                   <span class="stat-label">total users</span>
@@ -282,47 +291,43 @@
                   <span class="stat-label">messages today</span>
                   <span class="stat-value">8,456</span>
                 </div>
+                <div class="stat-item">
+                  <span class="stat-label">server uptime</span>
+                  <span class="stat-value">7d 14h</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">memory usage</span>
+                  <span class="stat-value">68%</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">cpu usage</span>
+                  <span class="stat-value">32%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tools Tab (for admins) -->
+        <div class="tab-content" id="other-admin-stuff">
+          <div class="tab-header">
+            <h2>admin tools</h2>
+          </div>
+          <div class="admin-tools">
+            <div class="tool-section">
+              <h3>user management</h3>
+              <div class="admin-actions">
+                <button class="btn-primary">manage users</button>
+                <button class="btn-secondary">view ban list</button>
+                <button class="btn-secondary">system announcements</button>
               </div>
             </div>
             <div class="tool-section">
-              <h3>recent reports</h3>
-              <div class="reports-list">
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                    <button class="btn-ban">ban</button>
-                  </div>
-                </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                    <button class="btn-ban">ban</button>
-                  </div>
-                </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                    <button class="btn-ban">ban</button>
-                  </div>
-                </div>
+              <h3>server management</h3>
+              <div class="admin-actions">
+                <button class="btn-secondary">maintenance mode</button>
+                <button class="btn-secondary">backup database</button>
+                <button class="btn-danger">restart server</button>
               </div>
             </div>
           </div>

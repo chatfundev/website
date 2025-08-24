@@ -1,46 +1,77 @@
-// Tab switching functionality
+/**
+ * Main Chat Application JavaScript
+ * Handles tab switching, chat functionality, user moderation, and context menus
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
-  const navItems = document.querySelectorAll('.nav-item');
-  const tabContents = document.querySelectorAll('.tab-content');
-
-  navItems.forEach(item => {
-    item.addEventListener('click', function () {
-      const tabId = this.getAttribute('data-tab');
-
-      // Remove active class from all nav items and tab contents
-      navItems.forEach(nav => nav.classList.remove('active'));
-      tabContents.forEach(content => content.classList.remove('active'));
-
-      // Add active class to clicked nav item and corresponding tab content
-      this.classList.add('active');
-      document.getElementById(tabId).classList.add('active');
-    });
-  });
+  // =====================================
+  // CONFIGURATION & GLOBAL VARIABLES
+  // =====================================
 
   // Mock user role check (replace with actual authentication logic)
-  const userRole = 'admin'; // Can be 'user', 'mod', or 'admin'
-  const currentUsername = document.getElementById('username').textContent;
+  const USER_ROLE = 'admin'; // Can be 'user', 'mod', or 'admin'
+  const CURRENT_USERNAME = document.getElementById('username').textContent;
 
-  if (userRole === 'mod') {
-    document.querySelector('.mod-only').style.display = 'flex';
-  }
-
-  if (userRole === 'admin') {
-    document.querySelector('.admin-only').style.display = 'flex';
-    document.querySelectorAll('.admin-only-action').forEach(element => {
-      element.style.display = 'block';
-    });
-  }
-
-  // Chat functionality
+  // DOM Elements
+  const navItems = document.querySelectorAll('.nav-item');
+  const tabContents = document.querySelectorAll('.tab-content');
   const chatInput = document.querySelector('.chat-input');
   const sendButton = document.querySelector('.send-button');
   const chatMessages = document.getElementById('chat-messages');
   const chatInputContainer = document.querySelector('.chat-input-container');
 
-  // Mute functionality
+  // Mute functionality variables
   let muteExpiry = null;
   let muteCountdownInterval = null;
+
+  // Context menu variables
+  let currentMessageElement = null;
+  let currentMessageAuthor = null;
+  let currentMessageId = null;
+
+  // =====================================
+  // TAB SWITCHING FUNCTIONALITY
+  // =====================================
+
+  function initializeTabSwitching() {
+    navItems.forEach(item => {
+      item.addEventListener('click', function () {
+        const tabId = this.getAttribute('data-tab');
+
+        // Remove active class from all nav items and tab contents
+        navItems.forEach(nav => nav.classList.remove('active'));
+        tabContents.forEach(content => content.classList.remove('active'));
+
+        // Add active class to clicked nav item and corresponding tab content
+        this.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
+  }
+
+  // =====================================
+  // USER ROLE PERMISSIONS
+  // =====================================
+
+  function initializeUserPermissions() {
+    if (USER_ROLE === 'mod' || USER_ROLE === 'admin') {
+      document.querySelectorAll('.mod-only').forEach(element => {
+        element.style.display = 'flex';
+      });
+    }
+
+    if (USER_ROLE === 'admin') {
+      document.querySelectorAll('.admin-only').forEach(element => {
+        element.style.display = 'flex';
+      });
+
+      document.querySelectorAll('.admin-only-action').forEach(element => {
+        element.style.display = 'block';
+      });
+    }
+  }  // =====================================
+  // MUTE FUNCTIONALITY
+  // =====================================
 
   function muteUser(expiryEpochSeconds) {
     muteExpiry = expiryEpochSeconds * 1000; // Convert to milliseconds
@@ -92,16 +123,12 @@ document.addEventListener('DOMContentLoaded', function () {
     `;
 
     // Reattach event listeners
-    const newChatInput = document.querySelector('.chat-input');
-    const newSendButton = document.querySelector('.send-button');
-
-    newSendButton.addEventListener('click', sendMessage);
-    newChatInput.addEventListener('keypress', function (e) {
-      if (e.key === 'Enter') {
-        sendMessage();
-      }
-    });
+    attachChatEventListeners();
   }
+
+  // =====================================
+  // CHAT FUNCTIONALITY
+  // =====================================
 
   function sendMessage() {
     // Check if user is muted
@@ -113,117 +140,186 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!currentChatInput) return; // Input not available (user might be muted)
 
     const message = currentChatInput.value.trim();
-    if (message) {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = 'message';
-      messageDiv.setAttribute('data-author', currentUsername);
-      messageDiv.setAttribute('data-message-id', Date.now().toString());
-      messageDiv.innerHTML = `
-              <span class="message-user">${currentUsername}:</span>
-              <span class="message-text">${message}</span>
-              <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            `;
-      chatMessages.appendChild(messageDiv);
-      chatMessages.scrollTop = chatMessages.scrollHeight;
-      currentChatInput.value = '';
+    if (!message) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+    messageDiv.setAttribute('data-author', CURRENT_USERNAME);
+    messageDiv.setAttribute('data-message-id', Date.now().toString());
+    messageDiv.innerHTML = `
+      <span class="message-user">${CURRENT_USERNAME}:</span>
+      <span class="message-text">${message}</span>
+      <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+    `;
+
+    chatMessages.appendChild(messageDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+    currentChatInput.value = '';
+  }
+
+  function attachChatEventListeners() {
+    const currentSendButton = document.querySelector('.send-button');
+    const currentChatInput = document.querySelector('.chat-input');
+
+    if (currentSendButton) {
+      currentSendButton.addEventListener('click', sendMessage);
+    }
+
+    if (currentChatInput) {
+      currentChatInput.addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+          sendMessage();
+        }
+      });
     }
   }
 
-  sendButton.addEventListener('click', sendMessage);
-  chatInput.addEventListener('keypress', function (e) {
-    if (e.key === 'Enter') {
-      sendMessage();
-    }
-  });
+  function initializeChatFunctionality() {
+    attachChatEventListeners();
+  }
 
-  // Example function to mute a user (can be called from admin actions)
-  // Usage: muteUserWithCountdown(Math.floor(Date.now() / 1000) + 300); // Mute for 5 minutes
-  window.muteUserWithCountdown = muteUser;
+  // =====================================
+  // CONTEXT MENU FUNCTIONALITY  
+  // =====================================
 
-  // Context Menu Functionality
-  const contextMenu = document.getElementById('messageContextMenu');
-  const reportMenuItem = document.getElementById('reportMessage');
-  const deleteMenuItem = document.getElementById('deleteMessage');
-  const userActionsMenuItem = document.getElementById('userActions');
+  function initializeContextMenu() {
+    const contextMenu = document.getElementById('messageContextMenu');
+    const reportMenuItem = document.getElementById('reportMessage');
+    const deleteMenuItem = document.getElementById('deleteMessage');
+    const userActionsMenuItem = document.getElementById('userActions');
 
-  // Modals
-  const reportModal = document.getElementById('reportModal');
-  const deleteModal = document.getElementById('deleteModal');
-  const userActionsModal = document.getElementById('userActionsModal');
+    // Context menu event listeners
+    document.addEventListener('contextmenu', function (e) {
+      const messageElement = e.target.closest('.message');
+      if (messageElement && messageElement.parentElement.id === 'chat-messages') {
+        e.preventDefault();
 
-  let currentMessageElement = null;
-  let currentMessageAuthor = null;
-  let currentMessageId = null;
+        currentMessageElement = messageElement;
+        currentMessageAuthor = messageElement.getAttribute('data-author');
+        currentMessageId = messageElement.getAttribute('data-message-id');
 
-  // Context menu event listeners
-  document.addEventListener('contextmenu', function (e) {
-    const messageElement = e.target.closest('.message');
-    if (messageElement && messageElement.parentElement.id === 'chat-messages') {
-      e.preventDefault();
+        // Show/hide menu items based on permissions
+        const isOwnMessage = currentMessageAuthor === CURRENT_USERNAME;
+        const isMod = USER_ROLE === 'mod' || USER_ROLE === 'admin';
+        const isAdmin = USER_ROLE === 'admin';
 
-      currentMessageElement = messageElement;
-      currentMessageAuthor = messageElement.getAttribute('data-author');
-      currentMessageId = messageElement.getAttribute('data-message-id');
+        // Report message: show for everyone, but not for own messages
+        const showReport = !isOwnMessage;
+        reportMenuItem.style.display = showReport ? 'block' : 'none';
 
-      // Show/hide menu items based on permissions
-      const isOwnMessage = currentMessageAuthor === currentUsername;
-      const isMod = userRole === 'mod' || userRole === 'admin';
-      const isAdmin = userRole === 'admin';
+        // Delete message: show for mods/admins and message author
+        const showDelete = isMod || isOwnMessage;
+        deleteMenuItem.style.display = showDelete ? 'block' : 'none';
 
-      // Report message: show for everyone, but not for own messages
-      const showReport = !isOwnMessage;
-      reportMenuItem.style.display = showReport ? 'block' : 'none';
+        // User actions: show for mods/admins, but not for own messages
+        const showUserActions = isMod && !isOwnMessage;
+        userActionsMenuItem.style.display = showUserActions ? 'block' : 'none';
 
-      // Delete message: show for mods/admins and message author
-      const showDelete = isMod || isOwnMessage;
-      deleteMenuItem.style.display = showDelete ? 'block' : 'none';
-
-      // User actions: show for mods/admins, but not for own messages
-      const showUserActions = isMod && !isOwnMessage;
-      userActionsMenuItem.style.display = showUserActions ? 'block' : 'none';
-
-      // Only show context menu if at least one item is visible
-      if (showReport || showDelete || showUserActions) {
-        // Position and show context menu
-        contextMenu.style.left = e.pageX + 'px';
-        contextMenu.style.top = e.pageY + 'px';
-        contextMenu.style.display = 'block';
+        // Only show context menu if at least one item is visible
+        if (showReport || showDelete || showUserActions) {
+          // Position and show context menu
+          contextMenu.style.left = e.pageX + 'px';
+          contextMenu.style.top = e.pageY + 'px';
+          contextMenu.style.display = 'block';
+        }
       }
-    }
-  });
+    });
 
-  // Hide context menu when clicking elsewhere
-  document.addEventListener('click', function () {
-    contextMenu.style.display = 'none';
-  });
+    // Hide context menu when clicking elsewhere
+    document.addEventListener('click', function () {
+      contextMenu.style.display = 'none';
+    });
+  }
 
-  // Report message functionality
-  reportMenuItem.addEventListener('click', function () {
-    contextMenu.style.display = 'none';
+  // =====================================
+  // MODAL FUNCTIONALITY
+  // =====================================
 
-    // Populate the report modal with message information
-    document.getElementById('reportedUsername').textContent = currentMessageAuthor;
-    const messageContent = currentMessageElement.querySelector('.message-text').textContent;
-    document.getElementById('reportedMessageContent').textContent = messageContent;
+  function initializeModals() {
+    const reportModal = document.getElementById('reportModal');
+    const deleteModal = document.getElementById('deleteModal');
+    const userActionsModal = document.getElementById('userActionsModal');
 
-    // Reset the form
-    resetReportForm();
+    const reportMenuItem = document.getElementById('reportMessage');
+    const deleteMenuItem = document.getElementById('deleteMessage');
+    const userActionsMenuItem = document.getElementById('userActions');
 
-    reportModal.style.display = 'flex';
-  });
+    // Report message functionality
+    reportMenuItem.addEventListener('click', function () {
+      const contextMenu = document.getElementById('messageContextMenu');
+      contextMenu.style.display = 'none';
 
-  // Delete message functionality
-  deleteMenuItem.addEventListener('click', function () {
-    contextMenu.style.display = 'none';
-    deleteModal.style.display = 'flex';
-  });
+      // Populate the report modal with message information
+      document.getElementById('reportedUsername').textContent = currentMessageAuthor;
+      const messageContent = currentMessageElement.querySelector('.message-text').textContent;
+      document.getElementById('reportedMessageContent').textContent = messageContent;
 
-  // User actions functionality
-  userActionsMenuItem.addEventListener('click', function () {
-    contextMenu.style.display = 'none';
-    document.getElementById('targetUsername').textContent = currentMessageAuthor;
+      // Reset the form
+      resetReportForm();
+      reportModal.style.display = 'flex';
+    });
 
-    // Reset form
+    // Delete message functionality
+    deleteMenuItem.addEventListener('click', function () {
+      const contextMenu = document.getElementById('messageContextMenu');
+      contextMenu.style.display = 'none';
+      deleteModal.style.display = 'flex';
+    });
+
+    // User actions functionality
+    userActionsMenuItem.addEventListener('click', function () {
+      const contextMenu = document.getElementById('messageContextMenu');
+      contextMenu.style.display = 'none';
+      document.getElementById('targetUsername').textContent = currentMessageAuthor;
+
+      // Reset form
+      resetUserActionsForm();
+      toggleActionFields();
+      userActionsModal.style.display = 'flex';
+    });
+
+    // Modal close handlers
+    initializeModalCloseHandlers(reportModal, deleteModal, userActionsModal);
+  }
+
+  function initializeModalCloseHandlers(reportModal, deleteModal, userActionsModal) {
+    // Delete modal event listeners
+    document.getElementById('deleteModalClose').addEventListener('click', () => closeModal(deleteModal));
+    document.getElementById('cancelDelete').addEventListener('click', () => closeModal(deleteModal));
+    document.getElementById('confirmDelete').addEventListener('click', function () {
+      if (currentMessageElement) {
+        currentMessageElement.remove();
+      }
+      closeModal(deleteModal);
+    });
+
+    // User actions modal event listeners
+    document.getElementById('userActionsModalClose').addEventListener('click', () => closeModal(userActionsModal));
+    document.getElementById('cancelUserActions').addEventListener('click', () => closeModal(userActionsModal));
+    document.getElementById('confirmUserActions').addEventListener('click', handleUserActionsSubmit);
+
+    // Report modal close handlers
+    document.getElementById('reportModalClose').addEventListener('click', () => closeModal(reportModal));
+    document.getElementById('cancelReport').addEventListener('click', () => closeModal(reportModal));
+    document.getElementById('submitReport').addEventListener('click', handleReportSubmit);
+
+    // Close modals when clicking outside
+    window.addEventListener('click', function (e) {
+      if (e.target === reportModal) closeModal(reportModal);
+      if (e.target === deleteModal) closeModal(deleteModal);
+      if (e.target === userActionsModal) closeModal(userActionsModal);
+    });
+  }
+
+  function closeModal(modal) {
+    modal.style.display = 'none';
+  }
+
+  // =====================================
+  // USER ACTIONS FUNCTIONALITY
+  // =====================================
+
+  function resetUserActionsForm() {
     document.getElementById('muteUser').checked = false;
     document.getElementById('warnUser').checked = false;
     document.getElementById('banUser').checked = false;
@@ -232,12 +328,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('warnReason').value = '';
     document.getElementById('banReason').value = '';
     document.getElementById('banDuration').value = '1440';
-
-    // Show/hide duration and reason fields based on checkbox state
-    toggleActionFields();
-
-    userActionsModal.style.display = 'flex';
-  });
+  }
 
   // Function to toggle action fields visibility and required attributes
   function toggleActionFields() {
@@ -262,42 +353,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('banReason').required = banUser.checked;
   }
 
-  // Add event listeners for checkboxes to toggle field visibility
-  document.getElementById('muteUser').addEventListener('change', toggleActionFields);
-  document.getElementById('warnUser').addEventListener('change', toggleActionFields);
-  document.getElementById('banUser').addEventListener('change', toggleActionFields);
-
-  // Modal close functionality
-  function closeModal(modal) {
-    modal.style.display = 'none';
-  }
-
-  // Delete modal event listeners
-  document.getElementById('deleteModalClose').addEventListener('click', function () {
-    closeModal(deleteModal);
-  });
-
-  document.getElementById('cancelDelete').addEventListener('click', function () {
-    closeModal(deleteModal);
-  });
-
-  document.getElementById('confirmDelete').addEventListener('click', function () {
-    if (currentMessageElement) {
-      currentMessageElement.remove();
-    }
-    closeModal(deleteModal);
-  });
-
-  // User actions modal event listeners
-  document.getElementById('userActionsModalClose').addEventListener('click', function () {
-    closeModal(userActionsModal);
-  });
-
-  document.getElementById('cancelUserActions').addEventListener('click', function () {
-    closeModal(userActionsModal);
-  });
-
-  document.getElementById('confirmUserActions').addEventListener('click', function () {
+  function handleUserActionsSubmit() {
     const muteUserChecked = document.getElementById('muteUser').checked;
     const warnUserChecked = document.getElementById('warnUser').checked;
     const banUserChecked = document.getElementById('banUser').checked;
@@ -309,85 +365,87 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Validate required fields for selected actions
-    let validationErrors = [];
-
-    if (muteUserChecked) {
-      const muteReason = document.getElementById('muteReason').value.trim();
-      if (!muteReason) {
-        validationErrors.push('Mute reason is required');
-      }
-    }
-
-    if (warnUserChecked) {
-      const warnReason = document.getElementById('warnReason').value.trim();
-      if (!warnReason) {
-        validationErrors.push('Warning reason is required');
-      }
-    }
-
-    if (banUserChecked) {
-      const banReason = document.getElementById('banReason').value.trim();
-      if (!banReason) {
-        validationErrors.push('Ban reason is required');
-      }
-    }
+    const validationErrors = validateUserActionsForm(muteUserChecked, warnUserChecked, banUserChecked);
 
     if (validationErrors.length > 0) {
       alert('Please fix the following errors:\n• ' + validationErrors.join('\n• '));
       return;
     }
 
-    // Get form values
-    const muteDuration = document.getElementById('muteDuration').value;
-    const muteReason = document.getElementById('muteReason').value;
-    const warnReason = document.getElementById('warnReason').value;
-    const banReason = document.getElementById('banReason').value;
-    const banDuration = document.getElementById('banDuration').value;
+    // Get form values and apply actions
+    const actionData = gatherUserActionData();
+    applyUserActions(actionData, muteUserChecked, warnUserChecked, banUserChecked);
 
-    // Apply the actions
-    if (muteUserChecked && currentMessageAuthor === currentUsername) {
-      // If muting the current user, apply the mute with countdown
-      const muteSeconds = parseInt(muteDuration) * 60; // Convert minutes to seconds
+    const userActionsModal = document.getElementById('userActionsModal');
+    closeModal(userActionsModal);
+  }
+
+  function validateUserActionsForm(muteChecked, warnChecked, banChecked) {
+    const errors = [];
+
+    if (muteChecked && !document.getElementById('muteReason').value.trim()) {
+      errors.push('Mute reason is required');
+    }
+
+    if (warnChecked && !document.getElementById('warnReason').value.trim()) {
+      errors.push('Warning reason is required');
+    }
+
+    if (banChecked && !document.getElementById('banReason').value.trim()) {
+      errors.push('Ban reason is required');
+    }
+
+    return errors;
+  }
+
+  function gatherUserActionData() {
+    return {
+      muteDuration: document.getElementById('muteDuration').value,
+      muteReason: document.getElementById('muteReason').value,
+      warnReason: document.getElementById('warnReason').value,
+      banReason: document.getElementById('banReason').value,
+      banDuration: document.getElementById('banDuration').value
+    };
+  }
+
+  function applyUserActions(actionData, muteChecked, warnChecked, banChecked) {
+    // If muting the current user, apply the mute with countdown
+    if (muteChecked && currentMessageAuthor === CURRENT_USERNAME) {
+      const muteSeconds = parseInt(actionData.muteDuration) * 60; // Convert minutes to seconds
       const expiryTime = Math.floor(Date.now() / 1000) + muteSeconds;
       muteUser(expiryTime);
     }
 
-    // Create action summary
-    let actionSummary = [];
-    if (muteUserChecked) {
-      actionSummary.push(`Muted for ${muteDuration} minutes: ${muteReason}`);
-    }
-    if (warnUserChecked) {
-      actionSummary.push(`Warning: ${warnReason}`);
-    }
-    if (banUserChecked) {
-      const banDurationText = banDuration === '0' ? 'permanently' : `for ${banDuration} minutes`;
-      actionSummary.push(`Banned ${banDurationText}: ${banReason}`);
+    // Create action summary for logging
+    const actionSummary = [];
+    if (muteChecked) actionSummary.push(`Muted for ${actionData.muteDuration} minutes: ${actionData.muteReason}`);
+    if (warnChecked) actionSummary.push(`Warning: ${actionData.warnReason}`);
+    if (banChecked) {
+      const banDurationText = actionData.banDuration === '0' ? 'permanently' : `for ${actionData.banDuration} minutes`;
+      actionSummary.push(`Banned ${banDurationText}: ${actionData.banReason}`);
     }
 
-    // Show confirmation
+    // Log actions (replace with actual server communication)
     console.log('User actions applied to', currentMessageAuthor + ':', actionSummary);
-
-    // Here you would typically send the action to the server
     console.log('User actions data:', {
       target: currentMessageAuthor,
-      mute: muteUserChecked ? {
-        duration: muteDuration,
-        reason: muteReason
-      } : null,
-      warn: warnUserChecked ? {
-        reason: warnReason
-      } : null,
-      ban: banUserChecked ? {
-        reason: banReason,
-        duration: banDuration
-      } : null
+      mute: muteChecked ? { duration: actionData.muteDuration, reason: actionData.muteReason } : null,
+      warn: warnChecked ? { reason: actionData.warnReason } : null,
+      ban: banChecked ? { reason: actionData.banReason, duration: actionData.banDuration } : null
     });
+  }
 
-    closeModal(userActionsModal);
-  });
+  function initializeUserActionsListeners() {
+    // Add event listeners for checkboxes to toggle field visibility
+    document.getElementById('muteUser').addEventListener('change', toggleActionFields);
+    document.getElementById('warnUser').addEventListener('change', toggleActionFields);
+    document.getElementById('banUser').addEventListener('change', toggleActionFields);
+  }
 
-  // Report Modal Functionality
+  // =====================================
+  // REPORT FUNCTIONALITY
+  // =====================================
+
   function resetReportForm() {
     // Clear all radio buttons
     document.querySelectorAll('input[name="reportReason"]').forEach(radio => {
@@ -415,25 +473,7 @@ document.addEventListener('DOMContentLoaded', function () {
     submitButton.disabled = !reasonSelected;
   }
 
-  // Character count for description
-  document.getElementById('reportDescription').addEventListener('input', updateCharacterCount);
-
-  // Update submit button when reason is selected
-  document.querySelectorAll('input[name="reportReason"]').forEach(radio => {
-    radio.addEventListener('change', updateSubmitButton);
-  });
-
-  // Report modal close handlers
-  document.getElementById('reportModalClose').addEventListener('click', function () {
-    closeModal(reportModal);
-  });
-
-  document.getElementById('cancelReport').addEventListener('click', function () {
-    closeModal(reportModal);
-  });
-
-  // Report submission
-  document.getElementById('submitReport').addEventListener('click', function () {
+  function handleReportSubmit() {
     const selectedReason = document.querySelector('input[name="reportReason"]:checked');
     const description = document.getElementById('reportDescription').value;
 
@@ -445,17 +485,17 @@ document.addEventListener('DOMContentLoaded', function () {
     const reportData = {
       messageId: currentMessageId,
       reportedUser: currentMessageAuthor,
-      reportedBy: currentUsername,
+      reportedBy: CURRENT_USERNAME,
       reason: selectedReason.value,
       description: description.trim(),
       timestamp: new Date().toISOString(),
       messageContent: document.getElementById('reportedMessageContent').textContent
     };
 
-    // Here you would typically send the report to the server
+    // Log report (replace with actual server communication)
     console.log('Report submitted:', reportData);
 
-    // Show success feedback (you could replace this with a toast notification)
+    // Show success feedback
     const submitButton = document.getElementById('submitReport');
     const originalText = submitButton.innerHTML;
     submitButton.innerHTML = '<i class="fas fa-check"></i> Report Sent';
@@ -463,25 +503,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setTimeout(() => {
       submitButton.innerHTML = originalText;
+      const reportModal = document.getElementById('reportModal');
       closeModal(reportModal);
-
-      // You could show a success toast here
       console.log('Report has been sent to moderators for review.');
     }, 1500);
-  });
+  }
 
-  // Close modals when clicking outside
-  window.addEventListener('click', function (e) {
-    if (e.target === reportModal) {
-      closeModal(reportModal);
-    }
-    if (e.target === deleteModal) {
-      closeModal(deleteModal);
-    }
-    if (e.target === userActionsModal) {
-      closeModal(userActionsModal);
-    }
-  });
+  function initializeReportFunctionality() {
+    // Character count for description
+    document.getElementById('reportDescription').addEventListener('input', updateCharacterCount);
+
+    // Update submit button when reason is selected
+    document.querySelectorAll('input[name="reportReason"]').forEach(radio => {
+      radio.addEventListener('change', updateSubmitButton);
+    });
+  }
+
+  // =====================================
+  // UTILITY FUNCTIONS
+  // =====================================
 
   // Test functions for mute functionality (can be called from browser console)
   window.testMute = function (minutes = 1) {
@@ -494,4 +534,26 @@ document.addEventListener('DOMContentLoaded', function () {
     unmuteUser();
     console.log('User unmuted');
   };
+
+  // Example function to mute a user (can be called from admin actions)
+  // Usage: muteUserWithCountdown(Math.floor(Date.now() / 1000) + 300); // Mute for 5 minutes
+  window.muteUserWithCountdown = muteUser;
+
+  // =====================================
+  // INITIALIZATION
+  // =====================================
+
+  // Initialize all functionality when the page loads
+  function initializeApp() {
+    initializeTabSwitching();
+    initializeUserPermissions();
+    initializeChatFunctionality();
+    initializeContextMenu();
+    initializeModals();
+    initializeUserActionsListeners();
+    initializeReportFunctionality();
+  }
+
+  // Start the application
+  initializeApp();
 });
