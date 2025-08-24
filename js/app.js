@@ -69,7 +69,9 @@ document.addEventListener('DOMContentLoaded', function () {
         element.style.display = 'block';
       });
     }
-  }  // =====================================
+  }
+  
+  // =====================================
   // MUTE FUNCTIONALITY
   // =====================================
 
