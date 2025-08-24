@@ -230,41 +230,53 @@
           </div>
           <div class="mod-tools">
             <div class="tool-section">
-              <h3>recent reports</h3>
-              <div class="reports-list">
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                  </div>
+              <div class="reports-controls">
+                <div class="reports-tabs">
+                  <button class="reports-tab-btn active" data-category="all">All Reports</button>
+                  <button class="reports-tab-btn" data-category="pending">Awaiting Review</button>
+                  <button class="reports-tab-btn" data-category="completed">Completed</button>
                 </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                  </div>
+                <div class="reports-stats">
+                  <span class="reports-count">Total: <span id="totalReports">0</span></span>
                 </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                  </div>
+              </div>
+
+              <div class="reports-filter">
+                <div class="filter-row">
+                  <input type="text" id="reportSearchInput" placeholder="Search by username, reason, or submitter..."
+                    class="search-input">
+                  <select id="reasonFilter" class="filter-select">
+                    <option value="">All Reasons</option>
+                    <option value="spam">Spam</option>
+                    <option value="harassment">Harassment</option>
+                    <option value="inappropriate">Inappropriate Content</option>
+                    <option value="misinformation">Misinformation</option>
+                    <option value="cheating">Cheating</option>
+                  </select>
+                  <button id="clearFilters" class="btn secondary small">Clear Filters</button>
                 </div>
+              </div>
+
+              <div class="reports-help">
+                <i class="fas fa-info-circle"></i>
+                <span>Right-click on a report to take moderation actions. Use pagination to navigate through
+                  reports.</span>
+              </div>
+
+              <div class="reports-list" id="reportsList">
+                <!-- Reports will be dynamically loaded here -->
+              </div>
+
+              <div class="reports-pagination">
+                <button class="pagination-btn" id="prevPage" disabled>
+                  <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span class="pagination-info">
+                  Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                </span>
+                <button class="pagination-btn" id="nextPage" disabled>
+                  Next <i class="fas fa-chevron-right"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -387,6 +399,9 @@
       </div>
       <div class="context-menu-item" id="userActions">
         <i class="fas fa-user-shield"></i> User Actions
+      </div>
+      <div class="context-menu-item" id="undoReportActions">
+        <i class="fas fa-undo"></i> Undo Actions
       </div>
     </div>
 
@@ -609,6 +624,32 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelUserActions">Cancel</button>
           <button class="btn primary" id="confirmUserActions">Apply Actions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Undo Report Actions Modal -->
+    <div id="undoReportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Undo Report Actions</h3>
+          <span class="modal-close" id="undoReportModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="undo-report-info">
+            <p>This will undo the following actions taken on <strong id="undoTargetUser"></strong>:</p>
+            <div class="actions-taken" id="actionsTaken">
+              <!-- Actions will be listed here -->
+            </div>
+            <div class="warning-message">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>This action cannot be undone and will reopen the report for review.</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelUndoReport">Cancel</button>
+          <button class="btn danger" id="confirmUndoReport">Undo Actions</button>
         </div>
       </div>
     </div>

@@ -187,10 +187,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const reportMenuItem = document.getElementById('reportMessage');
     const deleteMenuItem = document.getElementById('deleteMessage');
     const userActionsMenuItem = document.getElementById('userActions');
+    const undoReportActionsMenuItem = document.getElementById('undoReportActions');
 
     // Context menu event listeners
     document.addEventListener('contextmenu', function (e) {
       const messageElement = e.target.closest('.message');
+      const reportItemElement = e.target.closest('.report-item');
+
+      // Handle message context menu
       if (messageElement && messageElement.parentElement.id === 'chat-messages') {
         e.preventDefault();
 
@@ -215,8 +219,46 @@ document.addEventListener('DOMContentLoaded', function () {
         const showUserActions = isMod && !isOwnMessage;
         userActionsMenuItem.style.display = showUserActions ? 'block' : 'none';
 
+        // Hide undo actions for regular messages
+        undoReportActionsMenuItem.style.display = 'none';
+
         // Only show context menu if at least one item is visible
         if (showReport || showDelete || showUserActions) {
+          // Position and show context menu
+          contextMenu.style.left = e.pageX + 'px';
+          contextMenu.style.top = e.pageY + 'px';
+          contextMenu.style.display = 'block';
+        }
+      }
+      // Handle report item context menu
+      else if (reportItemElement && reportItemElement.closest('#reports')) {
+        e.preventDefault();
+
+        // Only show context menu for mods/admins
+        const isMod = USER_ROLE === 'mod' || USER_ROLE === 'admin';
+        if (!isMod) return;
+
+        // Set current target to the reported user
+        currentMessageAuthor = reportItemElement.getAttribute('data-reported-user');
+        currentMessageElement = reportItemElement; // Store report element reference
+        currentMessageId = null; // No specific message ID for reports
+
+        const reportStatus = reportItemElement.getAttribute('data-status');
+
+        // Hide message-specific options
+        reportMenuItem.style.display = 'none';
+        deleteMenuItem.style.display = 'none';
+
+        // Show user actions only for pending reports
+        const showUserActions = reportStatus === 'pending';
+        userActionsMenuItem.style.display = showUserActions ? 'block' : 'none';
+
+        // Show undo actions only for completed reports
+        const showUndoActions = reportStatus === 'completed';
+        undoReportActionsMenuItem.style.display = showUndoActions ? 'block' : 'none';
+
+        // Only show context menu if at least one item is visible
+        if (showUserActions || showUndoActions) {
           // Position and show context menu
           contextMenu.style.left = e.pageX + 'px';
           contextMenu.style.top = e.pageY + 'px';
@@ -229,9 +271,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function () {
       contextMenu.style.display = 'none';
     });
-  }
-
-  // =====================================
+  }  // =====================================
   // MODAL FUNCTIONALITY
   // =====================================
 
@@ -239,10 +279,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const reportModal = document.getElementById('reportModal');
     const deleteModal = document.getElementById('deleteModal');
     const userActionsModal = document.getElementById('userActionsModal');
+    const undoReportModal = document.getElementById('undoReportModal');
 
     const reportMenuItem = document.getElementById('reportMessage');
     const deleteMenuItem = document.getElementById('deleteMessage');
     const userActionsMenuItem = document.getElementById('userActions');
+    const undoReportActionsMenuItem = document.getElementById('undoReportActions');
 
     // Report message functionality
     reportMenuItem.addEventListener('click', function () {
@@ -276,6 +318,13 @@ document.addEventListener('DOMContentLoaded', function () {
       resetUserActionsForm();
       toggleActionFields();
       userActionsModal.style.display = 'flex';
+    });
+
+    // Undo report actions functionality
+    undoReportActionsMenuItem.addEventListener('click', function () {
+      const contextMenu = document.getElementById('messageContextMenu');
+      contextMenu.style.display = 'none';
+      showUndoReportModal(currentMessageElement);
     });
 
     // Modal close handlers
@@ -433,6 +482,463 @@ document.addEventListener('DOMContentLoaded', function () {
       warn: warnChecked ? { reason: actionData.warnReason } : null,
       ban: banChecked ? { reason: actionData.banReason, duration: actionData.banDuration } : null
     });
+
+    // If this action was taken on a report item, update its status
+    if (currentMessageElement && currentMessageElement.classList.contains('report-item')) {
+      updateReportItemStatus(currentMessageElement, actionSummary);
+    }
+  }
+
+  function updateReportItemStatus(reportElement, actionSummary) {
+    const statusElement = reportElement.querySelector('.report-status');
+    if (statusElement) {
+      // Update status to show actions taken
+      statusElement.innerHTML = `<i class="fas fa-check-circle" title="Actions taken: ${actionSummary.join(', ')}"></i>`;
+      statusElement.style.color = 'var(--success-color, #28a745)';
+
+      // Add visual indicator that this report has been handled
+      reportElement.classList.add('completed');
+      reportElement.setAttribute('data-status', 'completed');
+      reportElement.setAttribute('data-actions', JSON.stringify(actionSummary));
+
+      // Refresh the current view to reflect the change
+      refreshReportsView();
+    }
+  }
+
+  // =====================================
+  // ENHANCED REPORTS SYSTEM
+  // =====================================
+
+  // Mock data - in a real application, this would come from the server
+  let reportsData = [
+    {
+      id: 1,
+      reportedUser: 'user456',
+      submitter: 'user123',
+      reason: 'spam',
+      messageContent: 'Buy my crypto now!!! Limited time offer!!!',
+      timestamp: new Date(2025, 7, 20, 10, 30),
+      status: 'pending'
+    },
+    {
+      id: 2,
+      reportedUser: 'toxicuser',
+      submitter: 'user789',
+      reason: 'harassment',
+      messageContent: 'You are the worst player ever, quit the game!',
+      timestamp: new Date(2025, 7, 21, 14, 15),
+      status: 'pending'
+    },
+    {
+      id: 3,
+      reportedUser: 'spammer123',
+      submitter: 'user456',
+      reason: 'inappropriate',
+      messageContent: 'Inappropriate content that violated community guidelines',
+      timestamp: new Date(2025, 7, 19, 16, 45),
+      status: 'completed',
+      actions: ['Warned: Inappropriate content', 'Muted for 60 minutes: Violation of community standards'],
+      handledBy: 'mod1',
+      handledAt: new Date(2025, 7, 19, 17, 0)
+    },
+    {
+      id: 4,
+      reportedUser: 'newbie42',
+      submitter: 'user111',
+      reason: 'misinformation',
+      messageContent: 'The earth is flat and vaccines cause autism',
+      timestamp: new Date(2025, 7, 22, 9, 20),
+      status: 'pending'
+    },
+    {
+      id: 5,
+      reportedUser: 'griefer99',
+      submitter: 'player555',
+      reason: 'cheating',
+      messageContent: 'Bragging about using cheats and exploits',
+      timestamp: new Date(2025, 7, 18, 20, 10),
+      status: 'completed',
+      actions: ['Banned permanently: Using cheats and exploits'],
+      handledBy: 'admin1',
+      handledAt: new Date(2025, 7, 18, 20, 30)
+    },
+    {
+      id: 6,
+      reportedUser: 'annoying_kid',
+      submitter: 'veteran_player',
+      reason: 'spam',
+      messageContent: 'hello hello hello hello hello (repeated 50 times)',
+      timestamp: new Date(2025, 7, 23, 11, 0),
+      status: 'pending'
+    },
+    {
+      id: 7,
+      reportedUser: 'troll_master',
+      submitter: 'casual_gamer',
+      reason: 'harassment',
+      messageContent: 'Targeting and bullying new players consistently',
+      timestamp: new Date(2025, 7, 24, 8, 45),
+      status: 'completed',
+      actions: ['Banned for 7 days: Repeated harassment of new players'],
+      handledBy: 'mod2',
+      handledAt: new Date(2025, 7, 24, 9, 0)
+    },
+    {
+      id: 8,
+      reportedUser: 'fake_news_guy',
+      submitter: 'fact_checker',
+      reason: 'misinformation',
+      messageContent: 'Spreading conspiracy theories and medical misinformation',
+      timestamp: new Date(2025, 7, 23, 19, 30),
+      status: 'pending'
+    },
+    {
+      id: 9,
+      reportedUser: 'scammer_bot',
+      submitter: 'alert_user',
+      reason: 'spam',
+      messageContent: 'Free money! Click this suspicious link now!',
+      timestamp: new Date(2025, 7, 22, 15, 20),
+      status: 'completed',
+      actions: ['Banned permanently: Account identified as spam bot', 'Warned: Removed suspicious links'],
+      handledBy: 'admin1',
+      handledAt: new Date(2025, 7, 22, 15, 25)
+    },
+    {
+      id: 10,
+      reportedUser: 'edgy_teen',
+      submitter: 'concerned_parent',
+      reason: 'inappropriate',
+      messageContent: 'Using offensive language and inappropriate jokes',
+      timestamp: new Date(2025, 7, 21, 12, 10),
+      status: 'pending'
+    }
+  ];
+
+  let currentReportsCategory = 'all';
+  let currentReportsPage = 1;
+  const reportsPerPage = 5;
+  let currentReportElement = null;
+  let currentSearchQuery = '';
+  let currentReasonFilter = '';
+
+  function initializeReportsSystem() {
+    // Initialize tab switching
+    const tabButtons = document.querySelectorAll('.reports-tab-btn');
+    tabButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        const category = this.getAttribute('data-category');
+        switchReportsTab(category);
+      });
+    });
+
+    // Initialize search and filter
+    const searchInput = document.getElementById('reportSearchInput');
+    const reasonFilter = document.getElementById('reasonFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+
+    searchInput.addEventListener('input', function () {
+      currentSearchQuery = this.value.toLowerCase().trim();
+      currentReportsPage = 1;
+      loadReports();
+    });
+
+    reasonFilter.addEventListener('change', function () {
+      currentReasonFilter = this.value;
+      currentReportsPage = 1;
+      loadReports();
+    });
+
+    clearFiltersBtn.addEventListener('click', function () {
+      searchInput.value = '';
+      reasonFilter.value = '';
+      currentSearchQuery = '';
+      currentReasonFilter = '';
+      currentReportsPage = 1;
+      loadReports();
+    });
+
+    // Initialize pagination
+    document.getElementById('prevPage').addEventListener('click', () => {
+      if (currentReportsPage > 1) {
+        currentReportsPage--;
+        loadReports();
+      }
+    });
+
+    document.getElementById('nextPage').addEventListener('click', () => {
+      const totalPages = Math.ceil(getFilteredReports().length / reportsPerPage);
+      if (currentReportsPage < totalPages) {
+        currentReportsPage++;
+        loadReports();
+      }
+    });
+
+    // Load initial reports
+    loadReports();
+
+    // Initialize undo modal
+    initializeUndoReportModal();
+  }
+
+  function switchReportsTab(category) {
+    currentReportsCategory = category;
+    currentReportsPage = 1;
+
+    // Update active tab
+    document.querySelectorAll('.reports-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`[data-category="${category}"]`).classList.add('active');
+
+    // Load reports for the selected category
+    loadReports();
+  }
+
+  function getFilteredReports() {
+    let filtered = reportsData;
+
+    // Filter by category
+    switch (currentReportsCategory) {
+      case 'pending':
+        filtered = filtered.filter(report => report.status === 'pending');
+        break;
+      case 'completed':
+        filtered = filtered.filter(report => report.status === 'completed');
+        break;
+      case 'all':
+      default:
+        // No additional filtering needed
+        break;
+    }
+
+    // Filter by search query
+    if (currentSearchQuery) {
+      filtered = filtered.filter(report =>
+        report.reportedUser.toLowerCase().includes(currentSearchQuery) ||
+        report.submitter.toLowerCase().includes(currentSearchQuery) ||
+        report.reason.toLowerCase().includes(currentSearchQuery) ||
+        (report.messageContent && report.messageContent.toLowerCase().includes(currentSearchQuery))
+      );
+    }
+
+    // Filter by reason
+    if (currentReasonFilter) {
+      filtered = filtered.filter(report => report.reason === currentReasonFilter);
+    }
+
+    // Sort by timestamp (newest first)
+    filtered.sort((a, b) => b.timestamp - a.timestamp);
+
+    return filtered;
+  }
+
+  function loadReports() {
+    const reportsList = document.getElementById('reportsList');
+    const filteredReports = getFilteredReports();
+    const totalPages = Math.ceil(filteredReports.length / reportsPerPage);
+
+    // Update statistics
+    document.getElementById('totalReports').textContent = filteredReports.length;
+
+    // Update pagination info
+    document.getElementById('currentPage').textContent = currentReportsPage;
+    document.getElementById('totalPages').textContent = Math.max(1, totalPages);
+
+    // Update pagination buttons
+    document.getElementById('prevPage').disabled = currentReportsPage <= 1;
+    document.getElementById('nextPage').disabled = currentReportsPage >= totalPages;
+
+    // Calculate which reports to show
+    const startIndex = (currentReportsPage - 1) * reportsPerPage;
+    const endIndex = startIndex + reportsPerPage;
+    const reportsToShow = filteredReports.slice(startIndex, endIndex);
+
+    // Clear current reports
+    reportsList.innerHTML = '';
+
+    // Show loading state
+    reportsList.innerHTML = '<div class="reports-loading"><i class="fas fa-spinner"></i> Loading reports...</div>';
+
+    // Simulate loading delay (remove in production)
+    setTimeout(() => {
+      reportsList.innerHTML = '';
+
+      if (reportsToShow.length === 0) {
+        // Show empty state
+        const emptyMessage = currentReportsCategory === 'pending' ? 'No pending reports' :
+          currentReportsCategory === 'completed' ? 'No completed reports' :
+            'No reports found';
+        reportsList.innerHTML = `
+          <div class="reports-empty">
+            <i class="fas fa-clipboard-list"></i>
+            <p>${emptyMessage}</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Render reports
+      reportsToShow.forEach(report => {
+        const reportElement = createReportElement(report);
+        reportsList.appendChild(reportElement);
+      });
+    }, 300);
+  }
+
+  function createReportElement(report) {
+    const reportDiv = document.createElement('div');
+    reportDiv.className = `report-item ${report.status}`;
+    reportDiv.setAttribute('data-report-id', report.id);
+    reportDiv.setAttribute('data-reported-user', report.reportedUser);
+    reportDiv.setAttribute('data-submitter', report.submitter);
+    reportDiv.setAttribute('data-reason', report.reason);
+    reportDiv.setAttribute('data-status', report.status);
+
+    if (report.actions) {
+      reportDiv.setAttribute('data-actions', JSON.stringify(report.actions));
+    }
+
+    const timeAgo = getTimeAgo(report.timestamp);
+    const statusIcon = report.status === 'completed' ?
+      '<i class="fas fa-check-circle" title="Report completed"></i>' :
+      '<i class="fas fa-clock" title="Pending review"></i>';
+
+    reportDiv.innerHTML = `
+      <div class="report-users">
+        <span class="report-user">
+          <span class="report-user-label">submitter: </span>${report.submitter}
+        </span>
+        <span class="report-user">
+          <span class="report-user-label">reported: </span>${report.reportedUser}
+        </span>
+        <span class="report-timestamp">${timeAgo}</span>
+      </div>
+      <span class="report-reason">${report.reason}</span>
+      <div class="report-status">
+        ${statusIcon}
+      </div>
+    `;
+
+    return reportDiv;
+  }
+
+  function getTimeAgo(timestamp) {
+    const now = new Date();
+    const diffMs = now - timestamp;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  }
+
+  function refreshReportsView() {
+    // Update the current view to reflect any changes
+    loadReports();
+  }
+
+  function initializeUndoReportModal() {
+    const undoModal = document.getElementById('undoReportModal');
+
+    // Close button
+    document.getElementById('undoReportModalClose').addEventListener('click', () => {
+      closeModal(undoModal);
+    });
+
+    // Cancel button
+    document.getElementById('cancelUndoReport').addEventListener('click', () => {
+      closeModal(undoModal);
+    });
+
+    // Confirm undo button
+    document.getElementById('confirmUndoReport').addEventListener('click', () => {
+      undoReportActions();
+      closeModal(undoModal);
+    });
+
+    // Close on outside click
+    window.addEventListener('click', function (e) {
+      if (e.target === undoModal) {
+        closeModal(undoModal);
+      }
+    });
+  }
+
+  function showUndoReportModal(reportElement) {
+    const reportId = parseInt(reportElement.getAttribute('data-report-id'));
+    const reportedUser = reportElement.getAttribute('data-reported-user');
+    const report = reportsData.find(r => r.id === reportId);
+
+    if (!report || report.status !== 'completed' || !report.actions) {
+      alert('Cannot undo actions for this report.');
+      return;
+    }
+
+    currentReportElement = reportElement;
+
+    // Populate modal
+    document.getElementById('undoTargetUser').textContent = reportedUser;
+
+    const actionsTakenDiv = document.getElementById('actionsTaken');
+    actionsTakenDiv.innerHTML = '';
+
+    report.actions.forEach(action => {
+      const actionDiv = document.createElement('div');
+      actionDiv.className = 'action-item';
+
+      // Determine icon based on action type
+      let icon = 'fas fa-info-circle';
+      if (action.toLowerCase().includes('mute')) icon = 'fas fa-volume-mute';
+      else if (action.toLowerCase().includes('ban')) icon = 'fas fa-ban';
+      else if (action.toLowerCase().includes('warn')) icon = 'fas fa-exclamation-triangle';
+
+      actionDiv.innerHTML = `
+        <i class="${icon}"></i>
+        <span>${action}</span>
+      `;
+      actionsTakenDiv.appendChild(actionDiv);
+    });
+
+    // Show modal
+    document.getElementById('undoReportModal').style.display = 'flex';
+  }
+
+  function undoReportActions() {
+    if (!currentReportElement) return;
+
+    const reportId = parseInt(currentReportElement.getAttribute('data-report-id'));
+    const report = reportsData.find(r => r.id === reportId);
+
+    if (report) {
+      // Update report status
+      report.status = 'pending';
+      delete report.actions;
+      delete report.handledBy;
+      delete report.handledAt;
+
+      // Update visual appearance
+      currentReportElement.classList.remove('completed');
+      currentReportElement.setAttribute('data-status', 'pending');
+      currentReportElement.removeAttribute('data-actions');
+
+      const statusElement = currentReportElement.querySelector('.report-status');
+      if (statusElement) {
+        statusElement.innerHTML = '<i class="fas fa-clock" title="Pending review"></i>';
+        statusElement.style.color = '';
+      }
+
+      // Log undo action
+      console.log('Report actions undone for report ID:', reportId);
+      console.log('Report reopened for review');
+
+      // Refresh the view
+      refreshReportsView();
+    }
+
+    currentReportElement = null;
   }
 
   function initializeUserActionsListeners() {
@@ -535,10 +1041,6 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('User unmuted');
   };
 
-  // Example function to mute a user (can be called from admin actions)
-  // Usage: muteUserWithCountdown(Math.floor(Date.now() / 1000) + 300); // Mute for 5 minutes
-  window.muteUserWithCountdown = muteUser;
-
   // =====================================
   // INITIALIZATION
   // =====================================
@@ -552,6 +1054,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeModals();
     initializeUserActionsListeners();
     initializeReportFunctionality();
+    initializeReportsSystem();
   }
 
   // Start the application

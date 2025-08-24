@@ -545,6 +545,12 @@
   background-color: var(--background-color);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-xs);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.report-item:hover {
+  background-color: var(--surface-color);
 }
 
 .report-users {
@@ -565,16 +571,285 @@
   min-width: 100px;
 }
 
+.report-timestamp {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+  font-style: italic;
+  margin-top: var(--spacing-xs);
+}
+
 .report-reason {
   color: var(--text-secondary);
   flex: 1;
 }
 
-.report-actions {
+.report-status {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--text-secondary);
+}
+
+.reports-help {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm);
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-small);
+  margin-bottom: var(--spacing-md);
+}
+
+.reports-help i {
+  font-size: var(--font-size-small);
+}
+
+.report-item.handled {
+  opacity: 0.7;
+  border-left: 4px solid var(--success-color, #28a745);
+}
+
+.report-status .fa-check-circle {
+  color: var(--success-color, #28a745);
+}
+
+/* Reports Tab System */
+.reports-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.reports-tabs {
   display: flex;
   gap: var(--spacing-xs);
 }
 
+.reports-tab-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reports-tab-btn:hover {
+  background-color: var(--surface-color);
+}
+
+.reports-tab-btn.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.reports-stats {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+}
+
+.reports-count {
+  font-weight: bold;
+}
+
+/* Reports Filter */
+.reports-filter {
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius);
+}
+
+.filter-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 200px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-small);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.filter-select {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+}
+
+.btn.small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-small);
+}
+
+/* Pagination Styles */
+.reports-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.pagination-btn {
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  color: var(--text-secondary);
+  font-size: var(--font-size-small);
+}
+
+/* Enhanced Report Items */
+.report-item {
+  position: relative;
+}
+
+.report-item.completed {
+  opacity: 0.8;
+  border-left: 4px solid var(--success-color, #28a745);
+}
+
+.report-item.completed::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(90deg, transparent 0%, var(--success-color, #28a745) 100%);
+  opacity: 0.05;
+  pointer-events: none;
+}
+
+/* Undo Report Modal Styles */
+.undo-report-info {
+  text-align: left;
+}
+
+.actions-taken {
+  background-color: var(--background-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+  margin: var(--spacing-md) 0;
+}
+
+.action-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.action-item:last-child {
+  margin-bottom: 0;
+}
+
+.action-item i {
+  width: 16px;
+  color: var(--text-secondary);
+}
+
+.warning-message {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: var(--border-radius);
+  color: #856404;
+  font-size: var(--font-size-small);
+}
+
+.warning-message i {
+  color: #ff6b35;
+}
+
+/* Empty State */
+.reports-empty {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.reports-empty i {
+  font-size: 48px;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.reports-loading {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+  color: var(--text-secondary);
+}
+
+.reports-loading i {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Report action button styles - deprecated, now using context menus
 .btn-warn,
 .btn-mute,
 .btn-ban {
@@ -601,6 +876,7 @@
   background-color: #dc3545;
   color: white;
 }
+*/
 
 .admin-actions {
   display: flex;
