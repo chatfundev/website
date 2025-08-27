@@ -10,23 +10,23 @@
 
 <p align="center">
   <!-- License -->
-  <a href="https://github.com/chatfundev/website/blob/main/LICENSE">
+  <a href="https://github.com/chatfundev/website/blob/main/LICENSE" style="text-decoration: none;">
     <img src="https://img.shields.io/github/license/chatfundev/website?style=flat-square&logo=opensourceinitiative&color=34c759" alt="License">
   </a>
   <!-- Stars -->
-  <a href="https://github.com/chatfundev/website/stargazers">
+  <a href="https://github.com/chatfundev/website/stargazers" style="text-decoration: none;">
     <img src="https://img.shields.io/github/stars/chatfundev/website?style=flat-square&logo=star&color=f2a900" alt="GitHub Stars">
   </a>
   <!-- Issues -->
-  <a href="https://github.com/chatfundev/website/issues">
+  <a href="https://github.com/chatfundev/website/issues" style="text-decoration: none;">
     <img src="https://img.shields.io/github/issues/chatfundev/website?style=flat-square&logo=github&color=ff6f61" alt="Open Issues">
   </a>
   <!-- Forks -->
-  <a href="https://github.com/chatfundev/website/network/members">
+  <a href="https://github.com/chatfundev/website/network/members" style="text-decoration: none;">
     <img src="https://img.shields.io/github/forks/chatfundev/website?style=flat-square&logo=github&color=9059ff" alt="Forks">
   </a>
   <!-- Contributors -->
-  <a href="https://github.com/chatfundev/website/graphs/contributors">
+  <a href="https://github.com/chatfundev/website/graphs/contributors" style="text-decoration: none;">
     <img src="https://img.shields.io/github/contributors/chatfundev/website?style=flat-square&logo=github&color=20c997" alt="Contributors">
   </a>
   <!-- Last Commit -->
