@@ -545,12 +545,71 @@
   background-color: var(--background-color);
   border-radius: var(--border-radius);
   margin-bottom: var(--spacing-xs);
-  cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .report-item:hover {
   background-color: var(--surface-color);
+}
+
+.report-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  flex: 1;
+}
+
+.report-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-left: auto;
+}
+
+.report-action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.report-action-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.report-action-btn i {
+  font-size: var(--font-size-small);
+}
+
+.user-actions-btn {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.user-actions-btn:hover {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.undo-actions-btn {
+  border-color: var(--warning-color, #ffc107);
+  color: var(--warning-color, #ffc107);
+}
+
+.undo-actions-btn:hover {
+  background-color: var(--warning-color, #ffc107);
+  color: white;
 }
 
 .report-users {

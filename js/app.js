@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
   }
-  
+
   // =====================================
   // MUTE FUNCTIONALITY
   // =====================================
@@ -196,8 +196,8 @@ document.addEventListener('DOMContentLoaded', function () {
       const messageElement = e.target.closest('.message');
       const reportItemElement = e.target.closest('.report-item');
 
-      // Handle message context menu
-      if (messageElement && messageElement.parentElement.id === 'chat-messages') {
+      // Handle message context menu (but not for report items)
+      if (messageElement && messageElement.parentElement.id === 'chat-messages' && !reportItemElement) {
         e.preventDefault();
 
         currentMessageElement = messageElement;
@@ -226,41 +226,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Only show context menu if at least one item is visible
         if (showReport || showDelete || showUserActions) {
-          // Position and show context menu
-          contextMenu.style.left = e.pageX + 'px';
-          contextMenu.style.top = e.pageY + 'px';
-          contextMenu.style.display = 'block';
-        }
-      }
-      // Handle report item context menu
-      else if (reportItemElement && reportItemElement.closest('#reports')) {
-        e.preventDefault();
-
-        // Only show context menu for mods/admins
-        const isMod = USER_ROLE === 'mod' || USER_ROLE === 'admin';
-        if (!isMod) return;
-
-        // Set current target to the reported user
-        currentMessageAuthor = reportItemElement.getAttribute('data-reported-user');
-        currentMessageElement = reportItemElement; // Store report element reference
-        currentMessageId = null; // No specific message ID for reports
-
-        const reportStatus = reportItemElement.getAttribute('data-status');
-
-        // Hide message-specific options
-        reportMenuItem.style.display = 'none';
-        deleteMenuItem.style.display = 'none';
-
-        // Show user actions only for pending reports
-        const showUserActions = reportStatus === 'pending';
-        userActionsMenuItem.style.display = showUserActions ? 'block' : 'none';
-
-        // Show undo actions only for completed reports
-        const showUndoActions = reportStatus === 'completed';
-        undoReportActionsMenuItem.style.display = showUndoActions ? 'block' : 'none';
-
-        // Only show context menu if at least one item is visible
-        if (showUserActions || showUndoActions) {
           // Position and show context menu
           contextMenu.style.left = e.pageX + 'px';
           contextMenu.style.top = e.pageY + 'px';
@@ -783,6 +748,24 @@ document.addEventListener('DOMContentLoaded', function () {
       reportsToShow.forEach(report => {
         const reportElement = createReportElement(report);
         reportsList.appendChild(reportElement);
+
+        // Add event listeners for action buttons
+        const userActionsBtn = reportElement.querySelector('.user-actions-btn');
+        const undoActionsBtn = reportElement.querySelector('.undo-actions-btn');
+
+        if (userActionsBtn) {
+          userActionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleUserActionsClick(reportElement);
+          });
+        }
+
+        if (undoActionsBtn) {
+          undoActionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            handleUndoActionsClick(reportElement);
+          });
+        }
       });
     }, 300);
   }
@@ -805,20 +788,45 @@ document.addEventListener('DOMContentLoaded', function () {
       '<i class="fas fa-check-circle" title="Report completed"></i>' :
       '<i class="fas fa-clock" title="Pending review"></i>';
 
+    // Determine which buttons to show based on status and permissions
+    const isMod = USER_ROLE === 'mod' || USER_ROLE === 'admin';
+    const showUserActions = isMod && report.status === 'pending';
+    const showUndoActions = isMod && report.status === 'completed';
+
+    const actionButtons = isMod ? `
+      <div class="report-actions">
+        ${showUserActions ? `
+          <button class="report-action-btn user-actions-btn" title="Take action on ${report.reportedUser}">
+            <i class="fas fa-user-shield"></i>
+            <span>User Actions</span>
+          </button>
+        ` : ''}
+        ${showUndoActions ? `
+          <button class="report-action-btn undo-actions-btn" title="Undo actions taken on ${report.reportedUser}">
+            <i class="fas fa-undo"></i>
+            <span>Undo Actions</span>
+          </button>
+        ` : ''}
+      </div>
+    ` : '';
+
     reportDiv.innerHTML = `
-      <div class="report-users">
-        <span class="report-user">
-          <span class="report-user-label">submitter: </span>${report.submitter}
-        </span>
-        <span class="report-user">
-          <span class="report-user-label">reported: </span>${report.reportedUser}
-        </span>
-        <span class="report-timestamp">${timeAgo}</span>
+      <div class="report-content">
+        <div class="report-users">
+          <span class="report-user">
+            <span class="report-user-label">submitter: </span>${report.submitter}
+          </span>
+          <span class="report-user">
+            <span class="report-user-label">reported: </span>${report.reportedUser}
+          </span>
+          <span class="report-timestamp">${timeAgo}</span>
+        </div>
+        <span class="report-reason">${report.reason}</span>
+        <div class="report-status">
+          ${statusIcon}
+        </div>
       </div>
-      <span class="report-reason">${report.reason}</span>
-      <div class="report-status">
-        ${statusIcon}
-      </div>
+      ${actionButtons}
     `;
 
     return reportDiv;
@@ -941,6 +949,34 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     currentReportElement = null;
+  }
+
+  // =====================================
+  // REPORT BUTTON HANDLERS
+  // =====================================
+
+  function handleUserActionsClick(reportElement) {
+    // Set current context similar to the old context menu approach
+    currentMessageAuthor = reportElement.getAttribute('data-reported-user');
+    currentMessageElement = reportElement;
+    currentMessageId = null;
+
+    // Open user actions modal
+    const userActionsModal = document.getElementById('userActionsModal');
+    document.getElementById('targetUsername').textContent = currentMessageAuthor;
+
+    // Reset form
+    resetUserActionsForm();
+    toggleActionFields();
+    userActionsModal.style.display = 'flex';
+  }
+
+  function handleUndoActionsClick(reportElement) {
+    // Set current context
+    currentMessageElement = reportElement;
+
+    // Show undo modal
+    showUndoReportModal(reportElement);
   }
 
   function initializeUserActionsListeners() {
