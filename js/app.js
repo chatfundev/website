@@ -1080,6 +1080,216 @@ document.addEventListener('DOMContentLoaded', function () {
   };
 
   // =====================================
+  // ITEMS FUNCTIONALITY
+  // =====================================
+
+  let currentItemToSell = null;
+
+  function initializeItemsFunctionality() {
+    // Add event listeners to action buttons
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('sell-button') && !e.target.disabled) {
+        handleSellItem(e.target);
+      } else if (e.target.id === 'createRandomBtn' && !e.target.disabled) {
+        handleCreateRandomItem();
+      }
+    });
+
+    // Initialize modal event listeners
+    initializeItemModals();
+  }
+
+  function initializeItemModals() {
+    const createItemModal = document.getElementById('createItemModal');
+    const sellItemModal = document.getElementById('sellItemModal');
+    const insufficientCoinsModal = document.getElementById('insufficientCoinsModal');
+
+    // Create item modal events
+    document.getElementById('createItemModalClose').addEventListener('click', () => closeModal(createItemModal));
+    document.getElementById('cancelCreateItem').addEventListener('click', () => closeModal(createItemModal));
+    document.getElementById('confirmCreateItem').addEventListener('click', () => {
+      confirmCreateRandomItem();
+      closeModal(createItemModal);
+    });
+
+    // Sell item modal events
+    document.getElementById('sellItemModalClose').addEventListener('click', () => closeModal(sellItemModal));
+    document.getElementById('cancelSellItem').addEventListener('click', () => closeModal(sellItemModal));
+    document.getElementById('confirmSellItem').addEventListener('click', () => {
+      confirmSellItem();
+      closeModal(sellItemModal);
+    });
+
+    // Insufficient coins modal events
+    document.getElementById('insufficientCoinsModalClose').addEventListener('click', () => closeModal(insufficientCoinsModal));
+    document.getElementById('closeInsufficientCoinsModal').addEventListener('click', () => closeModal(insufficientCoinsModal));
+
+    // Close modals on outside click
+    window.addEventListener('click', function (e) {
+      if (e.target === createItemModal) closeModal(createItemModal);
+      if (e.target === sellItemModal) closeModal(sellItemModal);
+      if (e.target === insufficientCoinsModal) closeModal(insufficientCoinsModal);
+    });
+  }
+
+  function handleSellItem(sellButton) {
+    const itemElement = sellButton.closest('.item');
+    const itemName = itemElement.querySelector('.item-name').textContent;
+    const itemRarity = itemElement.querySelector('.item-rarity').textContent;
+    const itemWorth = itemElement.querySelector('.item-worth').textContent;
+
+    // Extract coin value from the worth text (e.g., "Worth 50 Coins" -> 50)
+    const coinValue = parseInt(itemWorth.match(/\d+/)[0]);
+
+    // Store reference to the item for later
+    currentItemToSell = itemElement;
+
+    // Populate modal with item details
+    document.getElementById('sellItemName').textContent = itemName;
+    document.getElementById('sellItemRarity').textContent = itemRarity;
+    document.getElementById('sellItemPrice').innerHTML = `${coinValue} <i class="fas fa-coins"></i>`;
+
+    // Show modal
+    document.getElementById('sellItemModal').style.display = 'flex';
+  }
+
+  function confirmSellItem() {
+    if (!currentItemToSell) return;
+
+    const itemName = currentItemToSell.querySelector('.item-name').textContent;
+    const itemWorth = currentItemToSell.querySelector('.item-worth').textContent;
+    const coinValue = parseInt(itemWorth.match(/\d+/)[0]);
+
+    // Update the current coins display
+    const currentCoinsElement = document.querySelector('.currency-info span');
+    const currentCoinsText = currentCoinsElement.textContent;
+    const currentCoins = parseInt(currentCoinsText.match(/\d+/)[0]);
+    const newCoins = currentCoins + coinValue;
+
+    // Update the display
+    currentCoinsElement.innerHTML = `<i class="fas fa-coins"></i> coins: ${newCoins}`;
+
+    // Remove the item from the grid
+    currentItemToSell.remove();
+    currentItemToSell = null;
+
+    console.log(`Sold ${itemName} for ${coinValue} coins. New balance: ${newCoins}`);
+  }
+
+  function handleCreateRandomItem() {
+    const creationCost = 50; // Fixed cost for random item
+
+    // Check if user has enough coins
+    const currentCoinsElement = document.querySelector('.currency-info span');
+    const currentCoinsText = currentCoinsElement.textContent;
+    const currentCoins = parseInt(currentCoinsText.match(/\d+/)[0]);
+
+    if (currentCoins < creationCost) {
+      // Show insufficient coins modal instead of alert
+      showInsufficientCoinsModal(creationCost, currentCoins);
+      return;
+    }
+
+    // Update balance display in modal
+    document.getElementById('currentBalanceDisplay').innerHTML = `${currentCoins} <i class="fas fa-coins"></i>`;
+
+    // Show modal
+    document.getElementById('createItemModal').style.display = 'flex';
+  }
+
+  function showInsufficientCoinsModal(requiredCoins, currentCoins) {
+    const neededCoins = requiredCoins - currentCoins;
+
+    // Update modal content
+    document.getElementById('requiredCoinsDisplay').innerHTML = `${requiredCoins} <i class="fas fa-coins"></i>`;
+    document.getElementById('currentCoinsDisplay').innerHTML = `${currentCoins} <i class="fas fa-coins"></i>`;
+    document.getElementById('neededCoinsDisplay').innerHTML = `${neededCoins} <i class="fas fa-coins"></i> more`;
+
+    // Show modal
+    document.getElementById('insufficientCoinsModal').style.display = 'flex';
+  }
+
+  function confirmCreateRandomItem() {
+    const creationCost = 50;
+    const currentCoinsElement = document.querySelector('.currency-info span');
+    const currentCoinsText = currentCoinsElement.textContent;
+    const currentCoins = parseInt(currentCoinsText.match(/\d+/)[0]);
+
+    // Update coins
+    const newCoins = currentCoins - creationCost;
+    currentCoinsElement.innerHTML = `<i class="fas fa-coins"></i> coins: ${newCoins}`;
+
+    // Generate random item
+    const randomItem = generateRandomItem();
+
+    // Add to inventory
+    addItemToInventory(randomItem.name, randomItem.rarity, randomItem.worth);
+
+    console.log(`Created random item: ${randomItem.name} for ${creationCost} coins. New balance: ${newCoins}`);
+  }
+
+  function generateRandomItem() {
+    // Random item names
+    const itemNames = [
+      'mystic aura', 'shadow cloak', 'crystal sword', 'flame wings', 'ice shield',
+      'thunder bolt', 'star dust', 'moon beam', 'sun ray', 'wind spirit',
+      'earth guardian', 'water flow', 'fire dance', 'lightning strike', 'frost bite',
+      'golden crown', 'silver blade', 'bronze armor', 'diamond ring', 'ruby gem',
+      'emerald stone', 'sapphire orb', 'pearl necklace', 'amethyst staff', 'obsidian dagger'
+    ];
+
+    // Rarity weights (higher numbers = more likely)
+    const rarityWeights = [
+      { name: 'Common 50.0%', weight: 50, worthMultiplier: 0.5 },
+      { name: 'Uncommon 30.0%', weight: 30, worthMultiplier: 0.8 },
+      { name: 'Rare 17.24%', weight: 17, worthMultiplier: 1.2 },
+      { name: 'Epic 8.1%', weight: 8, worthMultiplier: 2.0 },
+      { name: 'Legendary 2.5%', weight: 3, worthMultiplier: 4.0 }
+    ];
+
+    // Pick random name
+    const randomName = itemNames[Math.floor(Math.random() * itemNames.length)];
+
+    // Pick random rarity based on weights
+    const totalWeight = rarityWeights.reduce((sum, rarity) => sum + rarity.weight, 0);
+    let randomWeight = Math.random() * totalWeight;
+    let selectedRarity = rarityWeights[0];
+
+    for (const rarity of rarityWeights) {
+      if (randomWeight <= rarity.weight) {
+        selectedRarity = rarity;
+        break;
+      }
+      randomWeight -= rarity.weight;
+    }
+
+    // Calculate worth based on rarity
+    const baseWorth = 25;
+    const worth = Math.floor(baseWorth * selectedRarity.worthMultiplier + Math.random() * 20);
+
+    return {
+      name: randomName,
+      rarity: selectedRarity.name,
+      worth: worth
+    };
+  }
+
+  function addItemToInventory(itemName, itemRarity, sellValue) {
+    const itemsGrid = document.querySelector('.items-grid');
+
+    const newItem = document.createElement('div');
+    newItem.className = 'item owned';
+    newItem.innerHTML = `
+      <div class="item-name">${itemName}</div>
+      <div class="item-rarity">${itemRarity}</div>
+      <div class="item-worth">Worth ${sellValue} Coins</div>
+      <button class="sell-button">sell</button>
+    `;
+
+    itemsGrid.appendChild(newItem);
+  }
+
+  // =====================================
   // INITIALIZATION
   // =====================================
 
@@ -1093,6 +1303,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeUserActionsListeners();
     initializeReportFunctionality();
     initializeReportsSystem();
+    initializeItemsFunctionality();
   }
 
   // Start the application

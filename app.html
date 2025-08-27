@@ -190,35 +190,28 @@
         <!-- Items Tab -->
         <div class="tab-content" id="items">
           <div class="tab-header">
-            <h2>items</h2>
+            <h2>inventory</h2>
             <div class="currency-info">
-              <span><i class="fas fa-coins" style="color: gold;"></i> coins: 250</span>
+              <span><i class="fas fa-coins"></i> coins: 250</span>
             </div>
           </div>
+
+          <div class="create-item-section">
+            <button class="btn" id="createRandomBtn">Forge Item - 50 Coins</button>
+          </div>
+
           <div class="items-grid">
             <div class="item owned">
-              <div class="item-icon">🎨</div>
-              <div class="item-info">
-                <h3>rainbow text</h3>
-                <p>make your text colorful</p>
-                <span class="item-status">owned</span>
-              </div>
+              <div class="item-name">mythril helmet</div>
+              <div class="item-rarity">Legendary 2.5%</div>
+              <div class="item-worth">Worth 150 Coins</div>
+              <button class="sell-button">sell</button>
             </div>
-            <div class="item available">
-              <div class="item-icon">✨</div>
-              <div class="item-info">
-                <h3>sparkle effect</h3>
-                <p>add sparkles to your messages</p>
-                <span class="item-price">50 coins</span>
-              </div>
-            </div>
-            <div class="item available">
-              <div class="item-icon">👑</div>
-              <div class="item-info">
-                <h3>crown badge</h3>
-                <p>show your royal status</p>
-                <span class="item-price">100 coins</span>
-              </div>
+            <div class="item owned">
+              <div class="item-name">lightning dagger</div>
+              <div class="item-rarity">Rare 17.24%</div>
+              <div class="item-worth">Worth 75 Coins</div>
+              <button class="sell-button">sell</button>
             </div>
           </div>
         </div>
@@ -651,6 +644,97 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelUndoReport">Cancel</button>
           <button class="btn danger" id="confirmUndoReport">Undo Actions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create Random Item Modal -->
+    <div id="createItemModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Create Random Item</h3>
+          <span class="modal-close" id="createItemModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="create-item-info">
+            <div class="item-preview">
+              <i class="fas fa-gift"></i>
+              <p>You will receive a completely random item!</p>
+            </div>
+            <div class="cost-info">
+              <span class="cost-label">Cost:</span>
+              <span class="cost-amount">50 <i class="fas fa-coins"></i></span>
+            </div>
+            <div class="balance-info">
+              <span class="balance-label">Your balance:</span>
+              <span class="balance-amount" id="currentBalanceDisplay">250 <i class="fas fa-coins"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelCreateItem">Cancel</button>
+          <button class="btn primary" id="confirmCreateItem">Create Item</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insufficient Coins Modal -->
+    <div id="insufficientCoinsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-exclamation-triangle"></i> Insufficient Coins</h3>
+          <span class="modal-close" id="insufficientCoinsModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="insufficient-coins-info">
+            <div class="insufficient-coins-preview">
+              <i class="fas fa-coins insufficient-coins-icon"></i>
+              <p>You don't have enough coins to create this item!</p>
+            </div>
+            <div class="coins-breakdown">
+              <div class="cost-info">
+                <span class="cost-label">Required:</span>
+                <span class="cost-amount" id="requiredCoinsDisplay">50 <i class="fas fa-coins"></i></span>
+              </div>
+              <div class="balance-info">
+                <span class="balance-label">Your balance:</span>
+                <span class="balance-amount" id="currentCoinsDisplay">0 <i class="fas fa-coins"></i></span>
+              </div>
+              <div class="shortage-info">
+                <span class="shortage-label">You need:</span>
+                <span class="shortage-amount" id="neededCoinsDisplay">50 <i class="fas fa-coins"></i> more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn primary" id="closeInsufficientCoinsModal">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sell Item Modal -->
+    <div id="sellItemModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Sell Item</h3>
+          <span class="modal-close" id="sellItemModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="sell-item-info">
+            <div class="item-details">
+              <div class="item-name-display" id="sellItemName">Item Name</div>
+              <div class="item-rarity-display" id="sellItemRarity">Rarity</div>
+            </div>
+            <div class="sell-price-info">
+              <span class="sell-label">You will receive:</span>
+              <span class="sell-amount" id="sellItemPrice">0 <i class="fas fa-coins"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelSellItem">Cancel</button>
+          <button class="btn danger" id="confirmSellItem">Sell Item</button>
         </div>
       </div>
     </div>
