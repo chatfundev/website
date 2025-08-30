@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://example.com/logo" alt="Logo" width="200" height="200"/>
+  <img src="https://chatfunyay.netlify.app/images/logo.svg" alt="Logo" width="200" height="200"/>
 </p>
 
 <h1 align="center">chatfun</h1>
