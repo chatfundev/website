@@ -1,0 +1,126 @@
+/* Chat Styles */
+
+.chat-info {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-md);
+}
+
+.chat-messages {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  height: 400px;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.message {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius);
+  position: relative;
+  cursor: default;
+}
+
+.message:hover {
+  background-color: var(--background-color);
+  transition: background-color var(--transition-duration) ease;
+}
+
+.message-user {
+  color: var(--primary-color);
+  font-weight: bold;
+  min-width: 80px;
+}
+
+.message-role {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.message-text {
+  color: var(--text-color);
+  flex: 1;
+}
+
+.message-time {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* Hide timestamps when body has class */
+body.hide-timestamps .message-time,
+.hide-timestamps .message-timestamp {
+  display: none !important;
+}
+
+/* Chat Input */
+.chat-input-container {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.chat-input {
+  flex: 1;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.send-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--background-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color var(--transition-duration) ease;
+}
+
+.send-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Mute Countdown */
+.mute-countdown-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--danger-color);
+  border-radius: var(--border-radius);
+  color: var(--danger-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.mute-message {
+  color: var(--danger-color);
+  margin-right: var(--spacing-xs);
+}
+
+.mute-timer {
+  color: var(--danger-color);
+  font-weight: bold;
+  font-family: monospace;
+  font-size: var(--font-size-lg);
+}

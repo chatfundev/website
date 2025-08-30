@@ -1,0 +1,240 @@
+/* Responsive Design Styles */
+
+/* Tablet and Mobile Responsive Design */
+@media (max-width: 768px) {
+
+  /* Layout Adjustments */
+  .main-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: auto;
+    max-height: 80px;
+    padding: var(--spacing-sm) 0;
+    z-index: 1000;
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sidebar-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 var(--spacing-sm);
+  }
+
+  .nav-item {
+    min-width: 120px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .nav-item.settings {
+    margin-top: 0;
+    border-top: none;
+    border-left: 1px solid var(--border-color);
+    padding-top: var(--spacing-sm);
+    margin-left: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+  }
+
+  .content {
+    margin-left: 0;
+    margin-top: 80px;
+    min-height: calc(100vh - 140px);
+  }
+
+  /* Grid Adjustments */
+  .achievements-grid,
+  .items-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Topbar Adjustments */
+  .topbar {
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  .topbar-left .logo .logo-image {
+    height: 24px;
+    width: 24px;
+  }
+
+  .topbar-left .logo h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  /* Settings Responsive */
+  .settings-sections {
+    max-width: 100%;
+  }
+
+  .settings-section {
+    padding: var(--spacing-md);
+  }
+
+  .setting-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .setting-label.toggle-setting .setting-info {
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .setting-select,
+  .setting-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .toggle-container {
+    align-self: flex-end;
+  }
+
+  /* Modal Responsive */
+  .modal-content {
+    width: 95%;
+    margin: 0;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: var(--spacing-md);
+  }
+
+  .action-duration,
+  .action-reason {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+    margin-left: var(--spacing-lg);
+  }
+
+  .modal-footer {
+    flex-direction: column;
+  }
+
+  .modal-footer .btn {
+    width: 100%;
+  }
+
+  /* Friends and DMs Responsive */
+  .dms-layout {
+    height: 500px;
+  }
+
+  .conversations-sidebar {
+    width: 250px;
+  }
+
+  .friend-request-item,
+  .friend-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+  }
+
+  .friend-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .dm-message {
+    max-width: 85%;
+  }
+}
+
+/* Small Mobile Responsive Design */
+@media (max-width: 480px) {
+
+  /* Settings Small Mobile */
+  .settings-section h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .setting-title {
+    font-size: var(--font-size-sm);
+  }
+
+  .setting-description {
+    font-size: var(--font-size-xs);
+  }
+
+  /* Friends Small Mobile */
+  .conversations-sidebar {
+    width: 200px;
+  }
+
+  .friends-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-xs);
+  }
+
+  .friend-requests-tabs {
+    flex-direction: column;
+  }
+
+  .friends-filter {
+    flex-wrap: wrap;
+  }
+}
+
+/* Large Screen Optimizations */
+@media (min-width: 1200px) {
+  .content {
+    margin-left: 220px;
+  }
+
+  .sidebar {
+    width: 220px;
+  }
+
+  .settings-sections {
+    max-width: 800px;
+  }
+
+  .achievements-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+
+  .dms-layout {
+    min-height: 700px;
+  }
+
+  .conversations-sidebar {
+    width: 320px;
+  }
+}
+
+/* Print Styles */
+@media print {
+
+  .sidebar,
+  .topbar,
+  .modal,
+  .context-menu {
+    display: none !important;
+  }
+
+  .content {
+    margin-left: 0;
+    margin-top: 0;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}

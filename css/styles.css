@@ -1,6 +1,17 @@
-/* Imports */
+/* Main Styles Import File */
 @import url('vars.css');
 @import url('global.css');
 @import url('header.css');
 @import url('components.css');
 @import url('forms.css');
+@import url('layout.css');
+@import url('navigation.css');
+@import url('chat.css');
+@import url('tables.css');
+@import url('settings.css');
+@import url('social.css');
+@import url('special-components.css');
+@import url('dashboard.css');
+@import url('modals.css');
+@import url('report-modals.css');
+@import url('responsive.css');
