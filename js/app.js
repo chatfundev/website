@@ -1880,7 +1880,7 @@ document.addEventListener('DOMContentLoaded', function () {
       soundNotifications: false,
       showTimestamps: true,
       autoScroll: true,
-      ctrlEnterToSend: true,
+      ctrlEnterToSend: false,
       showOnlineStatus: true,
       allowDirectMessages: true,
       contentFilter: true
