@@ -50,6 +50,14 @@
             <span class="nav-icon"><i class="fas fa-box"></i></span>
             <span class="nav-text">items</span>
           </div>
+          <div class="nav-item" data-tab="friends">
+            <span class="nav-icon"><i class="fas fa-users"></i></span>
+            <span class="nav-text">friends</span>
+          </div>
+          <div class="nav-item" data-tab="dms">
+            <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+            <span class="nav-text">dms</span>
+          </div>
 
           <!-- Separator and Mod/Admin sections -->
           <div class="nav-separator"></div>
@@ -216,6 +224,501 @@
           </div>
         </div>
 
+        <!-- Friends Tab -->
+        <div class="tab-content" id="friends">
+          <div class="tab-header">
+            <h2>friends</h2>
+            <div class="friends-info">
+              <span class="online-friends-count">5 online</span>
+            </div>
+          </div>
+
+          <!-- Friend Requests Section -->
+          <div class="friends-section">
+            <div class="friends-section-header">
+              <h3>Friend Requests</h3>
+              <span class="request-count">2 pending</span>
+            </div>
+
+            <div class="friend-requests-tabs">
+              <button class="request-tab-btn active" data-request-type="incoming">
+                <i class="fas fa-arrow-down"></i> Incoming (2)
+              </button>
+              <button class="request-tab-btn" data-request-type="outgoing">
+                <i class="fas fa-arrow-up"></i> Outgoing (1)
+              </button>
+            </div>
+
+            <!-- Incoming Requests -->
+            <div class="friend-requests-list incoming-requests active">
+              <div class="friend-request-item">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">gaming_pro_42</span>
+                  <span class="request-time">2 hours ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small success accept-friend-btn">
+                    <i class="fas fa-check"></i> Accept
+                  </button>
+                  <button class="btn small danger decline-friend-btn">
+                    <i class="fas fa-times"></i> Decline
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-request-item">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">chat_master_99</span>
+                  <span class="request-time">1 day ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small success accept-friend-btn">
+                    <i class="fas fa-check"></i> Accept
+                  </button>
+                  <button class="btn small danger decline-friend-btn">
+                    <i class="fas fa-times"></i> Decline
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Outgoing Requests -->
+            <div class="friend-requests-list outgoing-requests">
+              <div class="friend-request-item">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">cool_player_123</span>
+                  <span class="request-time">3 hours ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary cancel-request-btn">
+                    <i class="fas fa-times"></i> Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Friends List Section -->
+          <div class="friends-section">
+            <div class="friends-section-header">
+              <h3>Friends</h3>
+              <span class="friends-count">12 total</span>
+            </div>
+
+            <div class="friends-filter">
+              <button class="filter-btn active" data-filter="all">All (12)</button>
+              <button class="filter-btn" data-filter="online">Online (5)</button>
+              <button class="filter-btn" data-filter="offline">Offline (7)</button>
+            </div>
+
+            <div class="friends-list">
+              <!-- Online Friends -->
+              <div class="friend-item online" data-status="online">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator online"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">player123</span>
+                  <span class="friend-status">Playing ChatFun</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small primary message-friend-btn" data-friend="player123">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item online" data-status="online">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator online"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">gamer456</span>
+                  <span class="friend-status">Online</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small primary message-friend-btn" data-friend="gamer456">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item online" data-status="online">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator idle"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">social_butterfly</span>
+                  <span class="friend-status">Idle - 15 min</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small primary message-friend-btn" data-friend="social_butterfly">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item online" data-status="online">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator online"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">chat_lover</span>
+                  <span class="friend-status">Playing ChatFun</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small primary message-friend-btn" data-friend="chat_lover">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item online" data-status="online">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator online"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">fun_person</span>
+                  <span class="friend-status">Online</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small primary message-friend-btn" data-friend="fun_person">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <!-- Offline Friends -->
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">sleepy_gamer</span>
+                  <span class="friend-status">Last seen 2 hours ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="sleepy_gamer">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">night_owl</span>
+                  <span class="friend-status">Last seen yesterday</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="night_owl">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">weekend_warrior</span>
+                  <span class="friend-status">Last seen 3 days ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="weekend_warrior">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">busy_bee</span>
+                  <span class="friend-status">Last seen 1 week ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="busy_bee">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">casual_player</span>
+                  <span class="friend-status">Last seen 2 weeks ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="casual_player">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">mystery_user</span>
+                  <span class="friend-status">Last seen 1 month ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="mystery_user">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+
+              <div class="friend-item offline" data-status="offline">
+                <div class="friend-avatar">
+                  <i class="fas fa-user"></i>
+                  <div class="status-indicator offline"></div>
+                </div>
+                <div class="friend-info">
+                  <span class="friend-name">old_timer</span>
+                  <span class="friend-status">Last seen 2 months ago</span>
+                </div>
+                <div class="friend-actions">
+                  <button class="btn small secondary message-friend-btn" data-friend="old_timer">
+                    <i class="fas fa-comment"></i> Message
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DMs Tab -->
+        <div class="tab-content" id="dms">
+          <div class="tab-header">
+            <h2>direct messages</h2>
+            <div class="dms-info">
+              <span class="unread-count">3 unread</span>
+            </div>
+          </div>
+
+          <div class="dms-layout">
+            <!-- Conversations List -->
+            <div class="conversations-sidebar">
+              <div class="conversations-header">
+                <div class="search-container">
+                  <i class="fas fa-search search-icon"></i>
+                  <input type="text" class="conversation-search" placeholder="Search conversations...">
+                </div>
+              </div>
+
+              <div class="conversations-list">
+                <div class="conversation-item active" data-conversation="player123">
+                  <div class="conversation-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator online"></div>
+                  </div>
+                  <div class="conversation-info">
+                    <div class="conversation-header">
+                      <span class="conversation-name">player123</span>
+                      <span class="conversation-time">2:45 PM</span>
+                    </div>
+                    <div class="conversation-preview">
+                      <span class="last-message">Thanks for the help earlier!</span>
+                      <div class="unread-badge">2</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conversation-item" data-conversation="gamer456">
+                  <div class="conversation-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator online"></div>
+                  </div>
+                  <div class="conversation-info">
+                    <div class="conversation-header">
+                      <span class="conversation-name">gamer456</span>
+                      <span class="conversation-time">1:30 PM</span>
+                    </div>
+                    <div class="conversation-preview">
+                      <span class="last-message">Want to play later?</span>
+                      <div class="unread-badge">1</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conversation-item" data-conversation="social_butterfly">
+                  <div class="conversation-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator idle"></div>
+                  </div>
+                  <div class="conversation-info">
+                    <div class="conversation-header">
+                      <span class="conversation-name">social_butterfly</span>
+                      <span class="conversation-time">12:15 PM</span>
+                    </div>
+                    <div class="conversation-preview">
+                      <span class="last-message">See you tomorrow!</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conversation-item" data-conversation="chat_lover">
+                  <div class="conversation-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator online"></div>
+                  </div>
+                  <div class="conversation-info">
+                    <div class="conversation-header">
+                      <span class="conversation-name">chat_lover</span>
+                      <span class="conversation-time">11:45 AM</span>
+                    </div>
+                    <div class="conversation-preview">
+                      <span class="last-message">That was hilarious! 😂</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="conversation-item" data-conversation="sleepy_gamer">
+                  <div class="conversation-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator offline"></div>
+                  </div>
+                  <div class="conversation-info">
+                    <div class="conversation-header">
+                      <span class="conversation-name">sleepy_gamer</span>
+                      <span class="conversation-time">Yesterday</span>
+                    </div>
+                    <div class="conversation-preview">
+                      <span class="last-message">Good night!</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Message Area -->
+            <div class="dm-messages-area">
+              <!-- Active conversation header -->
+              <div class="dm-conversation-header">
+                <div class="dm-user-info">
+                  <div class="dm-user-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator online"></div>
+                  </div>
+                  <div class="dm-user-details">
+                    <span class="dm-user-name">player123</span>
+                    <span class="dm-user-status">Online</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Messages container -->
+              <div class="dm-messages" id="dm-messages">
+                <div class="dm-message received">
+                  <div class="dm-message-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div class="dm-message-content">
+                    <div class="dm-message-bubble">
+                      <span class="dm-message-text">Hey! How's it going?</span>
+                      <span class="dm-message-time">2:30 PM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dm-message sent">
+                  <div class="dm-message-content">
+                    <div class="dm-message-bubble">
+                      <span class="dm-message-text">Pretty good! Just got that rare item from the forge!</span>
+                      <span class="dm-message-time">2:32 PM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dm-message received">
+                  <div class="dm-message-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div class="dm-message-content">
+                    <div class="dm-message-bubble">
+                      <span class="dm-message-text">Nice! Which one did you get?</span>
+                      <span class="dm-message-time">2:33 PM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dm-message sent">
+                  <div class="dm-message-content">
+                    <div class="dm-message-bubble">
+                      <span class="dm-message-text">The lightning dagger! It's worth 75 coins</span>
+                      <span class="dm-message-time">2:34 PM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dm-message received">
+                  <div class="dm-message-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div class="dm-message-content">
+                    <div class="dm-message-bubble">
+                      <span class="dm-message-text">Awesome! Thanks for helping me with that boss earlier by the
+                        way</span>
+                      <span class="dm-message-time">2:44 PM</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="dm-message received">
+                  <div class="dm-message-avatar">
+                    <i class="fas fa-user"></i>
+                  </div>
+                  <div class="dm-message-content">
+                    <div class="dm-message-bubble">
+                      <span class="dm-message-text">Thanks for the help earlier!</span>
+                      <span class="dm-message-time">2:45 PM</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Message input -->
+              <div class="dm-input-container">
+                <input type="text" class="dm-input" placeholder="Type your message..." maxlength="200">
+                <button class="dm-send-button">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Reports Tab (for mods+) -->
         <div class="tab-content" id="reports">
           <div class="tab-header">
@@ -343,37 +846,204 @@
         <div class="tab-content" id="settings">
           <div class="tab-header">
             <h2>settings</h2>
+            <p class="settings-subtitle">customize your chatfun experience</p>
           </div>
           <div class="settings-sections">
+            <!-- Notifications Settings -->
             <div class="settings-section">
-              <h3>notifications</h3>
+              <h3><i class="fas fa-bell"></i> notifications</h3>
               <div class="setting-item">
-                <label class="setting-label">
-                  <div class="checkbox-container">
-                    <input type="checkbox" class="checkbox" checked>
-                    <span class="checkbox-label">message notifications</span>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">message notifications</span>
+                    <span class="setting-description">get notified when someone mentions you</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="messageNotifications" checked>
+                    <span class="toggle-slider"></span>
                   </div>
                 </label>
               </div>
               <div class="setting-item">
-                <label class="setting-label">
-                  <div class="checkbox-container">
-                    <input type="checkbox" class="checkbox">
-                    <span class="checkbox-label">achievement notifications</span>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">direct message notifications</span>
+                    <span class="setting-description">receive alerts for private messages</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="dmNotifications" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">achievement notifications</span>
+                    <span class="setting-description">celebrate your milestones and rewards</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="achievementNotifications">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">sound notifications</span>
+                    <span class="setting-description">play sounds for important events</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="soundNotifications">
+                    <span class="toggle-slider"></span>
                   </div>
                 </label>
               </div>
             </div>
+
+            <!-- Chat Settings -->
             <div class="settings-section">
-              <h3>account</h3>
+              <h3><i class="fas fa-comments"></i> chat preferences</h3>
               <div class="setting-item">
-                <button class="btn secondary">change password</button>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">show timestamps</span>
+                    <span class="setting-description">display message send times</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="showTimestamps" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
               </div>
               <div class="setting-item">
-                <button class="btn danger">logout</button>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">auto-scroll to new messages</span>
+                    <span class="setting-description">automatically scroll down for new messages</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="autoScroll" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
               </div>
               <div class="setting-item">
-                <button class="btn danger">delete account</button>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">ctrl+enter to send</span>
+                    <span class="setting-description">send messages with ctrl+enter instead of enter</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="ctrlEnterToSend">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">message history limit</span>
+                    <span class="setting-description">number of recent messages to keep loaded</span>
+                  </div>
+                  <select class="setting-select" id="messageHistoryLimit">
+                    <option value="50">50 messages</option>
+                    <option value="100" selected>100 messages</option>
+                    <option value="200">200 messages</option>
+                    <option value="500">500 messages</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-shield-alt"></i> privacy & safety</h3>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">show online status</span>
+                    <span class="setting-description">let others see when you're online</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="showOnlineStatus" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">allow direct messages</span>
+                    <span class="setting-description">receive private messages from other users</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="allowDirectMessages" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">filter inappropriate content</span>
+                    <span class="setting-description">automatically hide potentially offensive messages</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="contentFilter" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-user-cog"></i> account management</h3>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">change password</span>
+                    <span class="setting-description">update your account password</span>
+                  </div>
+                  <button class="btn secondary setting-button" id="changePasswordBtn">
+                    <i class="fas fa-key"></i> change
+                  </button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">download data</span>
+                    <span class="setting-description">export your chat history and account data</span>
+                  </div>
+                  <button class="btn secondary setting-button" id="exportDataBtn">
+                    <i class="fas fa-download"></i> export
+                  </button>
+                </div>
+              </div>
+              <div class="setting-item danger-zone">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">logout</span>
+                    <span class="setting-description">sign out of your account</span>
+                  </div>
+                  <button class="btn danger setting-button" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> logout
+                  </button>
+                </div>
+              </div>
+              <div class="setting-item danger-zone">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">delete account</span>
+                    <span class="setting-description">permanently delete your account and all data</span>
+                  </div>
+                  <button class="btn danger setting-button" id="deleteAccountBtn">
+                    <i class="fas fa-trash"></i> delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -735,6 +1405,169 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelSellItem">Cancel</button>
           <button class="btn danger" id="confirmSellItem">Sell Item</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Password</h3>
+          <span class="modal-close" id="changePasswordModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" name="currentPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmNewPassword">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+            </div>
+            <div class="password-requirements">
+              <h4>Password Requirements:</h4>
+              <ul>
+                <li>At least 8 characters long</li>
+                <li>Contains at least one uppercase letter</li>
+                <li>Contains at least one lowercase letter</li>
+                <li>Contains at least one number</li>
+                <li>Contains at least one special character</li>
+              </ul>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelChangePassword">Cancel</button>
+          <button class="btn primary" id="confirmChangePassword" form="changePasswordForm">Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear Cache Modal -->
+    <div id="clearCacheModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Clear Cache</h3>
+          <span class="modal-close" id="clearCacheModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon warning">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <p><strong>Are you sure you want to clear the application cache?</strong></p>
+          <p>This will:</p>
+          <ul>
+            <li>Clear all stored application data</li>
+            <li>Reset your preferences (except login credentials)</li>
+            <li>Reload the application</li>
+          </ul>
+          <p class="warning-text">You will remain logged in, but all temporary data will be lost.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelClearCache">Cancel</button>
+          <button class="btn warning" id="confirmClearCache">Clear Cache</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Sign Out</h3>
+          <span class="modal-close" id="logoutModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon info">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+          <p><strong>Are you sure you want to sign out?</strong></p>
+          <p>You will be redirected to the login page and will need to enter your credentials again to access ChatFun.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelLogout">Cancel</button>
+          <button class="btn primary" id="confirmLogout">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteAccountModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Delete Account</h3>
+          <span class="modal-close" id="deleteAccountModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon danger">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <p><strong>This action cannot be undone!</strong></p>
+          <p>Deleting your account will permanently:</p>
+          <ul>
+            <li>Remove all your messages and chat history</li>
+            <li>Delete your profile and achievements</li>
+            <li>Remove you from all friend lists</li>
+            <li>Delete all your items and coins</li>
+          </ul>
+          <div class="confirmation-input">
+            <label for="deleteConfirmation">Type <strong>"DELETE"</strong> to confirm:</label>
+            <input type="text" id="deleteConfirmation" placeholder="Type DELETE to confirm" autocomplete="off">
+          </div>
+          <p class="danger-text">This action is permanent and cannot be reversed.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelDeleteAccount">Cancel</button>
+          <button class="btn danger" id="confirmDeleteAccount" disabled>Delete Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Data Modal -->
+    <div id="downloadDataModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Download Your Data</h3>
+          <span class="modal-close" id="downloadDataModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon success">
+            <i class="fas fa-download"></i>
+          </div>
+          <p><strong>Export your ChatFun data</strong></p>
+          <p>This will create a downloadable file containing:</p>
+          <ul>
+            <li>Your profile information</li>
+            <li>Settings and preferences</li>
+            <li>Friend list and connections</li>
+            <li>Achievement history</li>
+            <li>Items and coin balance</li>
+          </ul>
+          <div class="data-format-selection">
+            <label>Choose export format:</label>
+            <div class="format-options">
+              <label class="format-option">
+                <input type="radio" name="exportFormat" value="json" checked>
+                <span>JSON (recommended)</span>
+              </label>
+              <label class="format-option">
+                <input type="radio" name="exportFormat" value="csv">
+                <span>CSV (spreadsheet)</span>
+              </label>
+            </div>
+          </div>
+          <p class="info-text">Your data export will begin immediately after confirmation.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelDownloadData">Cancel</button>
+          <button class="btn success" id="confirmDownloadData">Download Data</button>
         </div>
       </div>
     </div>

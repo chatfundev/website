@@ -164,15 +164,40 @@ document.addEventListener('DOMContentLoaded', function () {
     const currentChatInput = document.querySelector('.chat-input');
 
     if (currentSendButton) {
-      currentSendButton.addEventListener('click', sendMessage);
+      // Remove existing listener by cloning and replacing
+      const newSendButton = currentSendButton.cloneNode(true);
+      currentSendButton.parentNode.replaceChild(newSendButton, currentSendButton);
+      newSendButton.addEventListener('click', sendMessage);
     }
 
     if (currentChatInput) {
-      currentChatInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-          sendMessage();
+      // Remove existing listener by cloning and replacing
+      const newChatInput = currentChatInput.cloneNode(true);
+      currentChatInput.parentNode.replaceChild(newChatInput, currentChatInput);
+
+      newChatInput.addEventListener('keydown', function (e) {
+        const settings = getSettings();
+        const ctrlEnterMode = settings.ctrlEnterToSend;
+
+        if (ctrlEnterMode) {
+          // Ctrl+Enter to send mode
+          if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            sendMessage();
+          }
+        } else {
+          // Regular Enter to send mode
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+          }
         }
       });
+
+      // Maintain focus on the new input element
+      if (document.activeElement === document.body) {
+        newChatInput.focus();
+      }
     }
   }
 
@@ -1290,6 +1315,858 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // =====================================
+  // FRIENDS FUNCTIONALITY
+  // =====================================
+
+  function initializeFriendsFunctionality() {
+    // Initialize friend request tabs
+    initializeFriendRequestTabs();
+
+    // Initialize friends filter
+    initializeFriendsFilter();
+
+    // Initialize friend action buttons
+    initializeFriendActions();
+  }
+
+  function initializeFriendRequestTabs() {
+    const requestTabs = document.querySelectorAll('.request-tab-btn');
+    const requestLists = document.querySelectorAll('.friend-requests-list');
+
+    requestTabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        const requestType = this.getAttribute('data-request-type');
+
+        // Remove active class from all tabs and lists
+        requestTabs.forEach(t => t.classList.remove('active'));
+        requestLists.forEach(list => list.classList.remove('active'));
+
+        // Add active class to clicked tab and corresponding list
+        this.classList.add('active');
+        document.querySelector(`.${requestType}-requests`).classList.add('active');
+      });
+    });
+  }
+
+  function initializeFriendsFilter() {
+    const filterButtons = document.querySelectorAll('.friends-filter .filter-btn');
+    const friendItems = document.querySelectorAll('.friend-item');
+
+    filterButtons.forEach(button => {
+      button.addEventListener('click', function () {
+        const filter = this.getAttribute('data-filter');
+
+        // Remove active class from all filter buttons
+        filterButtons.forEach(btn => btn.classList.remove('active'));
+        this.classList.add('active');
+
+        // Show/hide friends based on filter
+        friendItems.forEach(item => {
+          const status = item.getAttribute('data-status');
+
+          if (filter === 'all') {
+            item.style.display = 'flex';
+          } else if (filter === 'online' && status === 'online') {
+            item.style.display = 'flex';
+          } else if (filter === 'offline' && status === 'offline') {
+            item.style.display = 'flex';
+          } else {
+            item.style.display = 'none';
+          }
+        });
+      });
+    });
+  }
+
+  function initializeFriendActions() {
+    // Accept friend request
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('accept-friend-btn') || e.target.parentElement.classList.contains('accept-friend-btn')) {
+        const requestItem = e.target.closest('.friend-request-item');
+        const friendName = requestItem.querySelector('.friend-name').textContent;
+
+        // Simulate accepting friend request
+        console.log(`Accepted friend request from ${friendName}`);
+
+        // Remove from requests (in real app, this would update the server)
+        requestItem.remove();
+
+        // Update request count
+        updateRequestCount();
+
+        // Show success message
+        showFriendActionMessage(`You are now friends with ${friendName}!`, 'success');
+      }
+    });
+
+    // Decline friend request
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('decline-friend-btn') || e.target.parentElement.classList.contains('decline-friend-btn')) {
+        const requestItem = e.target.closest('.friend-request-item');
+        const friendName = requestItem.querySelector('.friend-name').textContent;
+
+        // Simulate declining friend request
+        console.log(`Declined friend request from ${friendName}`);
+
+        // Remove from requests
+        requestItem.remove();
+
+        // Update request count
+        updateRequestCount();
+
+        // Show message
+        showFriendActionMessage(`Declined friend request from ${friendName}`, 'info');
+      }
+    });
+
+    // Cancel outgoing request
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('cancel-request-btn') || e.target.parentElement.classList.contains('cancel-request-btn')) {
+        const requestItem = e.target.closest('.friend-request-item');
+        const friendName = requestItem.querySelector('.friend-name').textContent;
+
+        // Simulate canceling friend request
+        console.log(`Canceled friend request to ${friendName}`);
+
+        // Remove from requests
+        requestItem.remove();
+
+        // Show message
+        showFriendActionMessage(`Canceled friend request to ${friendName}`, 'info');
+      }
+    });
+
+    // Message friend button
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('message-friend-btn') || e.target.parentElement.classList.contains('message-friend-btn')) {
+        const button = e.target.classList.contains('message-friend-btn') ? e.target : e.target.parentElement;
+        const friendName = button.getAttribute('data-friend');
+
+        // Switch to DMs tab and open conversation
+        switchToDMConversation(friendName);
+      }
+    });
+  }
+
+  function updateRequestCount() {
+    const incomingRequests = document.querySelectorAll('.incoming-requests .friend-request-item');
+    const requestCountSpan = document.querySelector('.request-count');
+    const incomingTabBtn = document.querySelector('[data-request-type="incoming"]');
+
+    const count = incomingRequests.length;
+    requestCountSpan.textContent = `${count} pending`;
+
+    // Update the tab button text
+    if (incomingTabBtn) {
+      incomingTabBtn.innerHTML = `<i class="fas fa-arrow-down"></i> Incoming (${count})`;
+    }
+  }
+
+  function showFriendActionMessage(message, type) {
+    // Create a temporary notification (you could enhance this with a proper notification system)
+    const notification = document.createElement('div');
+    notification.className = `friend-notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      background-color: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateX(0)';
+    }, 10);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.parentNode.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
+  }
+
+  // =====================================
+  // DMS FUNCTIONALITY
+  // =====================================
+
+  let currentDMConversation = 'player123';
+
+  function initializeDMsFunctionality() {
+    // Initialize conversation switching
+    initializeConversationSwitching();
+
+    // Initialize DM messaging
+    initializeDMMessaging();
+
+    // Initialize conversation search
+    initializeConversationSearch();
+  }
+
+  function initializeConversationSwitching() {
+    const conversationItems = document.querySelectorAll('.conversation-item');
+
+    conversationItems.forEach(item => {
+      item.addEventListener('click', function () {
+        const conversationId = this.getAttribute('data-conversation');
+        switchDMConversation(conversationId);
+      });
+    });
+  }
+
+  function switchDMConversation(conversationId) {
+    const conversationItems = document.querySelectorAll('.conversation-item');
+
+    // Remove active class from all conversations
+    conversationItems.forEach(item => item.classList.remove('active'));
+
+    // Add active class to selected conversation
+    const activeConversation = document.querySelector(`[data-conversation="${conversationId}"]`);
+    if (activeConversation) {
+      activeConversation.classList.add('active');
+
+      // Remove unread badge
+      const unreadBadge = activeConversation.querySelector('.unread-badge');
+      if (unreadBadge) {
+        unreadBadge.remove();
+      }
+    }
+
+    // Update conversation header
+    updateDMConversationHeader(conversationId);
+
+    // Load conversation messages (in a real app, this would fetch from server)
+    loadDMConversation(conversationId);
+
+    // Update current conversation
+    currentDMConversation = conversationId;
+  }
+
+  function updateDMConversationHeader(conversationId) {
+    const dmUserName = document.querySelector('.dm-user-name');
+    const dmUserStatus = document.querySelector('.dm-user-status');
+
+    // Mock user data (in real app, this would come from user data)
+    const userStatuses = {
+      'player123': { name: 'player123', status: 'Online', statusClass: 'online' },
+      'gamer456': { name: 'gamer456', status: 'Online', statusClass: 'online' },
+      'social_butterfly': { name: 'social_butterfly', status: 'Idle - 15 min', statusClass: 'idle' },
+      'chat_lover': { name: 'chat_lover', status: 'Playing ChatFun', statusClass: 'online' },
+      'sleepy_gamer': { name: 'sleepy_gamer', status: 'Last seen 2 hours ago', statusClass: 'offline' }
+    };
+
+    const userData = userStatuses[conversationId] || { name: conversationId, status: 'Unknown', statusClass: 'offline' };
+
+    dmUserName.textContent = userData.name;
+    dmUserStatus.textContent = userData.status;
+
+    // Update status indicator
+    const statusIndicator = document.querySelector('.dm-user-avatar .status-indicator');
+    if (statusIndicator) {
+      statusIndicator.className = `status-indicator ${userData.statusClass}`;
+    }
+  }
+
+  function loadDMConversation(conversationId) {
+    const dmMessages = document.getElementById('dm-messages');
+
+    // Mock conversations (in real app, this would be fetched from server)
+    const conversations = {
+      'player123': [
+        { type: 'received', text: 'Hey! How\'s it going?', time: '2:30 PM' },
+        { type: 'sent', text: 'Pretty good! Just got that rare item from the forge!', time: '2:32 PM' },
+        { type: 'received', text: 'Nice! Which one did you get?', time: '2:33 PM' },
+        { type: 'sent', text: 'The lightning dagger! It\'s worth 75 coins', time: '2:34 PM' },
+        { type: 'received', text: 'Awesome! Thanks for helping me with that boss earlier by the way', time: '2:44 PM' },
+        { type: 'received', text: 'Thanks for the help earlier!', time: '2:45 PM' }
+      ],
+      'gamer456': [
+        { type: 'received', text: 'Hey want to team up for some battles?', time: '1:15 PM' },
+        { type: 'sent', text: 'Sure! I\'m free right now', time: '1:16 PM' },
+        { type: 'received', text: 'Great! Meet you in the arena', time: '1:18 PM' },
+        { type: 'sent', text: 'On my way!', time: '1:19 PM' },
+        { type: 'received', text: 'Want to play later?', time: '1:30 PM' }
+      ],
+      'social_butterfly': [
+        { type: 'received', text: 'Did you see the new update?', time: '11:45 AM' },
+        { type: 'sent', text: 'Yes! The new features look amazing', time: '11:47 AM' },
+        { type: 'received', text: 'I know right! Can\'t wait to try them', time: '11:48 AM' },
+        { type: 'sent', text: 'Same here! Talk to you later', time: '12:10 PM' },
+        { type: 'received', text: 'See you tomorrow!', time: '12:15 PM' }
+      ],
+      'chat_lover': [
+        { type: 'received', text: 'LMAO that was hilarious! 😂', time: '11:30 AM' },
+        { type: 'sent', text: 'I know right? I couldn\'t stop laughing', time: '11:32 AM' },
+        { type: 'received', text: 'That was hilarious! 😂', time: '11:45 AM' }
+      ],
+      'sleepy_gamer': [
+        { type: 'sent', text: 'Hey, still up for that game?', time: 'Yesterday 10:30 PM' },
+        { type: 'received', text: 'Sorry, getting pretty tired', time: 'Yesterday 10:45 PM' },
+        { type: 'sent', text: 'No worries! Sleep well', time: 'Yesterday 10:46 PM' },
+        { type: 'received', text: 'Good night!', time: 'Yesterday 10:47 PM' }
+      ]
+    };
+
+    const messages = conversations[conversationId] || [];
+
+    // Clear existing messages
+    dmMessages.innerHTML = '';
+
+    // Add messages
+    messages.forEach(message => {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = `dm-message ${message.type}`;
+
+      let avatarHtml = '';
+      if (message.type === 'received') {
+        avatarHtml = `
+          <div class="dm-message-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+        `;
+      }
+
+      messageDiv.innerHTML = `
+        ${avatarHtml}
+        <div class="dm-message-content">
+          <div class="dm-message-bubble">
+            <span class="dm-message-text">${message.text}</span>
+            <span class="dm-message-time">${message.time}</span>
+          </div>
+        </div>
+      `;
+
+      dmMessages.appendChild(messageDiv);
+    });
+
+    // Scroll to bottom
+    dmMessages.scrollTop = dmMessages.scrollHeight;
+  }
+
+  function initializeDMMessaging() {
+    const dmInput = document.querySelector('.dm-input');
+    const dmSendButton = document.querySelector('.dm-send-button');
+
+    function sendDMMessage() {
+      if (!dmInput.value.trim()) return;
+
+      const message = dmInput.value.trim();
+      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Add message to conversation
+      addDMMessage('sent', message, currentTime);
+
+      // Clear input
+      dmInput.value = '';
+
+      // Simulate response after a short delay (for demo purposes)
+      setTimeout(() => {
+        const responses = [
+          'That sounds great!',
+          'I agree!',
+          'Haha, nice one!',
+          'Interesting point!',
+          'Thanks for letting me know!',
+          'Cool!',
+          'Awesome!',
+          'Got it!',
+          'Sure thing!',
+          'No problem!'
+        ];
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        const responseTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        addDMMessage('received', randomResponse, responseTime);
+      }, 1000 + Math.random() * 2000);
+    }
+
+    // Send message on button click
+    dmSendButton.addEventListener('click', sendDMMessage);
+
+    // Send message on Enter key
+    dmInput.addEventListener('keydown', function (e) {
+      const settings = getSettings();
+      const ctrlEnterMode = settings.ctrlEnterToSend;
+
+      if (ctrlEnterMode) {
+        // Ctrl+Enter to send mode
+        if (e.key === 'Enter' && e.ctrlKey) {
+          e.preventDefault();
+          sendDMMessage();
+        }
+      } else {
+        // Regular Enter to send mode
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          sendDMMessage();
+        }
+      }
+    });
+  }
+
+  function addDMMessage(type, text, time) {
+    const dmMessages = document.getElementById('dm-messages');
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `dm-message ${type}`;
+
+    let avatarHtml = '';
+    if (type === 'received') {
+      avatarHtml = `
+        <div class="dm-message-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+      `;
+    }
+
+    messageDiv.innerHTML = `
+      ${avatarHtml}
+      <div class="dm-message-content">
+        <div class="dm-message-bubble">
+          <span class="dm-message-text">${text}</span>
+          <span class="dm-message-time">${time}</span>
+        </div>
+      </div>
+    `;
+
+    dmMessages.appendChild(messageDiv);
+    dmMessages.scrollTop = dmMessages.scrollHeight;
+  }
+
+  function initializeConversationSearch() {
+    const searchInput = document.querySelector('.conversation-search');
+    const conversationItems = document.querySelectorAll('.conversation-item');
+
+    searchInput.addEventListener('input', function () {
+      const searchTerm = this.value.toLowerCase().trim();
+
+      conversationItems.forEach(item => {
+        const conversationName = item.querySelector('.conversation-name').textContent.toLowerCase();
+        const lastMessage = item.querySelector('.last-message').textContent.toLowerCase();
+
+        if (conversationName.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+          item.style.display = 'flex';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+  }
+
+  function switchToDMConversation(friendName) {
+    // Switch to DMs tab
+    const navItems = document.querySelectorAll('.nav-item');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    // Remove active class from all nav items and tab contents
+    navItems.forEach(nav => nav.classList.remove('active'));
+    tabContents.forEach(content => content.classList.remove('active'));
+
+    // Add active class to DMs nav and tab
+    const dmsNav = document.querySelector('[data-tab="dms"]');
+    const dmsTab = document.getElementById('dms');
+
+    if (dmsNav && dmsTab) {
+      dmsNav.classList.add('active');
+      dmsTab.classList.add('active');
+
+      // Switch to the specific conversation
+      switchDMConversation(friendName);
+    }
+  }
+
+  // =====================================
+  // SETTINGS FUNCTIONALITY
+  // =====================================
+
+  function initializeSettings() {
+    // Load saved settings from localStorage
+    loadSettings();
+
+    // Message history limit
+    const messageHistoryLimit = document.getElementById('messageHistoryLimit');
+    messageHistoryLimit.addEventListener('change', function () {
+      setSetting('messageHistoryLimit', this.value);
+    });
+
+    // Toggle settings
+    const toggleSettings = [
+      'messageNotifications',
+      'dmNotifications',
+      'achievementNotifications',
+      'soundNotifications',
+      'showTimestamps',
+      'autoScroll',
+      'ctrlEnterToSend',
+      'showOnlineStatus',
+      'allowDirectMessages',
+      'contentFilter'
+    ];
+
+    toggleSettings.forEach(settingId => {
+      const checkbox = document.getElementById(settingId);
+      if (checkbox) {
+        checkbox.addEventListener('change', function () {
+          setSetting(settingId, this.checked);
+          applyToggleSetting(settingId, this.checked);
+        });
+      }
+    });
+
+    // Button event listeners
+    document.getElementById('changePasswordBtn')?.addEventListener('click', showChangePasswordModal);
+    document.getElementById('exportDataBtn')?.addEventListener('click', showDownloadDataModal);
+    document.getElementById('logoutBtn')?.addEventListener('click', showLogoutModal);
+    document.getElementById('deleteAccountBtn')?.addEventListener('click', showDeleteAccountModal);
+  }
+
+  function loadSettings() {
+    // Load settings from localStorage and apply them
+    const settings = getSettings();
+
+    // Apply message history limit
+    const messageHistoryLimit = document.getElementById('messageHistoryLimit');
+    if (messageHistoryLimit) {
+      messageHistoryLimit.value = settings.messageHistoryLimit;
+    }
+
+    // Apply toggle settings
+    const toggleSettings = [
+      'messageNotifications',
+      'dmNotifications',
+      'achievementNotifications',
+      'soundNotifications',
+      'showTimestamps',
+      'autoScroll',
+      'ctrlEnterToSend',
+      'showOnlineStatus',
+      'allowDirectMessages',
+      'contentFilter',
+      'developerMode'
+    ];
+
+    toggleSettings.forEach(settingId => {
+      const checkbox = document.getElementById(settingId);
+      if (checkbox) {
+        checkbox.checked = settings[settingId];
+        applyToggleSetting(settingId, settings[settingId]);
+      }
+    });
+  }
+
+  function getSettings() {
+    // Default settings
+    const defaults = {
+      messageHistoryLimit: '100',
+      messageNotifications: true,
+      dmNotifications: true,
+      achievementNotifications: false,
+      soundNotifications: false,
+      showTimestamps: true,
+      autoScroll: true,
+      ctrlEnterToSend: true,
+      showOnlineStatus: true,
+      allowDirectMessages: true,
+      contentFilter: true
+    };
+
+    // Get saved settings from localStorage
+    const saved = localStorage.getItem('chatfun_settings');
+    if (saved) {
+      try {
+        return { ...defaults, ...JSON.parse(saved) };
+      } catch (e) {
+        console.warn('Failed to parse saved settings, using defaults');
+      }
+    }
+
+    return defaults;
+  }
+
+  function setSetting(key, value) {
+    const settings = getSettings();
+    settings[key] = value;
+    localStorage.setItem('chatfun_settings', JSON.stringify(settings));
+  }
+
+  function applyToggleSetting(settingId, enabled) {
+    const body = document.body;
+
+    switch (settingId) {
+      case 'showTimestamps':
+        body.classList.toggle('hide-timestamps', !enabled);
+        break;
+      case 'contentFilter':
+        body.classList.toggle('content-filter-disabled', !enabled);
+        break;
+      case 'ctrlEnterToSend':
+        // Re-attach event listeners with new setting
+        updateInputEventListeners();
+        break;
+      // Add more toggle implementations as needed
+    }
+  }
+
+  function updateInputEventListeners() {
+    // Update chat input listeners
+    attachChatEventListeners();
+
+    // Update DM input listeners if DM tab is active
+    const dmInput = document.getElementById('dm-input');
+    const dmSendButton = document.getElementById('dm-send-button');
+    if (dmInput && dmSendButton) {
+      // Remove existing listeners by cloning and replacing the elements
+      const newDmInput = dmInput.cloneNode(true);
+      dmInput.parentNode.replaceChild(newDmInput, dmInput);
+
+      // Re-attach the DM listeners
+      newDmInput.addEventListener('keydown', function (e) {
+        const settings = getSettings();
+        const ctrlEnterMode = settings.ctrlEnterToSend;
+
+        if (ctrlEnterMode) {
+          // Ctrl+Enter to send mode
+          if (e.key === 'Enter' && e.ctrlKey) {
+            e.preventDefault();
+            sendDMMessage();
+          }
+        } else {
+          // Regular Enter to send mode
+          if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendDMMessage();
+          }
+        }
+      });
+    }
+  }
+
+  function showChangePasswordModal() {
+    const modal = document.getElementById('changePasswordModal');
+    const form = document.getElementById('changePasswordForm');
+    const closeBtn = document.getElementById('changePasswordModalClose');
+    const cancelBtn = document.getElementById('cancelChangePassword');
+    const confirmBtn = document.getElementById('confirmChangePassword');
+
+    // Reset form
+    form.reset();
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Close button handlers
+    closeBtn.onclick = () => closeModal(modal);
+    cancelBtn.onclick = () => closeModal(modal);
+
+    // Form submission
+    confirmBtn.onclick = (e) => {
+      e.preventDefault();
+      handlePasswordChange();
+    };
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      handlePasswordChange();
+    };
+  }
+
+  function handlePasswordChange() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmNewPassword = document.getElementById('confirmNewPassword').value;
+
+    // Validate passwords
+    if (newPassword !== confirmNewPassword) {
+      alert('New passwords do not match!');
+      return;
+    }
+
+    if (!validatePassword(newPassword)) {
+      alert('Password does not meet the requirements!');
+      return;
+    }
+
+    // In a real application, this would make an API call
+    // For demo purposes, we'll just show a success message
+    alert('Password changed successfully! (This is a demo - no actual change was made)');
+    closeModal(document.getElementById('changePasswordModal'));
+  }
+
+  function validatePassword(password) {
+    // Check password requirements
+    const minLength = password.length >= 8;
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+
+    return minLength && hasUpper && hasLower && hasNumber && hasSpecial;
+  }
+
+  function showClearCacheModal() {
+    const modal = document.getElementById('clearCacheModal');
+    const closeBtn = document.getElementById('clearCacheModalClose');
+    const cancelBtn = document.getElementById('cancelClearCache');
+    const confirmBtn = document.getElementById('confirmClearCache');
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Close button handlers
+    closeBtn.onclick = () => closeModal(modal);
+    cancelBtn.onclick = () => closeModal(modal);
+
+    // Confirm button handler
+    confirmBtn.onclick = () => {
+      clearApplicationCache();
+      closeModal(modal);
+    };
+  }
+
+  function showLogoutModal() {
+    const modal = document.getElementById('logoutModal');
+    const closeBtn = document.getElementById('logoutModalClose');
+    const cancelBtn = document.getElementById('cancelLogout');
+    const confirmBtn = document.getElementById('confirmLogout');
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Close button handlers
+    closeBtn.onclick = () => closeModal(modal);
+    cancelBtn.onclick = () => closeModal(modal);
+
+    // Confirm button handler
+    confirmBtn.onclick = () => {
+      confirmLogout();
+      closeModal(modal);
+    };
+  }
+
+  function showDeleteAccountModal() {
+    const modal = document.getElementById('deleteAccountModal');
+    const closeBtn = document.getElementById('deleteAccountModalClose');
+    const cancelBtn = document.getElementById('cancelDeleteAccount');
+    const confirmBtn = document.getElementById('confirmDeleteAccount');
+    const confirmInput = document.getElementById('deleteConfirmation');
+
+    // Reset modal
+    confirmInput.value = '';
+    confirmBtn.disabled = true;
+    confirmInput.className = '';
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Close button handlers
+    closeBtn.onclick = () => closeModal(modal);
+    cancelBtn.onclick = () => closeModal(modal);
+
+    // Input validation
+    confirmInput.oninput = () => {
+      const isValid = confirmInput.value.toUpperCase() === 'DELETE';
+      confirmBtn.disabled = !isValid;
+      confirmInput.className = confirmInput.value ? (isValid ? 'valid' : 'invalid') : '';
+    };
+
+    // Confirm button handler
+    confirmBtn.onclick = () => {
+      confirmDeleteAccount();
+      closeModal(modal);
+    };
+  }
+
+  function showDownloadDataModal() {
+    const modal = document.getElementById('downloadDataModal');
+    const closeBtn = document.getElementById('downloadDataModalClose');
+    const cancelBtn = document.getElementById('cancelDownloadData');
+    const confirmBtn = document.getElementById('confirmDownloadData');
+
+    // Show modal
+    modal.style.display = 'flex';
+
+    // Close button handlers
+    closeBtn.onclick = () => closeModal(modal);
+    cancelBtn.onclick = () => closeModal(modal);
+
+    // Confirm button handler
+    confirmBtn.onclick = () => {
+      const format = document.querySelector('input[name="exportFormat"]:checked')?.value || 'json';
+      exportUserData(format);
+      closeModal(modal);
+    };
+  }
+
+  function exportUserData(format = 'json') {
+    // Create a downloadable file with user data
+    const settings = getSettings();
+    const userData = {
+      username: CURRENT_USERNAME,
+      settings: settings,
+      exportDate: new Date().toISOString(),
+      // Add more user data as needed
+    };
+
+    let blob, filename, extension;
+
+    if (format === 'csv') {
+      // Convert to CSV format
+      const csvData = [
+        ['Field', 'Value'],
+        ['Username', userData.username],
+        ['Export Date', userData.exportDate],
+        ['Settings', JSON.stringify(userData.settings)]
+      ];
+      const csvContent = csvData.map(row => row.map(field => `"${field}"`).join(',')).join('\n');
+      blob = new Blob([csvContent], { type: 'text/csv' });
+      extension = 'csv';
+    } else {
+      // Default JSON format
+      blob = new Blob([JSON.stringify(userData, null, 2)], { type: 'application/json' });
+      extension = 'json';
+    }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chatfun-data-${CURRENT_USERNAME}-${new Date().toISOString().split('T')[0]}.${extension}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function confirmLogout() {
+    // Clear any session data
+    localStorage.removeItem('chatfun_auth_token');
+    // Redirect to login page
+    window.location.href = 'login.html';
+  }
+
+  function confirmDeleteAccount() {
+    // This would make an API call to delete the account
+    alert('Account deletion functionality would be implemented here');
+    // After successful deletion, redirect to home page
+    window.location.href = 'index.html';
+  }
+
+  // =====================================
   // INITIALIZATION
   // =====================================
 
@@ -1304,6 +2181,9 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeReportFunctionality();
     initializeReportsSystem();
     initializeItemsFunctionality();
+    initializeFriendsFunctionality();
+    initializeDMsFunctionality();
+    initializeSettings();
   }
 
   // Start the application

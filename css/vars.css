@@ -1,9 +1,10 @@
 /* CSS Variables */
 :root {
-  /* Colors */
+  /* Colors - Dark Mode (Default) */
   --primary-color: #ff9500;
   --primary-hover: #ffb84d;
   --primary-color-rgb: 255, 149, 0;
+  --primary-color-opacity: rgba(255, 149, 0, 0.15);
   --danger-color: #dc3545;
   --danger-hover: #c82333;
   --success-color: #2ecc71;
@@ -20,9 +21,10 @@
 
   /* Typography */
   --font-family: 'Courier New', monospace;
+  --font-size-xs: 10px;
   --font-size-sm: 12px;
   --font-size-base: 14px;
-  --font-size-large: 16px;
+  --font-size-lg: 16px;
   --font-size-xl: 24px;
   --font-size-xxl: 32px;
 

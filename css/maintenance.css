@@ -24,7 +24,7 @@
 }
 
 .maintenance-message {
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-lg);
   color: var(--text-secondary);
   margin-bottom: var(--spacing-xl);
   line-height: 1.5;
@@ -101,7 +101,7 @@
 }
 
 .maintenance-footer p:first-child {
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-lg);
   color: var(--text-primary);
 }
 

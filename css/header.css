@@ -41,7 +41,7 @@
 
 .header p {
   color: var(--text-secondary);
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-lg);
   margin-bottom: var(--spacing-xxxl);
 }
 
