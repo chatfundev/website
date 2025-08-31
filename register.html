@@ -8,6 +8,102 @@
     <link rel="icon" type="image/svg+xml" href="images/logo.svg">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/footer.css">
+    <script src="https://kit.fontawesome.com/ac9ab6562b.js" crossorigin="anonymous"></script>
+    <style>
+      .error-container,
+      .success-container {
+        margin-bottom: 20px;
+        padding: 0;
+        display: none;
+      }
+
+      .error-message,
+      .success-message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+      }
+
+      .error-message {
+        background-color: rgba(231, 76, 60, 0.1);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        color: #e74c3c;
+      }
+
+      .success-message {
+        background-color: rgba(39, 174, 96, 0.1);
+        border: 1px solid rgba(39, 174, 96, 0.3);
+        color: #27ae60;
+      }
+
+      .login-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .loading-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .password-requirements {
+        margin-top: 8px;
+        font-size: 0.875rem;
+        color: #666;
+      }
+
+      .requirement {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin: 4px 0;
+      }
+
+      .requirement.valid {
+        color: #27ae60;
+      }
+
+      .requirement.invalid {
+        color: #e74c3c;
+      }
+
+      .requirement i {
+        font-size: 0.75rem;
+      }
+
+      .password-match-indicator {
+        margin-top: 8px;
+        font-size: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .password-match-indicator.valid {
+        color: #27ae60;
+      }
+
+      .password-match-indicator.invalid {
+        color: #e74c3c;
+      }
+    </style>
   </head>
 
   <body>
@@ -20,29 +116,199 @@
         <p>register to continue</p>
       </div>
 
-      <form>
+      <form id="registerForm">
         <div class="form-group">
           <label for="username">username</label>
           <input type="text" id="username" name="username" placeholder="enter username" required>
+          <div id="username-requirements" class="password-requirements" style="display: none;">
+            <div class="requirement" id="req-username-length">
+              <i class="fas fa-times"></i>
+              <span>At least 3 characters</span>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
           <label for="password">password</label>
           <input type="password" id="password" name="password" placeholder="enter password" required>
+          <div id="password-requirements" class="password-requirements" style="display: none;">
+            <div class="requirement" id="req-length">
+              <i class="fas fa-times"></i>
+              <span>At least 6 characters</span>
+            </div>
+          </div>
         </div>
 
         <div class="form-group">
           <label for="confirm-password">confirm password</label>
           <input type="password" id="confirm-password" name="confirm-password" placeholder="confirm password" required>
+          <div id="password-match" class="password-match-indicator" style="display: none;">
+            <i class="fas fa-times"></i>
+            <span>Passwords do not match</span>
+          </div>
         </div>
 
-        <button type="submit" class="login-button">register</button>
+        <button type="submit" class="login-button" id="registerBtn">
+          <span class="btn-text">register</span>
+        </button>
       </form>
 
       <div class="footer">
         <a href="login.html">already have an account?</a> | <a href="index.html">home</a>
       </div>
     </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Check if user is already logged in
+        checkAuthStatus();
+
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const btnText = registerBtn.querySelector('.btn-text');
+
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+
+        // Username validation
+        usernameInput.addEventListener('input', function () {
+          const username = this.value.trim();
+          const requirements = document.getElementById('username-requirements');
+          const lengthReq = document.getElementById('req-username-length');
+
+          if (username.length > 0) {
+            requirements.style.display = 'block';
+
+            if (username.length >= 3) {
+              lengthReq.classList.remove('invalid');
+              lengthReq.classList.add('valid');
+              lengthReq.querySelector('i').className = 'fas fa-check';
+            } else {
+              lengthReq.classList.remove('valid');
+              lengthReq.classList.add('invalid');
+              lengthReq.querySelector('i').className = 'fas fa-times';
+            }
+          } else {
+            requirements.style.display = 'none';
+          }
+        });
+
+        // Password validation
+        passwordInput.addEventListener('input', function () {
+          const password = this.value;
+          const requirements = document.getElementById('password-requirements');
+          const lengthReq = document.getElementById('req-length');
+
+          if (password.length > 0) {
+            requirements.style.display = 'block';
+
+            if (password.length >= 6) {
+              lengthReq.classList.remove('invalid');
+              lengthReq.classList.add('valid');
+              lengthReq.querySelector('i').className = 'fas fa-check';
+            } else {
+              lengthReq.classList.remove('valid');
+              lengthReq.classList.add('invalid');
+              lengthReq.querySelector('i').className = 'fas fa-times';
+            }
+          } else {
+            requirements.style.display = 'none';
+          }
+
+          // Check password match if confirm password is filled
+          checkPasswordMatch();
+        });
+
+        // Password confirmation validation
+        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+
+        function checkPasswordMatch() {
+          const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+          const matchIndicator = document.getElementById('password-match');
+
+          if (confirmPassword.length > 0) {
+            matchIndicator.style.display = 'flex';
+
+            if (password === confirmPassword) {
+              matchIndicator.classList.remove('invalid');
+              matchIndicator.classList.add('valid');
+              matchIndicator.querySelector('i').className = 'fas fa-check';
+              matchIndicator.querySelector('span').textContent = 'Passwords match';
+            } else {
+              matchIndicator.classList.remove('valid');
+              matchIndicator.classList.add('invalid');
+              matchIndicator.querySelector('i').className = 'fas fa-times';
+              matchIndicator.querySelector('span').textContent = 'Passwords do not match';
+            }
+          } else {
+            matchIndicator.style.display = 'none';
+          }
+        }
+
+        registerForm.addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+
+          // Validation
+          if (!username || !password || !confirmPassword) {
+            showError('Please fill in all fields');
+            return;
+          }
+
+          if (username.length < 3) {
+            showError('Username must be at least 3 characters');
+            return;
+          }
+
+          if (password.length < 6) {
+            showError('Password must be at least 6 characters');
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            showError('Passwords do not match');
+            return;
+          }
+
+          // Disable button and show loading
+          registerBtn.disabled = true;
+          btnText.innerHTML = '<div class="loading-spinner"></div> creating account...';
+
+          try {
+            const result = await register(username, password);
+
+            if (result.success) {
+              showSuccess('Account created successfully! Redirecting...');
+
+              // Redirect to app after a short delay
+              setTimeout(() => {
+                window.location.href = 'app.html';
+              }, 1500);
+            } else {
+              showError(result.error || 'Registration failed');
+
+              // Re-enable button
+              registerBtn.disabled = false;
+              btnText.textContent = 'register';
+            }
+          } catch (error) {
+            showError('An unexpected error occurred. Please try again.');
+            console.error('Registration error:', error);
+
+            // Re-enable button
+            registerBtn.disabled = false;
+            btnText.textContent = 'register';
+          }
+        });
+      });
+    </script>
   </body>
 
 </html>

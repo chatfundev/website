@@ -8,6 +8,61 @@
     <link rel="icon" type="image/svg+xml" href="images/logo.svg">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/footer.css">
+    <script src="https://kit.fontawesome.com/ac9ab6562b.js" crossorigin="anonymous"></script>
+    <style>
+      .error-container,
+      .success-container {
+        margin-bottom: 20px;
+        padding: 0;
+        display: none;
+      }
+
+      .error-message,
+      .success-message {
+        padding: 12px 16px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 500;
+      }
+
+      .error-message {
+        background-color: rgba(231, 76, 60, 0.1);
+        border: 1px solid rgba(231, 76, 60, 0.3);
+        color: #e74c3c;
+      }
+
+      .success-message {
+        background-color: rgba(39, 174, 96, 0.1);
+        border: 1px solid rgba(39, 174, 96, 0.3);
+        color: #27ae60;
+      }
+
+      .login-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .loading-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
 
   <body>
@@ -20,7 +75,7 @@
         <p>sign in to continue</p>
       </div>
 
-      <form>
+      <form id="loginForm">
         <div class="form-group">
           <label for="username">username</label>
           <input type="text" id="username" name="username" placeholder="enter username" required>
@@ -31,13 +86,71 @@
           <input type="password" id="password" name="password" placeholder="enter password" required>
         </div>
 
-        <button type="submit" class="login-button">login</button>
+        <button type="submit" class="login-button" id="loginBtn">
+          <span class="btn-text">login</span>
+        </button>
       </form>
 
       <div class="footer">
         <a href="register.html">create account</a> | <a href="index.html">home</a>
       </div>
     </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Check if user is already logged in
+        checkAuthStatus();
+
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const btnText = loginBtn.querySelector('.btn-text');
+
+        loginForm.addEventListener('submit', async function (e) {
+          e.preventDefault();
+
+          const username = document.getElementById('username').value.trim();
+          const password = document.getElementById('password').value;
+
+          // Basic validation
+          if (!username || !password) {
+            showError('Please fill in all fields');
+            return;
+          }
+
+          // Disable button and show loading
+          loginBtn.disabled = true;
+          btnText.innerHTML = '<div class="loading-spinner"></div> signing in...';
+
+          try {
+            const result = await login(username, password);
+
+            if (result.success) {
+              showSuccess('Login successful! Redirecting...');
+
+              // Redirect to app after a short delay
+              setTimeout(() => {
+                window.location.href = 'app.html';
+              }, 1500);
+            } else {
+              showError(result.error || 'Login failed');
+
+              // Re-enable button
+              loginBtn.disabled = false;
+              btnText.textContent = 'login';
+            }
+          } catch (error) {
+            showError('An unexpected error occurred. Please try again.');
+            console.error('Login error:', error);
+
+            // Re-enable button
+            loginBtn.disabled = false;
+            btnText.textContent = 'login';
+          }
+        });
+      });
+    </script>
   </body>
 
 </html>

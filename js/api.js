@@ -1,10 +1,12 @@
 class APIHandler {
   constructor(baseURL = '') {
     this.baseURL = baseURL;
+    this.bearerToken = null;
   }
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -13,11 +15,36 @@ class APIHandler {
       ...options
     };
 
+    if (this.bearerToken) {
+      config.headers['Authorization'] = `Bearer ${this.bearerToken}`;
+    }
+
     try {
+      console.log('Making API request:', {
+        url,
+        method: config.method || 'GET',
+        headers: config.headers,
+        body: config.body
+      });
+
       const response = await fetch(url, config);
 
+      console.log('API response:', {
+        status: response.status,
+        statusText: response.statusText,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        let errorMessage = `HTTP error! status: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       return await response.json();
@@ -37,7 +64,10 @@ class APIHandler {
   async post(endpoint, data, headers = {}) {
     return this.request(endpoint, {
       method: 'POST',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      },
       body: JSON.stringify(data)
     });
   }
@@ -45,7 +75,10 @@ class APIHandler {
   async put(endpoint, data, headers = {}) {
     return this.request(endpoint, {
       method: 'PUT',
-      headers,
+      headers: {
+        'Content-Type': 'application/json',
+        ...headers
+      },
       body: JSON.stringify(data)
     });
   }

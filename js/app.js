@@ -1,16 +1,11 @@
-/**
- * Main Chat Application JavaScript
- * Handles tab switching, chat functionality, user moderation, and context menus
- */
-
 document.addEventListener('DOMContentLoaded', function () {
   // =====================================
   // CONFIGURATION & GLOBAL VARIABLES
   // =====================================
 
-  // Mock user role check (replace with actual authentication logic)
-  const USER_ROLE = 'admin'; // Can be 'user', 'mod', or 'admin'
-  const CURRENT_USERNAME = document.getElementById('username').textContent;
+  // User Information - make them global properties
+  window.USER_ROLE = null;
+  window.CURRENT_USERNAME = null;
 
   // DOM Elements
   const navItems = document.querySelectorAll('.nav-item');
@@ -54,13 +49,13 @@ document.addEventListener('DOMContentLoaded', function () {
   // =====================================
 
   function initializeUserPermissions() {
-    if (USER_ROLE === 'mod' || USER_ROLE === 'admin') {
+    if (window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin') {
       document.querySelectorAll('.mod-only').forEach(element => {
         element.style.display = 'flex';
       });
     }
 
-    if (USER_ROLE === 'admin') {
+    if (window.USER_ROLE === 'admin') {
       document.querySelectorAll('.admin-only').forEach(element => {
         element.style.display = 'flex';
       });
@@ -132,7 +127,10 @@ document.addEventListener('DOMContentLoaded', function () {
   // CHAT FUNCTIONALITY
   // =====================================
 
-  function sendMessage() {
+  let lastMessageId = null;
+  let messagePollingInterval = null;
+
+  async function sendMessage() {
     // Check if user is muted
     if (muteExpiry && Date.now() < muteExpiry) {
       return; // User is still muted, don't send message
@@ -144,19 +142,99 @@ document.addEventListener('DOMContentLoaded', function () {
     const message = currentChatInput.value.trim();
     if (!message) return;
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message';
-    messageDiv.setAttribute('data-author', CURRENT_USERNAME);
-    messageDiv.setAttribute('data-message-id', Date.now().toString());
-    messageDiv.innerHTML = `
-      <span class="message-user">${CURRENT_USERNAME}:</span>
-      <span class="message-text">${message}</span>
-      <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-    `;
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        console.error('No auth token available');
+        return;
+      }
 
-    chatMessages.appendChild(messageDiv);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    currentChatInput.value = '';
+      // Set the bearer token for this request
+      api.bearerToken = token;
+
+      // Send message to server
+      await api.post('/messages', { content: message });
+
+      // Clear input on successful send
+      currentChatInput.value = '';
+
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      // Could show an error message to user here
+    }
+  }
+
+  async function fetchMessages() {
+    try {
+      const token = getAuthToken();
+      if (!token) {
+        return;
+      }
+
+      // Set the bearer token for this request
+      api.bearerToken = token;
+
+      // Fetch messages from server
+      const response = await api.get('/messages?limit=50');
+
+      if (response.messages && Array.isArray(response.messages)) {
+        updateChatMessages(response.messages);
+      }
+
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    }
+  }
+
+  function updateChatMessages(messages) {
+    // Clear existing messages
+    chatMessages.innerHTML = '';
+
+    messages.forEach(message => {
+      const messageDiv = document.createElement('div');
+      messageDiv.className = 'message';
+      messageDiv.setAttribute('data-author', message.username);
+      messageDiv.setAttribute('data-message-id', message.uuid);
+
+      // Format timestamp
+      const timestamp = new Date(message.timestamp);
+      const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      // Add badge if exists
+      let badgeHtml = '';
+      if (message.badge && message.badge !== 'shadowbanned') {
+        badgeHtml = `<span class="user-badge ${message.badge}">${message.badge}</span>`;
+      }
+
+      messageDiv.innerHTML = `
+        <span class="message-user">${message.username}:${badgeHtml}</span>
+        <span class="message-text">${message.content}</span>
+        <span class="message-time">${timeString}</span>
+      `;
+
+      chatMessages.appendChild(messageDiv);
+    });
+
+    // Auto-scroll to bottom if enabled
+    const settings = getSettings();
+    if (settings.autoScroll) {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+  }
+
+  function startMessagePolling() {
+    // Fetch messages immediately
+    fetchMessages();
+
+    // Set up polling every second
+    messagePollingInterval = setInterval(fetchMessages, 1000);
+  }
+
+  function stopMessagePolling() {
+    if (messagePollingInterval) {
+      clearInterval(messagePollingInterval);
+      messagePollingInterval = null;
+    }
   }
 
   function attachChatEventListeners() {
@@ -203,6 +281,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function initializeChatFunctionality() {
     attachChatEventListeners();
+    startMessagePolling();
   }
 
   // =====================================
@@ -230,9 +309,9 @@ document.addEventListener('DOMContentLoaded', function () {
         currentMessageId = messageElement.getAttribute('data-message-id');
 
         // Show/hide menu items based on permissions
-        const isOwnMessage = currentMessageAuthor === CURRENT_USERNAME;
-        const isMod = USER_ROLE === 'mod' || USER_ROLE === 'admin';
-        const isAdmin = USER_ROLE === 'admin';
+        const isOwnMessage = currentMessageAuthor === window.CURRENT_USERNAME;
+        const isMod = window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin';
+        const isAdmin = window.USER_ROLE === 'admin';
 
         // Report message: show for everyone, but not for own messages
         const showReport = !isOwnMessage;
@@ -451,7 +530,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function applyUserActions(actionData, muteChecked, warnChecked, banChecked) {
     // If muting the current user, apply the mute with countdown
-    if (muteChecked && currentMessageAuthor === CURRENT_USERNAME) {
+    if (muteChecked && currentMessageAuthor === window.CURRENT_USERNAME) {
       const muteSeconds = parseInt(actionData.muteDuration) * 60; // Convert minutes to seconds
       const expiryTime = Math.floor(Date.now() / 1000) + muteSeconds;
       muteUser(expiryTime);
@@ -814,7 +893,7 @@ document.addEventListener('DOMContentLoaded', function () {
       '<i class="fas fa-clock" title="Pending review"></i>';
 
     // Determine which buttons to show based on status and permissions
-    const isMod = USER_ROLE === 'mod' || USER_ROLE === 'admin';
+    const isMod = window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin';
     const showUserActions = isMod && report.status === 'pending';
     const showUndoActions = isMod && report.status === 'completed';
 
@@ -1054,7 +1133,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const reportData = {
       messageId: currentMessageId,
       reportedUser: currentMessageAuthor,
-      reportedBy: CURRENT_USERNAME,
+      reportedBy: window.CURRENT_USERNAME,
       reason: selectedReason.value,
       description: description.trim(),
       timestamp: new Date().toISOString(),
@@ -2117,10 +2196,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Create a downloadable file with user data
     const settings = getSettings();
     const userData = {
-      username: CURRENT_USERNAME,
+      username: window.CURRENT_USERNAME,
       settings: settings,
-      exportDate: new Date().toISOString(),
-      // Add more user data as needed
+      exportDate: new Date().toISOString()
     };
 
     let blob, filename, extension;
@@ -2145,7 +2223,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `chatfun-data-${CURRENT_USERNAME}-${new Date().toISOString().split('T')[0]}.${extension}`;
+    a.download = `chatfun-data-${window.CURRENT_USERNAME}-${new Date().toISOString().split('T')[0]}.${extension}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -2166,12 +2244,49 @@ document.addEventListener('DOMContentLoaded', function () {
     window.location.href = 'index.html';
   }
 
+  function initializeUserData() {
+    // Fetch and display user data
+    const token = window.getAuthToken();
+    if (!token) return;
+
+    // Set the bearer token for API requests
+    window.api.bearerToken = token;
+
+    window.api.get('/auth/me')
+      .then(data => {
+        if (data.user && data.user.username) {
+          // Update the global variables that are declared at the top
+          window.CURRENT_USERNAME = data.user.username;
+          const usernameElement = document.getElementById('username');
+          if (usernameElement) {
+            usernameElement.textContent = data.user.username;
+          }
+        }
+
+        if (data.user && data.user.role) {
+          window.USER_ROLE = data.user.role;
+        }
+      })
+      .catch(error => {
+        console.error("Error fetching user data:", error);
+      });
+  }
+
   // =====================================
   // INITIALIZATION
   // =====================================
 
   // Initialize all functionality when the page loads
   function initializeApp() {
+    // Check if user is logged in
+    const token = window.getAuthToken();
+    if (!token) {
+      // Redirect to login page if not logged in
+      window.location.href = 'login.html';
+      return;
+    }
+
+    initializeUserData();
     initializeTabSwitching();
     initializeUserPermissions();
     initializeChatFunctionality();
@@ -2188,4 +2303,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Start the application
   initializeApp();
+
+  // Clean up polling when leaving the page
+  window.addEventListener('beforeunload', function () {
+    stopMessagePolling();
+  });
 });
