@@ -208,17 +208,149 @@
           </div>
 
           <div class="items-grid">
-            <div class="item owned">
-              <div class="item-name">mythril helmet</div>
-              <div class="item-rarity">Legendary 2.5%</div>
-              <div class="item-worth">Worth 150 Coins</div>
-              <button class="sell-button">sell</button>
+            <!-- Variation 1: Basic item -->
+            <div class="item">
+              <div class="item-header">
+                <span class="item-name">Blazing Shortsword</span>
+                <span class="item-rarity">RARE</span>
+                <div class="actions-dropdown">
+                  <button class="actions-btn" tabindex="0">Actions</button>
+                  <div class="actions-menu">
+                    <div class="actions-menu-item" tabindex="0" class="item-sell-button">Sell Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-reforge-button">Reforge Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-rune-button">Apply Rune</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-body">
+                <div class="item-runes">
+                  <span class="rune hydro">Hydro Rune</span>
+                  <span class="rune-level">III</span>
+                  <span class="rune galactic">Galactic Rune</span>
+                  <span class="rune-level">IV</span>
+                </div>
+                <div class="item-worth"><i class="fas fa-coins"></i> 12K coins</div>
+                <div class="value-breakdown">
+                  <div class="breakdown-title">Value Breakdown</div>
+                  <ul>
+                    <li><span class="breakdown-label">Base Item</span> <span class="breakdown-value">5K</span></li>
+                    <li><span class="breakdown-label">Hydro Rune III</span> <span class="breakdown-value">+3K</span>
+                    </li>
+                    <li><span class="breakdown-label">Galactic Rune IV</span> <span class="breakdown-value">+4K</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="item-edition">
+                  <span class="edition-label">Edition</span>
+                  <span class="edition-number">#1</span>
+                  <span class="edition-label">Forged By</span>
+                  <span class="forged-by">proplayer919</span>
+                </div>
+              </div>
             </div>
-            <div class="item owned">
-              <div class="item-name">lightning dagger</div>
-              <div class="item-rarity">Rare 17.24%</div>
-              <div class="item-worth">Worth 75 Coins</div>
-              <button class="sell-button">sell</button>
+
+            <!-- Variation 2: With Rune Multipliers -->
+            <div class="item">
+              <div class="item-header">
+                <span class="item-name">Blazing Shortsword</span>
+                <span class="item-rarity">RARE</span>
+                <div class="actions-dropdown">
+                  <button class="actions-btn" tabindex="0">Actions</button>
+                  <div class="actions-menu">
+                    <div class="actions-menu-item" tabindex="0" class="item-sell-button">Sell Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-reforge-button">Reforge Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-rune-button">Apply Rune</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-body">
+                <div class="item-runes">
+                  <span class="rune hydro">Hydro Rune</span>
+                  <span class="rune-level">III</span>
+                  <span class="rune-multiplier">x1.2</span>
+                  <span class="rune galactic">Galactic Rune</span>
+                  <span class="rune-level">IV</span>
+                  <span class="rune-multiplier">x1.5</span>
+                </div>
+                <div class="item-worth"><i class="fas fa-coins"></i> 18K coins</div>
+                <div class="value-breakdown">
+                  <div class="breakdown-title">Value Breakdown</div>
+                  <ul>
+                    <li><span class="breakdown-label">Base Item</span> <span class="breakdown-value">5K</span></li>
+                    <li><span class="breakdown-label">Hydro Rune III (x1.2)</span> <span
+                        class="breakdown-value">+3.6K</span></li>
+                    <li><span class="breakdown-label">Galactic Rune IV (x1.5)</span> <span
+                        class="breakdown-value">+6K</span></li>
+                    <li><span class="breakdown-label">Synergy Bonus</span> <span class="breakdown-value">+3.4K</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="item-edition">
+                  <span class="edition-label">Edition</span>
+                  <span class="edition-number">#1</span>
+                  <span class="edition-label">Forged By</span>
+                  <span class="forged-by">proplayer919</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Variation 3: With Rune Multipliers & Reforge Stats -->
+            <div class="item">
+              <div class="item-header">
+                <span class="item-name">Blazing Shortsword</span>
+                <span class="item-rarity">RARE</span>
+                <div class="actions-dropdown">
+                  <button class="actions-btn" tabindex="0">Actions</button>
+                  <div class="actions-menu">
+                    <div class="actions-menu-item" tabindex="0" class="item-sell-button">Sell Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-reforge-button">Reforge Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-rune-button">Apply Rune</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-body">
+                <div class="item-runes">
+                  <span class="rune hydro">Hydro Rune</span>
+                  <span class="rune-level">III</span>
+                  <span class="rune-multiplier">x1.2</span>
+                  <span class="rune galactic">Galactic Rune</span>
+                  <span class="rune-level">IV</span>
+                  <span class="rune-multiplier">x1.5</span>
+                </div>
+                <div class="reforge-stats">
+                  <div class="reforge-title">Reforge Stats</div>
+                  <ul>
+                    <li><span class="reforge-stat-label">Rune Success Rate</span> <span
+                        class="reforge-stat-value reforge-stat-value-positive">+18%</span></li>
+                    <li><span class="reforge-stat-label">Rune Catastrophic Fail Rate</span> <span
+                        class="reforge-stat-value reforge-stat-value-negative">-65%</span></li>
+                  </ul>
+                </div>
+                <div class="item-worth"><i class="fas fa-coins"></i> 21K coins</div>
+                <div class="value-breakdown">
+                  <div class="breakdown-title">Value Breakdown</div>
+                  <ul>
+                    <li><span class="breakdown-label">Base Item</span> <span class="breakdown-value">5K</span></li>
+                    <li><span class="breakdown-label">Hydro Rune III (x1.2)</span> <span
+                        class="breakdown-value">+3.6K</span></li>
+                    <li><span class="breakdown-label">Galactic Rune IV (x1.5)</span> <span
+                        class="breakdown-value">+6K</span></li>
+                    <li><span class="breakdown-label">Synergy Bonus</span> <span class="breakdown-value">+3.4K</span>
+                    </li>
+                    <li><span class="breakdown-label">Reforge Stats</span> <span class="breakdown-value">+3K</span></li>
+                  </ul>
+                </div>
+                <div class="item-edition">
+                  <span class="edition-label">Edition</span>
+                  <span class="edition-number">#1</span>
+                  <span class="edition-label">Forged By</span>
+                  <span class="forged-by">proplayer919</span>
+                </div>
+                <div class="item-extra">
+                  <span class="extra-label">Last Reforged</span>
+                  <span class="extra-value">2025-08-29</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -1053,6 +1185,7 @@
     <script src="js/app.js"></script>
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
+    <script src="js/items.js"></script>
 
     <!-- Context Menu -->
     <div id="messageContextMenu" class="context-menu">
@@ -1319,11 +1452,11 @@
       </div>
     </div>
 
-    <!-- Create Random Item Modal -->
+    <!-- Forge New Item Modal -->
     <div id="createItemModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>Create Random Item</h3>
+          <h3>Forge New Item</h3>
           <span class="modal-close" id="createItemModalClose">&times;</span>
         </div>
         <div class="modal-body">

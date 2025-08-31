@@ -10,8 +10,6 @@ document.addEventListener('DOMContentLoaded', function () {
   // DOM Elements
   const navItems = document.querySelectorAll('.nav-item');
   const tabContents = document.querySelectorAll('.tab-content');
-  const chatInput = document.querySelector('.chat-input');
-  const sendButton = document.querySelector('.send-button');
   const chatMessages = document.getElementById('chat-messages');
   const chatInputContainer = document.querySelector('.chat-input-container');
 
@@ -49,13 +47,15 @@ document.addEventListener('DOMContentLoaded', function () {
   // =====================================
 
   function initializeUserPermissions() {
-    if (window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin') {
+    if (window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin' || window.USER_ROLE === 'owner') {
+      console.log("Mod access!");
       document.querySelectorAll('.mod-only').forEach(element => {
         element.style.display = 'flex';
       });
     }
 
-    if (window.USER_ROLE === 'admin') {
+    if (window.USER_ROLE === 'admin' || window.USER_ROLE === 'owner') {
+      console.log("Admin access!")
       document.querySelectorAll('.admin-only').forEach(element => {
         element.style.display = 'flex';
       });
@@ -64,6 +64,8 @@ document.addEventListener('DOMContentLoaded', function () {
         element.style.display = 'block';
       });
     }
+
+    console.log("Role: " + window.USER_ROLE);
   }
 
   // =====================================
@@ -198,27 +200,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Format timestamp
       const timestamp = new Date(message.timestamp);
-      const timeString = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeString = timestamp.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      badgeIcons = {
+        mod: '<i class="fa fa-shield"></i>',
+        admin: '<i class="fa fa-tools"></i>',
+        owner: '<i class="fa fa-crown"></i>',
+        shadowbanned: '<i class="fa fa-user-slash"></i>'
+      }
 
       // Add badge if exists
       let badgeHtml = '';
-      if (message.badge && message.badge !== 'shadowbanned') {
-        badgeHtml = `<span class="user-badge ${message.badge}">${message.badge}</span>`;
+      if (message.badge) {
+        badgeHtml = `<span class="message-role">[${badgeIcons[message.badge]} ${message.badge}]</span> `;
       }
 
       messageDiv.innerHTML = `
-        <span class="message-user">${message.username}:${badgeHtml}</span>
-        <span class="message-text">${message.content}</span>
-        <span class="message-time">${timeString}</span>
+        <div class="message-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="message-content">
+          <span class="message-user">${badgeHtml}${message.username}:</span>
+          <span class="message-text">${message.content}</span>
+          <span class="message-time">${timeString}</span>
+        </div>
       `;
 
       chatMessages.appendChild(messageDiv);
     });
 
-    // Auto-scroll to bottom if enabled
+    // Auto-scroll to bottom if enabled and user is at or near the bottom
     const settings = getSettings();
     if (settings.autoScroll) {
+      const scrollPosition = chatMessages.scrollTop;
+      const scrollHeight = chatMessages.scrollHeight;
+      const clientHeight = chatMessages.clientHeight;
+      const threshold = 100;
+
+      const isNearBottom = scrollPosition >= (scrollHeight - clientHeight - threshold);
+      if (isNearBottom) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }
+    }
+
+    // Always scroll to bottom on initial load
+    if (!window.initialLoadScroll) {
       chatMessages.scrollTop = chatMessages.scrollHeight;
+      window.initialLoadScroll = true;
     }
   }
 
@@ -1191,12 +1222,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function initializeItemsFunctionality() {
     // Add event listeners to action buttons
-    document.addEventListener('click', function (e) {
-      if (e.target.classList.contains('sell-button') && !e.target.disabled) {
-        handleSellItem(e.target);
-      } else if (e.target.id === 'createRandomBtn' && !e.target.disabled) {
-        handleCreateRandomItem();
-      }
+    document.getElementById('createRandomBtn').addEventListener('click', function () {
+      handleCreateRandomItem();
+    });
+
+    Array.from(document.getElementsByClassName('item-sell-button')).forEach(button => {
+      console.log('Found sell button:', button);
+      button.addEventListener('click', function () {
+        handleSellItem(button);
+      });
     });
 
     // Initialize modal event listeners
@@ -1719,6 +1753,12 @@ document.addEventListener('DOMContentLoaded', function () {
             <i class="fas fa-user"></i>
           </div>
         `;
+      } else if (message.type === 'sent') {
+        avatarHtml = `
+          <div class="dm-message-avatar">
+            <i class="fas fa-user"></i>
+          </div>
+        `;
       }
 
       messageDiv.innerHTML = `
@@ -1807,6 +1847,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let avatarHtml = '';
     if (type === 'received') {
+      avatarHtml = `
+        <div class="dm-message-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+      `;
+    } else if (type === 'sent') {
       avatarHtml = `
         <div class="dm-message-avatar">
           <i class="fas fa-user"></i>

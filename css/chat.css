@@ -18,17 +18,39 @@
 
 .message {
   display: flex;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-sm);
   margin-bottom: var(--spacing-xs);
   padding: var(--spacing-xs);
   border-radius: var(--border-radius);
   position: relative;
   cursor: default;
+  align-items: center;
 }
 
 .message:hover {
   background-color: var(--background-color);
   transition: background-color var(--transition-duration) ease;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  background-color: var(--background-color);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.message-content {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex: 1;
+  align-items: baseline;
 }
 
 .message-user {

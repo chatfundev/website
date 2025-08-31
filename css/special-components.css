@@ -187,8 +187,8 @@
 }
 
 .dm-message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   font-size: var(--font-size-sm);
   flex-shrink: 0;
 }

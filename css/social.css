@@ -145,11 +145,12 @@
 
 .dms-layout {
   display: flex;
-  min-height: 600px;
   height: calc(100% - 5vh);
   border: 1px solid var(--border-color);
   border-radius: var(--border-radius);
   overflow: hidden;
+  flex-shrink: 0;
+  max-height: calc(100% - 5vh);
 }
 
 /* Conversations Sidebar */
