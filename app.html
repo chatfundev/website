@@ -857,6 +857,46 @@
                   </div>
                 </label>
               </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">hide profile pictures</span>
+                    <span class="setting-description">show default avatars instead of profile pictures</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="hideProfilePictures">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Profile Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-user-circle"></i> profile</h3>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">profile picture</span>
+                    <span class="setting-description">upload a custom profile picture (max 5MB)</span>
+                  </div>
+                  <div class="profile-picture-controls">
+                    <div class="current-avatar" id="currentAvatar">
+                      <div class="default-avatar">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    </div>
+                    <div class="avatar-buttons">
+                      <button class="btn secondary setting-button" id="uploadAvatarBtn" onclick="showAvatarUpload()">
+                        <i class="fas fa-upload"></i> upload
+                      </button>
+                      <button class="btn danger setting-button" id="removeAvatarBtn" style="display: none;">
+                        <i class="fas fa-trash"></i> remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Account Settings -->
@@ -917,6 +957,40 @@
     <script src="js/auth.js"></script>
     <script src="js/items.js"></script>
 
+    <!-- Hidden file input for avatar upload -->
+    <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
+
+    <!-- Avatar Crop Modal - REMOVED -->
+    <!--
+    <div id="avatarCropModal" class="modal">
+      <div class="modal-content avatar-crop-modal">
+        <div class="modal-header">
+          <h3>Crop Profile Picture</h3>
+          <span class="close" id="avatarCropClose">&times;</span>
+        </div>
+        <div class="avatar-crop-container">
+          <div class="crop-preview-container">
+            <canvas id="cropCanvas" width="400" height="400"></canvas>
+            <div class="crop-circle"></div>
+          </div>
+          <div class="crop-controls">
+            <div class="crop-control-group">
+              <label for="zoomSlider">Zoom:</label>
+              <input type="range" id="zoomSlider" min="0.5" max="4" step="0.1" value="1">
+            </div>
+            <div class="crop-control-group">
+              <label>Position: Click and drag the image</label>
+            </div>
+            <div class="crop-buttons">
+              <button class="btn secondary" id="cancelCrop">Cancel</button>
+              <button class="btn primary" id="confirmCrop">Upload</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    -->
+
     <!-- Context Menu -->
     <div id="messageContextMenu" class="context-menu">
       <div class="context-menu-item" id="reportMessage">
@@ -956,6 +1030,23 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelDelete">Cancel</button>
           <button class="btn danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Avatar Modal -->
+    <div id="deleteAvatarModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Delete Profile Picture</h3>
+          <span class="modal-close" id="deleteAvatarModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete your profile picture? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelDeleteAvatar">Cancel</button>
+          <button class="btn danger" id="confirmDeleteAvatar">Delete</button>
         </div>
       </div>
     </div>

@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
   window.USER_ROLE = null;
   window.USER_ID = null;
   window.CURRENT_USERNAME = null;
+  window.CURRENT_USER_HAS_AVATAR = false;
 
   // DOM Elements
   const navItems = document.querySelectorAll('.nav-item');
@@ -76,6 +77,11 @@ document.addEventListener('DOMContentLoaded', function () {
           } else {
             await loadLatestDMConversation();
           }
+        }
+
+        // If entering settings tab, load current avatar
+        if (tabId === 'settings') {
+          loadCurrentAvatar();
         }
       });
     });
@@ -295,9 +301,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       messageDiv.innerHTML = `
-        <div class="message-avatar">
-          <i class="fas fa-user"></i>
-        </div>
+        ${createAvatarElement(message.user_id, message.has_avatar, 'message-avatar')}
         <div class="message-content">
           <span class="message-user">${badgeHtml}${message.username}:</span>
           <span class="message-text">${message.content}</span>
@@ -538,6 +542,15 @@ document.addEventListener('DOMContentLoaded', function () {
       closeModal(deleteModal);
     });
 
+    // Delete avatar modal event listeners
+    const deleteAvatarModal = document.getElementById('deleteAvatarModal');
+    document.getElementById('deleteAvatarModalClose').addEventListener('click', () => closeModal(deleteAvatarModal));
+    document.getElementById('cancelDeleteAvatar').addEventListener('click', () => closeModal(deleteAvatarModal));
+    document.getElementById('confirmDeleteAvatar').addEventListener('click', function () {
+      performAvatarRemoval();
+      closeModal(deleteAvatarModal);
+    });
+
     // User actions modal event listeners
     document.getElementById('userActionsModalClose').addEventListener('click', () => closeModal(userActionsModal));
     document.getElementById('cancelUserActions').addEventListener('click', () => closeModal(userActionsModal));
@@ -553,6 +566,7 @@ document.addEventListener('DOMContentLoaded', function () {
       if (e.target === reportModal) closeModal(reportModal);
       if (e.target === deleteModal) closeModal(deleteModal);
       if (e.target === userActionsModal) closeModal(userActionsModal);
+      if (e.target === deleteAvatarModal) closeModal(deleteAvatarModal);
     });
   }
 
@@ -2373,14 +2387,10 @@ document.addEventListener('DOMContentLoaded', function () {
       conversation.other_user.status === 'idle' ? 'idle' : 'offline';
 
     conversationDiv.innerHTML = `
-      <div class="conversation-avatar">
-        <i class="fas fa-user"></i>
-        <span class="status-indicator ${statusClass}"></span>
-      </div>
+      ${createAvatarElement(conversation.other_user.id, conversation.other_user.has_avatar, 'conversation-avatar').replace('</div>', `<span class="status-indicator ${statusClass}"></span></div>`)}
       <div class="conversation-content">
         <div class="conversation-header">
           <span class="conversation-name">${conversation.other_user.username}</span>
-          <span class="conversation-time">${formatConversationTime(conversation.last_message_time)}</span>
         </div>
         <div class="last-message">${conversation.last_message || 'No messages yet'}</div>
         <div class="conversation-status">${conversation.other_user.status_text}</div>
@@ -2479,6 +2489,7 @@ document.addEventListener('DOMContentLoaded', function () {
   async function updateDMConversationHeader(conversationUsername) {
     const dmUserName = document.querySelector('.dm-user-name');
     const dmUserStatus = document.querySelector('.dm-user-status');
+    const dmUserAvatar = document.querySelector('.dm-user-avatar');
 
     try {
       // Get conversation data to get user info
@@ -2493,7 +2504,18 @@ document.addEventListener('DOMContentLoaded', function () {
         dmUserStatus.textContent = otherUser.status_text;
       }
 
-      // Update status indicator
+      // Update avatar
+      if (dmUserAvatar) {
+        const avatarHtml = createAvatarElement(otherUser.id, otherUser.has_avatar, 'dm-user-avatar');
+        // Extract the avatar content and add status indicator
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = avatarHtml;
+        const avatarElement = tempDiv.firstElementChild;
+        avatarElement.innerHTML += `<div class="status-indicator ${otherUser.status}"></div>`;
+        dmUserAvatar.innerHTML = avatarElement.innerHTML;
+      }
+
+      // Update status indicator (fallback)
       const statusIndicator = document.querySelector('.dm-user-avatar .status-indicator');
       if (statusIndicator) {
         statusIndicator.className = `status-indicator ${otherUser.status}`;
@@ -2888,7 +2910,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const dmMessages = document.getElementById('dm-messages');
 
     // Handle both old format (type, text, time) and new format (message object)
-    let type, text, time, reactions, replyTo, messageId;
+    let type, text, time, reactions, replyTo, messageId, senderId, hasAvatar;
 
     if (typeof messageData === 'string') {
       // Old format: addDMMessage(type, text, time)
@@ -2899,14 +2921,19 @@ document.addEventListener('DOMContentLoaded', function () {
       reactions = null;
       replyTo = null;
       messageId = null;
+      senderId = null;
+      hasAvatar = false;
     } else {
       // New format: addDMMessage(messageObject)
+      console.log('Adding DM message:', messageData);
       type = messageData.is_own ? 'sent' : 'received';
       text = messageData.content;
       time = messageData.time || messageData.timestamp;
       reactions = messageData.reactions;
       replyTo = messageData.reply_to;
       messageId = messageData.id;
+      senderId = messageData.sender ? messageData.sender.id : null;
+      hasAvatar = messageData.sender ? messageData.sender.has_avatar : false;
       shouldScroll = arguments[1] !== undefined ? arguments[1] : true;
     }
 
@@ -2916,12 +2943,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let avatarHtml = '';
     if (type === 'received') {
-      avatarHtml = `
-        <div class="dm-message-avatar">
-          <i class="fas fa-user"></i>
-        </div>
-      `;
+      console.log(`Creating received message avatar: senderId=${senderId}, hasAvatar=${hasAvatar}`);
+      avatarHtml = createAvatarElement(senderId, hasAvatar, 'dm-message-avatar');
+    } else if (type === 'sent') {
+      // For sent messages, use current user's avatar info
+      console.log(`Creating sent message avatar: userId=${window.USER_ID}, hasAvatar=${window.CURRENT_USER_HAS_AVATAR}`);
+      avatarHtml = createAvatarElement(window.USER_ID, window.CURRENT_USER_HAS_AVATAR, 'dm-message-avatar');
     }
+    console.log(`Avatar HTML: ${avatarHtml}`);
 
     // Build reply preview if this is a reply
     let replyHtml = '';
@@ -2946,12 +2975,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     messageDiv.innerHTML = `
-      ${avatarHtml}
       <div class="dm-message-content">
         ${replyHtml}
         <div class="dm-message-bubble">
           <span class="dm-message-text">${text}</span>
-          <span class="dm-message-time">${time}</span>
         </div>
         ${reactionsHtml}
       </div>
@@ -3188,7 +3215,8 @@ document.addEventListener('DOMContentLoaded', function () {
       'ctrlEnterToSend',
       'allowDirectMessages',
       'contentFilter',
-      'appearOffline'
+      'appearOffline',
+      'hideProfilePictures'
     ];
 
     toggleSettings.forEach(settingId => {
@@ -3206,11 +3234,19 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('exportDataBtn')?.addEventListener('click', showDownloadDataModal);
     document.getElementById('logoutBtn')?.addEventListener('click', showLogoutModal);
     document.getElementById('deleteAccountBtn')?.addEventListener('click', showDeleteAccountModal);
+
+    // Avatar event listeners
+    document.getElementById('uploadAvatarBtn')?.addEventListener('click', showAvatarUpload);
+    document.getElementById('removeAvatarBtn')?.addEventListener('click', removeAvatar);
+    document.getElementById('avatarInput')?.addEventListener('change', handleAvatarUpload);
   }
 
   function loadSettings() {
     // Load settings from localStorage and apply them
     const settings = getSettings();
+
+    // Load current avatar for the profile picture section
+    loadCurrentAvatar();
 
     // Apply toggle settings
     const toggleSettings = [
@@ -3224,6 +3260,7 @@ document.addEventListener('DOMContentLoaded', function () {
       'allowDirectMessages',
       'contentFilter',
       'appearOffline',
+      'hideProfilePictures',
       'developerMode'
     ];
 
@@ -3248,7 +3285,8 @@ document.addEventListener('DOMContentLoaded', function () {
       ctrlEnterToSend: false,
       allowDirectMessages: true,
       contentFilter: true,
-      appearOffline: false
+      appearOffline: false,
+      hideProfilePictures: false
     };
 
     // Get saved settings from localStorage
@@ -3364,6 +3402,30 @@ document.addEventListener('DOMContentLoaded', function () {
           }
         }
         break;
+      case 'hideProfilePictures':
+        // Force refresh of displayed avatars when setting changes
+        refreshAvatarsDisplay();
+        break;
+    }
+  }
+
+  function refreshAvatarsDisplay() {
+    // Refresh chat messages
+    fetchMessages();
+
+    // Refresh conversations list
+    loadConversationsList();
+
+    // Refresh friends list if visible
+    const friendsTab = document.getElementById('friends');
+    if (friendsTab && friendsTab.classList.contains('active')) {
+      loadFriendsList();
+    }
+
+    // Refresh current DM conversation header
+    const dmUserName = document.querySelector('.dm-user-name');
+    if (dmUserName && dmUserName.textContent) {
+      updateDMConversationHeader(dmUserName.textContent);
     }
   }
 
@@ -3608,6 +3670,458 @@ document.addEventListener('DOMContentLoaded', function () {
     URL.revokeObjectURL(url);
   }
 
+  // =====================================
+  // AVATAR FUNCTIONALITY
+  // =====================================
+
+  function showAvatarUpload() {
+    document.getElementById('avatarInput').click();
+  }
+
+  function handleAvatarUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File too large. Maximum size is 5MB.');
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      alert('Invalid file type. Please upload a PNG, JPEG, GIF, or WebP image.');
+      return;
+    }
+
+    // Upload directly
+    uploadAvatar(file);
+
+    // Clear the file input
+    event.target.value = '';
+  }
+
+  async function uploadAvatar(file) {
+    try {
+      // Create FormData
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      // Show loading state
+      const uploadBtn = document.getElementById('uploadAvatarBtn');
+      if (uploadBtn) {
+        const originalText = uploadBtn.innerHTML;
+        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        uploadBtn.disabled = true;
+      }
+
+      // Upload the image
+      const token = window.getAuthToken();
+      const response = await fetch(window.api.baseURL + '/profile/avatar/upload', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Upload failed';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (jsonError) {
+          // If JSON parsing fails, use the response status text
+          errorMessage = response.statusText || `HTTP ${response.status}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      // Parse successful response
+      let responseData = null;
+      try {
+        responseData = await response.json();
+      } catch (jsonError) {
+        console.warn('Response is not valid JSON, but upload may have succeeded');
+      }
+
+      // Update display and show success
+      await loadCurrentAvatar();
+      alert('Profile picture uploaded successfully!');
+
+    } catch (error) {
+      console.error('Avatar upload failed:', error);
+      alert(error.message || 'Failed to upload profile picture. Please try again.');
+    } finally {
+      // Reset upload button
+      const uploadBtn = document.getElementById('uploadAvatarBtn');
+      if (uploadBtn) {
+        uploadBtn.innerHTML = '<i class="fas fa-upload"></i> upload';
+        uploadBtn.disabled = false;
+      }
+    }
+  }
+
+  async function removeAvatar() {
+    const modal = document.getElementById('avatarCropModal');
+    const canvas = document.getElementById('cropCanvas');
+    const ctx = canvas.getContext('2d');
+    const zoomSlider = document.getElementById('zoomSlider');
+
+    // Reset crop parameters
+    cropScale = 1;
+    cropOffsetX = 0;
+    cropOffsetY = 0;
+    zoomSlider.value = 1;
+
+    // Load and display image
+    const img = new Image();
+    img.onload = function () {
+      cropImageData = img;
+
+      // Calculate initial positioning to center the image
+      const canvasAspect = canvas.width / canvas.height;
+      const imageAspect = img.width / img.height;
+
+      let displayWidth, displayHeight;
+
+      if (imageAspect > canvasAspect) {
+        // Image is wider - fit to height
+        displayHeight = canvas.height;
+        displayWidth = displayHeight * imageAspect;
+      } else {
+        // Image is taller - fit to width
+        displayWidth = canvas.width;
+        displayHeight = displayWidth / imageAspect;
+      }
+
+      // Center the image
+      cropOffsetX = (canvas.width - displayWidth) / 2;
+      cropOffsetY = (canvas.height - displayHeight) / 2;
+
+      // Set initial scale based on display size
+      cropScale = displayWidth / img.width;
+      zoomSlider.value = cropScale;
+
+      drawCropPreview();
+      modal.style.display = 'flex';
+    };
+    img.src = URL.createObjectURL(file);
+
+    // Set up event listeners
+    setupCropEventListeners();
+  }
+
+  function setupCropEventListeners() {
+    const canvas = document.getElementById('cropCanvas');
+    const zoomSlider = document.getElementById('zoomSlider');
+    const cancelBtn = document.getElementById('cancelCrop');
+    const confirmBtn = document.getElementById('confirmCrop');
+    const closeBtn = document.getElementById('avatarCropClose');
+    const modal = document.getElementById('avatarCropModal');
+
+    // Remove existing listeners
+    canvas.onmousedown = null;
+    canvas.onmousemove = null;
+    canvas.onmouseup = null;
+    zoomSlider.oninput = null;
+
+    // Zoom slider
+    zoomSlider.oninput = function () {
+      cropScale = parseFloat(this.value);
+      drawCropPreview();
+    };
+
+    // Mouse events for dragging
+    canvas.onmousedown = function (e) {
+      isDragging = true;
+      const rect = canvas.getBoundingClientRect();
+      const startX = e.clientX - rect.left;
+      const startY = e.clientY - rect.top;
+
+      canvas.onmousemove = function (e) {
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const currentX = e.clientX - rect.left;
+        const currentY = e.clientY - rect.top;
+
+        cropOffsetX += currentX - startX;
+        cropOffsetY += currentY - startY;
+
+        // Update start position for next move
+        startX = currentX;
+        startY = currentY;
+
+        drawCropPreview();
+      };
+    };
+
+    canvas.onmouseup = function () {
+      isDragging = false;
+      canvas.onmousemove = null;
+    };
+
+    // Touch events for mobile
+    canvas.ontouchstart = function (e) {
+      e.preventDefault();
+      isDragging = true;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      const startX = touch.clientX - rect.left;
+      const startY = touch.clientY - rect.top;
+
+      canvas.ontouchmove = function (e) {
+        e.preventDefault();
+        if (!isDragging) return;
+        const rect = canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const currentX = touch.clientX - rect.left;
+        const currentY = touch.clientY - rect.top;
+
+        cropOffsetX += currentX - startX;
+        cropOffsetY += currentY - startY;
+
+        drawCropPreview();
+      };
+    };
+
+    canvas.ontouchend = function (e) {
+      e.preventDefault();
+      isDragging = false;
+      canvas.ontouchmove = null;
+    };
+
+    // Button events
+    cancelBtn.onclick = () => closeCropModal();
+    closeBtn.onclick = () => closeCropModal();
+    confirmBtn.onclick = () => uploadCroppedImage();
+
+    // Close modal when clicking outside
+    modal.onclick = function (e) {
+      if (e.target === modal) {
+        closeCropModal();
+      }
+    };
+  }
+
+  function drawCropPreview() {
+    const canvas = document.getElementById('cropCanvas');
+    const ctx = canvas.getContext('2d');
+
+    if (!cropImageData) return;
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Calculate scaled dimensions
+    const scaledWidth = cropImageData.width * cropScale;
+    const scaledHeight = cropImageData.height * cropScale;
+
+    // Draw image with current scale and offset
+    ctx.drawImage(
+      cropImageData,
+      cropOffsetX,
+      cropOffsetY,
+      scaledWidth,
+      scaledHeight
+    );
+  }
+
+  function closeCropModal() {
+    const modal = document.getElementById('avatarCropModal');
+    modal.style.display = 'none';
+
+    // Clean up
+    if (cropImageData && cropImageData.src) {
+      URL.revokeObjectURL(cropImageData.src);
+    }
+    cropImageData = null;
+  }
+
+  async function uploadCroppedImage() {
+    try {
+      const confirmBtn = document.getElementById('confirmCrop');
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+
+      // Create a new canvas for the cropped image
+      const cropCanvas = document.createElement('canvas');
+      const cropCtx = cropCanvas.getContext('2d');
+      const size = 512; // Final avatar size (higher quality)
+
+      cropCanvas.width = size;
+      cropCanvas.height = size;
+
+      // Calculate the crop area (center circle from the preview canvas)
+      const previewCanvas = document.getElementById('cropCanvas');
+      const centerX = previewCanvas.width / 2;
+      const centerY = previewCanvas.height / 2;
+      const radius = 100; // Half of crop circle size (200px diameter)
+
+      // Calculate what portion of the original image is visible in the crop circle
+      const scaledWidth = cropImageData.width * cropScale;
+      const scaledHeight = cropImageData.height * cropScale;
+
+      // Calculate the actual image coordinates for the crop area
+      const cropStartX = (centerX - radius - cropOffsetX) / scaledWidth * cropImageData.width;
+      const cropStartY = (centerY - radius - cropOffsetY) / scaledHeight * cropImageData.height;
+      const cropWidth = (radius * 2) / scaledWidth * cropImageData.width;
+      const cropHeight = (radius * 2) / scaledHeight * cropImageData.height;
+
+      // Ensure we don't go outside image bounds
+      const clampedX = Math.max(0, Math.min(cropStartX, cropImageData.width - cropWidth));
+      const clampedY = Math.max(0, Math.min(cropStartY, cropImageData.height - cropHeight));
+      const clampedWidth = Math.min(cropWidth, cropImageData.width - clampedX);
+      const clampedHeight = Math.min(cropHeight, cropImageData.height - clampedY);
+
+      // Draw the cropped portion
+      cropCtx.drawImage(
+        cropImageData,
+        clampedX,
+        clampedY,
+        clampedWidth,
+        clampedHeight,
+        0,
+        0,
+        size,
+        size
+      );
+
+      // Convert to blob
+      cropCanvas.toBlob(async (blob) => {
+        const formData = new FormData();
+        formData.append('avatar', blob, 'avatar.jpg');
+
+        // Upload the cropped image
+        const token = window.getAuthToken();
+        const response = await fetch('/api/profile/avatar/upload', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Upload failed');
+        }
+
+        // Close modal and update display
+        closeCropModal();
+        await loadCurrentAvatar();
+        alert('Profile picture uploaded successfully!');
+
+      }, 'image/jpeg', 0.9);
+
+    } catch (error) {
+      console.error('Avatar upload failed:', error);
+      alert(error.message || 'Failed to upload profile picture. Please try again.');
+    } finally {
+      const confirmBtn = document.getElementById('confirmCrop');
+      confirmBtn.disabled = false;
+      confirmBtn.innerHTML = 'Upload';
+    }
+  }
+
+  async function removeAvatar() {
+    // Show the delete avatar modal instead of confirm dialog
+    const modal = document.getElementById('deleteAvatarModal');
+    modal.style.display = 'flex';
+  }
+
+  async function performAvatarRemoval() {
+    try {
+      const removeBtn = document.getElementById('removeAvatarBtn');
+      removeBtn.disabled = true;
+      removeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> removing...';
+
+      await api.delete('/profile/avatar');
+
+      // Update the avatar display
+      await loadCurrentAvatar();
+      alert('Profile picture removed successfully!');
+
+    } catch (error) {
+      console.error('Avatar removal failed:', error);
+      alert(error.message || 'Failed to remove profile picture. Please try again.');
+    } finally {
+      const removeBtn = document.getElementById('removeAvatarBtn');
+      removeBtn.disabled = false;
+      removeBtn.innerHTML = '<i class="fas fa-trash"></i> remove';
+    }
+  }
+
+  async function loadCurrentAvatar() {
+    try {
+      console.log('Loading current avatar...');
+      const currentAvatarEl = document.getElementById('currentAvatar');
+      const removeBtn = document.getElementById('removeAvatarBtn');
+
+      if (!currentAvatarEl) {
+        console.error('currentAvatar element not found');
+        return;
+      }
+
+      // Get current user data to check for avatar
+      const userData = await api.get('/auth/me');
+      console.log('User data:', userData);
+
+      if (userData.user.has_avatar && userData.user.avatar_url) {
+        // Show actual avatar
+        console.log('Showing avatar:', userData.user.avatar_url);
+        currentAvatarEl.innerHTML = `<img src="${window.api.baseURL}${userData.user.avatar_url}" alt="Profile Picture" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="default-avatar" style="display: none;"><i class="fas fa-user"></i></div>`;
+        removeBtn.style.display = 'block';
+        // Update global avatar status
+        window.CURRENT_USER_HAS_AVATAR = true;
+      } else {
+        // Show default avatar
+        console.log('Showing default avatar');
+        currentAvatarEl.innerHTML = '<div class="default-avatar"><i class="fas fa-user"></i></div>';
+        removeBtn.style.display = 'none';
+        // Update global avatar status
+        window.CURRENT_USER_HAS_AVATAR = false;
+      }
+    } catch (error) {
+      console.error('Failed to load current avatar:', error);
+    }
+  }
+
+  function getAvatarUrl(userId, hasAvatar) {
+    const settings = getSettings();
+
+    // If user has disabled profile pictures, always return null for default avatar
+    if (settings.hideProfilePictures) {
+      return null;
+    }
+
+    // Return avatar URL if user has one
+    return hasAvatar ? `${window.api.baseURL}/profile/avatar/${userId}` : null;
+  }
+
+  function createAvatarElement(userId, hasAvatar, className = 'message-avatar') {
+    if (!hasAvatar) console.log(`Creating avatar element: userId=${userId}, hasAvatar=${hasAvatar}, className=${className}`);
+    const avatarUrl = getAvatarUrl(userId, hasAvatar);
+    if (!hasAvatar) console.log(`Avatar URL: ${avatarUrl}`);
+
+    if (avatarUrl) {
+      return `
+        <div class="${className}">
+          <img src="${avatarUrl}" alt="Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="default-avatar" style="display: none;"><i class="fas fa-user"></i></div>
+        </div>
+      `;
+    } else {
+      return `
+        <div class="${className}">
+          <div class="default-avatar"><i class="fas fa-user"></i></div>
+        </div>
+      `;
+    }
+  }
+
   function showAddFriendModal() {
     const modal = document.getElementById('addFriendModal');
     const closeBtn = document.getElementById('addFriendModalClose');
@@ -3669,7 +4183,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function confirmLogout() {
     // Clear any session data
-    localStorage.removeItem('chatfun_auth_token');
+    localStorage.removeItem('authToken');
     // Redirect to login page
     window.location.href = 'login.html';
   }
@@ -3707,12 +4221,16 @@ document.addEventListener('DOMContentLoaded', function () {
         if (data.user && data.user.role) {
           window.USER_ROLE = data.user.role;
           window.USER_ID = data.user.uuid;
+          window.CURRENT_USER_HAS_AVATAR = data.user.has_avatar || false;
         }
 
         // Load user settings from server and merge with local settings
         if (data.user && data.user.settings) {
           mergeServerSettings(data.user.settings);
         }
+
+        // Load current avatar
+        loadCurrentAvatar();
       })
       .catch(error => {
         console.error("Error fetching user data:", error);

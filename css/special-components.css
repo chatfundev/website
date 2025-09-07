@@ -156,7 +156,8 @@
 .friend-avatar,
 .conversation-avatar,
 .dm-user-avatar,
-.dm-message-avatar {
+.dm-message-avatar,
+.message-avatar {
   position: relative;
   background-color: var(--background-color);
   border: 2px solid var(--border-color);
@@ -164,6 +165,30 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--text-secondary);
+  overflow: hidden;
+}
+
+/* Avatar images */
+.friend-avatar img,
+.conversation-avatar img,
+.dm-user-avatar img,
+.dm-message-avatar img,
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Default avatar (when no image) */
+.default-avatar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--surface-color);
   color: var(--text-secondary);
 }
 
@@ -187,6 +212,13 @@
 }
 
 .dm-message-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.message-avatar {
   width: 40px;
   height: 40px;
   font-size: var(--font-size-sm);
