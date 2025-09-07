@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // User Information - make them global properties
   window.USER_ROLE = null;
+  window.USER_ID = null;
   window.CURRENT_USERNAME = null;
 
   // DOM Elements
@@ -21,6 +22,27 @@ document.addEventListener('DOMContentLoaded', function () {
   let currentMessageElement = null;
   let currentMessageAuthor = null;
   let currentMessageId = null;
+  let currentReplyTo = null;
+
+  // =====================================
+  // AUTHENTICATION UTILITIES
+  // =====================================
+
+  function validateAuthenticationAndRedirect() {
+    const token = window.getAuthToken();
+    if (!token) {
+      console.warn('No authentication token found - redirecting to login');
+      window.location.href = 'login.html';
+      return false;
+    }
+
+    // Set token for API calls
+    if (window.api) {
+      window.api.bearerToken = token;
+    }
+
+    return true;
+  }
 
   // =====================================
   // TAB SWITCHING FUNCTIONALITY
@@ -28,8 +50,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
   function initializeTabSwitching() {
     navItems.forEach(item => {
-      item.addEventListener('click', function () {
+      item.addEventListener('click', async function () {
         const tabId = this.getAttribute('data-tab');
+
+        // Clean up DM polling when leaving DMs tab
+        if (dmPollingInterval && tabId !== 'dms') {
+          clearInterval(dmPollingInterval);
+          dmPollingInterval = null;
+          currentDMConversation = null;
+          currentConversationId = null;
+        }
 
         // Remove active class from all nav items and tab contents
         navItems.forEach(nav => nav.classList.remove('active'));
@@ -38,6 +68,15 @@ document.addEventListener('DOMContentLoaded', function () {
         // Add active class to clicked nav item and corresponding tab content
         this.classList.add('active');
         document.getElementById(tabId).classList.add('active');
+
+        // If entering DMs tab, check if DMs are enabled and load latest conversation
+        if (tabId === 'dms') {
+          if (!isDMsEnabled()) {
+            showDMDisabledScreen();
+          } else {
+            await loadLatestDMConversation();
+          }
+        }
       });
     });
   }
@@ -47,14 +86,14 @@ document.addEventListener('DOMContentLoaded', function () {
   // =====================================
 
   function initializeUserPermissions() {
-    if (window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin' || window.USER_ROLE === 'owner') {
+    if (window.USER_ROLE == 'mod' || window.USER_ROLE == 'admin' || window.USER_ROLE == 'owner') {
       console.log("Mod access!");
       document.querySelectorAll('.mod-only').forEach(element => {
         element.style.display = 'flex';
       });
     }
 
-    if (window.USER_ROLE === 'admin' || window.USER_ROLE === 'owner') {
+    if (window.USER_ROLE == 'admin' || window.USER_ROLE == 'owner') {
       console.log("Admin access!")
       document.querySelectorAll('.admin-only').forEach(element => {
         element.style.display = 'flex';
@@ -148,6 +187,7 @@ document.addEventListener('DOMContentLoaded', function () {
       const token = getAuthToken();
       if (!token) {
         console.error('No auth token available');
+        window.location.href = 'login.html';
         return;
       }
 
@@ -162,7 +202,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     } catch (error) {
       console.error('Failed to send message:', error);
-      // Could show an error message to user here
+
+      // Check if this is an authentication error
+      if (error.message && (error.message.includes('401') || error.message.includes('Token has expired'))) {
+        console.warn('Authentication failed while sending message');
+        // API handler will redirect, but this is a backup
+        return;
+      }
+
+      // Show a user-friendly error message for other errors
+      showNotification('Failed to send message. Please try again.', 'error');
     }
   }
 
@@ -170,6 +219,8 @@ document.addEventListener('DOMContentLoaded', function () {
     try {
       const token = getAuthToken();
       if (!token) {
+        console.warn('No auth token available for fetching messages');
+        window.location.href = 'login.html';
         return;
       }
 
@@ -185,12 +236,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
     } catch (error) {
       console.error('Failed to fetch messages:', error);
+
+      // Check if this is an authentication error
+      if (error.message && (error.message.includes('401') || error.message.includes('Token has expired'))) {
+        console.warn('Authentication failed while fetching messages');
+        // API handler will redirect, but we can stop polling
+        stopMessagePolling();
+        return;
+      }
+
+      // For other errors, just log them - don't stop the app
     }
   }
 
   function updateChatMessages(messages) {
     // Clear existing messages
     chatMessages.innerHTML = '';
+
+    // Show empty state if no messages
+    if (messages.length === 0) {
+      const emptyState = document.createElement('div');
+      emptyState.className = 'empty-state';
+      emptyState.innerHTML = `
+        <div class="empty-state-content">
+          <i class="fas fa-comments empty-state-icon"></i>
+          <h3>No messages yet</h3>
+          <p>Be the first to start the conversation!</p>
+        </div>
+      `;
+      chatMessages.appendChild(emptyState);
+      return;
+    }
 
     messages.forEach(message => {
       const messageDiv = document.createElement('div');
@@ -232,18 +308,10 @@ document.addEventListener('DOMContentLoaded', function () {
       chatMessages.appendChild(messageDiv);
     });
 
-    // Auto-scroll to bottom if enabled and user is at or near the bottom
+    // Auto-scroll to bottom if enabled (always scroll when enabled)
     const settings = getSettings();
     if (settings.autoScroll) {
-      const scrollPosition = chatMessages.scrollTop;
-      const scrollHeight = chatMessages.scrollHeight;
-      const clientHeight = chatMessages.clientHeight;
-      const threshold = 100;
-
-      const isNearBottom = scrollPosition >= (scrollHeight - clientHeight - threshold);
-      if (isNearBottom) {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }
+      chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
     // Always scroll to bottom on initial load
@@ -372,7 +440,33 @@ document.addEventListener('DOMContentLoaded', function () {
     // Hide context menu when clicking elsewhere
     document.addEventListener('click', function () {
       contextMenu.style.display = 'none';
+      const dmContextMenu = document.getElementById('dmContextMenu');
+      if (dmContextMenu) {
+        dmContextMenu.style.display = 'none';
+      }
     });
+
+    // DM context menu event handlers
+    const replyDMMenuItem = document.getElementById('replyDMMessage');
+    const reactDMMenuItem = document.getElementById('reactDMMessage');
+
+    if (replyDMMenuItem) {
+      replyDMMenuItem.addEventListener('click', function () {
+        if (window.currentDMMessageId) {
+          replyToDMMessage(window.currentDMMessageId);
+        }
+        document.getElementById('dmContextMenu').style.display = 'none';
+      });
+    }
+
+    if (reactDMMenuItem) {
+      reactDMMenuItem.addEventListener('click', function () {
+        if (window.currentDMMessageId) {
+          showReactionPicker(window.currentDMMessageId);
+        }
+        document.getElementById('dmContextMenu').style.display = 'none';
+      });
+    }
   }  // =====================================
   // MODAL FUNCTIONALITY
   // =====================================
@@ -1440,6 +1534,277 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize friend action buttons
     initializeFriendActions();
+
+    // Add specific event listener for the add friend button
+    const addFriendBtn = document.getElementById('sendFriendRequestBtn');
+    if (addFriendBtn) {
+      addFriendBtn.addEventListener('click', function () {
+        showAddFriendModal();
+      });
+    }
+
+    // Load friends and requests from server
+    loadFriendsList();
+    loadFriendRequests();
+
+    // Set up periodic refresh
+    setInterval(() => {
+      loadFriendsList();
+      loadFriendRequests();
+    }, 30000);
+
+    // Update user status periodically
+    setInterval(updateUserStatus, 60000); // Update status every minute
+    updateUserStatus(); // Initial status update
+
+    // Update online users count periodically
+    setInterval(updateOnlineUsersCount, 30000); // Update every 30 seconds
+    updateOnlineUsersCount(); // Initial count update
+  }
+
+  async function loadFriendsList() {
+    try {
+      const response = await api.get('/friends/list');
+      const friends = response.friends || [];
+
+      const friendsContainer = document.querySelector('.friends-list');
+      if (!friendsContainer) return;
+
+      // Clear existing friends
+      friendsContainer.innerHTML = '';
+
+      // Count friends by status
+      let totalCount = friends.length;
+      let onlineCount = 0;
+      let offlineCount = 0;
+
+      if (friends.length === 0) {
+        friendsContainer.innerHTML = `
+          <div class="no-friends-message">
+            <div class="no-friends-icon">
+              <i class="fas fa-user-friends"></i>
+            </div>
+            <h3>No friends yet</h3>
+            <p>Send friend requests to start building your network!</p>
+          </div>
+        `;
+      } else {
+        friends.forEach(friend => {
+          const friendElement = createFriendElement(friend);
+          friendsContainer.appendChild(friendElement);
+
+          // Count friends by status
+          if (friend.status === 'online' || friend.status === 'idle') {
+            onlineCount++;
+          } else {
+            offlineCount++;
+          }
+        });
+      }
+
+      // Update friend counts in UI
+      updateFriendCounts(totalCount, onlineCount, offlineCount);
+      updateOnlineFriendsCount(onlineCount);
+
+    } catch (error) {
+      console.error('Failed to load friends list:', error);
+    }
+  }
+
+  function createFriendElement(friend) {
+    const friendDiv = document.createElement('div');
+    friendDiv.className = 'friend-item';
+    friendDiv.setAttribute('data-status', friend.status);
+
+    const statusIcon = getStatusIcon(friend.status);
+    const statusClass = friend.status === 'online' ? 'online' : friend.status === 'idle' ? 'idle' : 'offline';
+
+    friendDiv.innerHTML = `
+      <div class="friend-avatar">
+        <i class="fas fa-user"></i>
+        <span class="status-indicator ${statusClass}"></span>
+      </div>
+      <div class="friend-info">
+        <span class="friend-name">${friend.username}</span>
+        <span class="friend-status">${friend.status_text}</span>
+      </div>
+      <div class="friend-actions">
+        <button class="message-friend-btn btn-primary" data-friend="${friend.username}">
+          <i class="fas fa-comment"></i> Message
+        </button>
+        <button class="remove-friend-btn btn-danger" data-friend-id="${friend.id}">
+          <i class="fas fa-user-minus"></i> Remove
+        </button>
+      </div>
+    `;
+
+    return friendDiv;
+  }
+
+  function getStatusIcon(status) {
+    switch (status) {
+      case 'online': return '🟢';
+      case 'idle': return '🟡';
+      case 'offline': return '⚫';
+      default: return '⚫';
+    }
+  }
+
+  async function loadFriendRequests() {
+    try {
+      const [incomingResponse, outgoingResponse] = await Promise.all([
+        api.get('/friends/requests/incoming'),
+        api.get('/friends/requests/outgoing')
+      ]);
+
+      const incomingRequests = incomingResponse.requests || [];
+      const outgoingRequests = outgoingResponse.requests || [];
+
+      // Load incoming requests
+      const incomingContainer = document.querySelector('.incoming-requests');
+      if (incomingContainer) {
+        incomingContainer.innerHTML = '';
+
+        if (incomingRequests.length === 0) {
+          incomingContainer.innerHTML = `
+            <div class="no-requests-message">
+              <p>No incoming friend requests</p>
+            </div>
+          `;
+        } else {
+          incomingRequests.forEach(request => {
+            const requestElement = createIncomingRequestElement(request);
+            incomingContainer.appendChild(requestElement);
+          });
+        }
+      }
+
+      // Load outgoing requests  
+      const outgoingContainer = document.querySelector('.outgoing-requests');
+      if (outgoingContainer) {
+        outgoingContainer.innerHTML = '';
+
+        if (outgoingRequests.length === 0) {
+          outgoingContainer.innerHTML = `
+            <div class="no-requests-message">
+              <p>No outgoing friend requests</p>
+            </div>
+          `;
+        } else {
+          outgoingRequests.forEach(request => {
+            const requestElement = createOutgoingRequestElement(request);
+            outgoingContainer.appendChild(requestElement);
+          });
+        }
+      }
+
+      // Update request counts
+      updateRequestCount(incomingRequests.length, outgoingRequests.length);
+
+    } catch (error) {
+      console.error('Failed to load friend requests:', error);
+    }
+  }
+
+  function createIncomingRequestElement(request) {
+    const requestDiv = document.createElement('div');
+    requestDiv.className = 'friend-request-item';
+    requestDiv.setAttribute('data-request-id', request.id);
+
+    requestDiv.innerHTML = `
+      <div class="request-user-info">
+        <div class="request-user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="request-user-details">
+          <span class="friend-name">${request.requester.username}</span>
+          <span class="request-time">${formatRequestTime(request.created_at)}</span>
+        </div>
+      </div>
+      <div class="request-actions">
+        <button class="accept-friend-btn btn-success" data-request-id="${request.id}">
+          <i class="fas fa-check"></i> Accept
+        </button>
+        <button class="decline-friend-btn btn-danger" data-request-id="${request.id}">
+          <i class="fas fa-times"></i> Decline
+        </button>
+      </div>
+    `;
+
+    return requestDiv;
+  }
+
+  function createOutgoingRequestElement(request) {
+    const requestDiv = document.createElement('div');
+    requestDiv.className = 'friend-request-item';
+    requestDiv.setAttribute('data-request-id', request.id);
+
+    requestDiv.innerHTML = `
+      <div class="request-user-info">
+        <div class="request-user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="request-user-details">
+          <span class="friend-name">${request.recipient.username}</span>
+          <span class="request-time">${formatRequestTime(request.created_at)}</span>
+        </div>
+      </div>
+      <div class="request-actions">
+        <button class="cancel-request-btn btn-secondary" data-request-id="${request.id}">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+      </div>
+    `;
+
+    return requestDiv;
+  }
+
+  function formatRequestTime(timestamp) {
+    if (!timestamp) return '';
+
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor(diff / (1000 * 60));
+
+    if (days > 0) return `${days}d ago`;
+    if (hours > 0) return `${hours}h ago`;
+    if (minutes > 0) return `${minutes}m ago`;
+    return 'Just now';
+  }
+
+  async function updateUserStatus() {
+    try {
+      await api.post('/friends/status', { status: 'online' });
+    } catch (error) {
+      console.error('Failed to update user status:', error);
+    }
+  }
+
+  async function updateOnlineUsersCount() {
+    try {
+      const response = await api.get('/stats/online');
+      const onlineCount = response.online_count || 0;
+
+      const onlineCountElement = document.getElementById('online-count');
+      if (onlineCountElement) {
+        if (onlineCount === 0) {
+          onlineCountElement.textContent = 'No one online';
+        } else if (onlineCount === 1) {
+          onlineCountElement.textContent = '1 person online';
+        } else {
+          onlineCountElement.textContent = `${onlineCount} people online`;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update online users count:', error);
+      const onlineCountElement = document.getElementById('online-count');
+      if (onlineCountElement) {
+        onlineCountElement.textContent = 'Error loading count';
+      }
+    }
   }
 
   function initializeFriendRequestTabs() {
@@ -1492,60 +1857,46 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function initializeFriendActions() {
+    // Send friend request
+    document.addEventListener('click', function (e) {
+      if (e.target.id === 'sendFriendRequestBtn' || e.target.classList.contains('sendFriendRequestBtn') || e.target.parentElement.classList.contains('sendFriendRequestBtn')) {
+        showAddFriendModal();
+      }
+    });
+
     // Accept friend request
     document.addEventListener('click', function (e) {
       if (e.target.classList.contains('accept-friend-btn') || e.target.parentElement.classList.contains('accept-friend-btn')) {
-        const requestItem = e.target.closest('.friend-request-item');
-        const friendName = requestItem.querySelector('.friend-name').textContent;
-
-        // Simulate accepting friend request
-        console.log(`Accepted friend request from ${friendName}`);
-
-        // Remove from requests (in real app, this would update the server)
-        requestItem.remove();
-
-        // Update request count
-        updateRequestCount();
-
-        // Show success message
-        showFriendActionMessage(`You are now friends with ${friendName}!`, 'success');
+        const button = e.target.classList.contains('accept-friend-btn') ? e.target : e.target.parentElement;
+        const requestId = button.getAttribute('data-request-id');
+        acceptFriendRequest(requestId);
       }
     });
 
     // Decline friend request
     document.addEventListener('click', function (e) {
       if (e.target.classList.contains('decline-friend-btn') || e.target.parentElement.classList.contains('decline-friend-btn')) {
-        const requestItem = e.target.closest('.friend-request-item');
-        const friendName = requestItem.querySelector('.friend-name').textContent;
-
-        // Simulate declining friend request
-        console.log(`Declined friend request from ${friendName}`);
-
-        // Remove from requests
-        requestItem.remove();
-
-        // Update request count
-        updateRequestCount();
-
-        // Show message
-        showFriendActionMessage(`Declined friend request from ${friendName}`, 'info');
+        const button = e.target.classList.contains('decline-friend-btn') ? e.target : e.target.parentElement;
+        const requestId = button.getAttribute('data-request-id');
+        declineFriendRequest(requestId);
       }
     });
 
     // Cancel outgoing request
     document.addEventListener('click', function (e) {
       if (e.target.classList.contains('cancel-request-btn') || e.target.parentElement.classList.contains('cancel-request-btn')) {
-        const requestItem = e.target.closest('.friend-request-item');
-        const friendName = requestItem.querySelector('.friend-name').textContent;
+        const button = e.target.classList.contains('cancel-request-btn') ? e.target : e.target.parentElement;
+        const requestId = button.getAttribute('data-request-id');
+        declineFriendRequest(requestId); // Same endpoint for cancel
+      }
+    });
 
-        // Simulate canceling friend request
-        console.log(`Canceled friend request to ${friendName}`);
-
-        // Remove from requests
-        requestItem.remove();
-
-        // Show message
-        showFriendActionMessage(`Canceled friend request to ${friendName}`, 'info');
+    // Remove friend
+    document.addEventListener('click', function (e) {
+      if (e.target.classList.contains('remove-friend-btn') || e.target.parentElement.classList.contains('remove-friend-btn')) {
+        const button = e.target.classList.contains('remove-friend-btn') ? e.target : e.target.parentElement;
+        const friendId = button.getAttribute('data-friend-id');
+        removeFriend(friendId);
       }
     });
 
@@ -1561,17 +1912,143 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  function updateRequestCount() {
-    const incomingRequests = document.querySelectorAll('.incoming-requests .friend-request-item');
+  async function acceptFriendRequest(requestId) {
+    try {
+      await api.post(`/friends/request/${requestId}/accept`);
+      showFriendActionMessage('Friend request accepted!', 'success');
+
+      // Reload friends and requests
+      loadFriendsList();
+      loadFriendRequests();
+    } catch (error) {
+      console.error('Failed to accept friend request:', error);
+      showFriendActionMessage('Failed to accept friend request', 'error');
+    }
+  }
+
+  async function declineFriendRequest(requestId) {
+    try {
+      await api.post(`/friends/request/${requestId}/decline`);
+      showFriendActionMessage('Friend request declined', 'info');
+
+      // Reload requests
+      loadFriendRequests();
+    } catch (error) {
+      console.error('Failed to decline friend request:', error);
+      showFriendActionMessage('Failed to decline friend request', 'error');
+    }
+  }
+
+  async function removeFriend(friendId) {
+    if (!confirm('Are you sure you want to remove this friend?')) {
+      return;
+    }
+
+    try {
+      await api.post('/friends/remove', { friend_id: friendId });
+      showFriendActionMessage('Friend removed', 'info');
+
+      // Reload friends list
+      loadFriendsList();
+    } catch (error) {
+      console.error('Failed to remove friend:', error);
+      showFriendActionMessage('Failed to remove friend', 'error');
+    }
+  }
+
+  async function sendFriendRequest(username) {
+    try {
+      await api.post('/friends/request', { username: username });
+      showFriendActionMessage(`Friend request sent to ${username}!`, 'success');
+
+      // Reload requests
+      loadFriendRequests();
+    } catch (error) {
+      console.error('Failed to send friend request:', error);
+      const errorMessage = error.message || 'Failed to send friend request';
+      showFriendActionMessage(errorMessage, 'error');
+      throw error; // Re-throw to handle in modal
+    }
+  }
+
+  function updateOnlineFriendsCount(count) {
+    const onlineFriendsSpan = document.querySelector('.online-friends-count');
+    if (onlineFriendsSpan) {
+      if (count === 0) {
+        onlineFriendsSpan.textContent = 'No friends online';
+      } else if (count === 1) {
+        onlineFriendsSpan.textContent = '1 friend online';
+      } else {
+        onlineFriendsSpan.textContent = `${count} friends online`;
+      }
+    }
+  }
+
+  function updateFriendCounts(totalCount, onlineCount, offlineCount) {
+    // Update total friends count
+    const totalCountSpan = document.getElementById('friends-total-count');
+    if (totalCountSpan) {
+      if (totalCount === 0) {
+        totalCountSpan.textContent = 'No friends';
+      } else if (totalCount === 1) {
+        totalCountSpan.textContent = '1 total';
+      } else {
+        totalCountSpan.textContent = `${totalCount} total`;
+      }
+    }
+
+    // Update filter button counts
+    const allBtn = document.getElementById('filter-all');
+    const onlineBtn = document.getElementById('filter-online');
+    const offlineBtn = document.getElementById('filter-offline');
+
+    if (allBtn) {
+      allBtn.textContent = `All (${totalCount})`;
+    }
+    if (onlineBtn) {
+      onlineBtn.textContent = `Online (${onlineCount})`;
+    }
+    if (offlineBtn) {
+      offlineBtn.textContent = `Offline (${offlineCount})`;
+    }
+  }
+
+  function updateRequestCount(incomingCount = null, outgoingCount = null) {
+    if (incomingCount === null) {
+      // Count from DOM if not provided
+      const incomingRequests = document.querySelectorAll('.incoming-requests .friend-request-item:not(.no-requests-message)');
+      incomingCount = incomingRequests.length;
+    }
+
+    if (outgoingCount === null) {
+      // Count from DOM if not provided  
+      const outgoingRequests = document.querySelectorAll('.outgoing-requests .friend-request-item:not(.no-requests-message)');
+      outgoingCount = outgoingRequests.length;
+    }
+
     const requestCountSpan = document.querySelector('.request-count');
     const incomingTabBtn = document.querySelector('[data-request-type="incoming"]');
+    const outgoingTabBtn = document.querySelector('[data-request-type="outgoing"]');
 
-    const count = incomingRequests.length;
-    requestCountSpan.textContent = `${count} pending`;
+    // Update the main request count (total pending)
+    const totalPending = incomingCount;
+    if (requestCountSpan) {
+      if (totalPending === 0) {
+        requestCountSpan.textContent = 'No pending requests';
+      } else if (totalPending === 1) {
+        requestCountSpan.textContent = '1 pending request';
+      } else {
+        requestCountSpan.textContent = `${totalPending} pending requests`;
+      }
+    }
 
-    // Update the tab button text
+    // Update the tab button texts
     if (incomingTabBtn) {
-      incomingTabBtn.innerHTML = `<i class="fas fa-arrow-down"></i> Incoming (${count})`;
+      incomingTabBtn.innerHTML = `<i class="fas fa-arrow-down"></i> Incoming (${incomingCount})`;
+    }
+
+    if (outgoingTabBtn) {
+      outgoingTabBtn.innerHTML = `<i class="fas fa-arrow-up"></i> Outgoing (${outgoingCount})`;
     }
   }
 
@@ -1619,9 +2096,21 @@ document.addEventListener('DOMContentLoaded', function () {
   // DMS FUNCTIONALITY
   // =====================================
 
-  let currentDMConversation = 'player123';
+  let currentDMConversation = null;
+  let currentConversationId = null;
+  let lastMessageCount = 0;
+  let dmPollingInterval = null;
 
   function initializeDMsFunctionality() {
+    // Check if user has disabled DMs first
+    if (!isDMsEnabled()) {
+      showDMDisabledScreen();
+      return;
+    }
+
+    // Load conversations from server
+    loadConversationsList();
+
     // Initialize conversation switching
     initializeConversationSwitching();
 
@@ -1630,27 +2119,324 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize conversation search
     initializeConversationSearch();
+
+    // Set up periodic refresh of conversations (every 30 seconds)
+    setInterval(loadConversationsList, 30000);
+
+    // Check if DMs tab is already active on page load
+    const dmsTab = document.getElementById('dms');
+    if (dmsTab && dmsTab.classList.contains('active')) {
+      // Delay to ensure conversations are loaded first
+      setTimeout(loadLatestDMConversation, 300);
+    }
+  }
+
+  function isDMsEnabled() {
+    const settings = getSettings();
+    return settings.allowDirectMessages !== false;
+  }
+
+  function showDMDisabledForOtherUser(username) {
+    const dmMessages = document.getElementById('dm-messages');
+    const dmInputContainer = document.querySelector('.dm-input-container');
+    const dmConversationHeader = document.querySelector('.dm-conversation-header');
+
+    // Hide input container and header
+    if (dmInputContainer) {
+      dmInputContainer.style.display = 'none';
+    }
+    if (dmConversationHeader) {
+      dmConversationHeader.style.display = 'none';
+    }
+
+    // Show DM disabled screen for other user
+    dmMessages.innerHTML = `
+      <div class="dm-disabled-screen other-user">
+        <div class="dm-disabled-content">
+          <i class="fas fa-ban dm-disabled-icon"></i>
+          <h3>${username} has disabled direct messages</h3>
+          <p>This user has chosen not to receive direct messages. You cannot send them messages at this time.</p>
+        </div>
+      </div>
+    `;
+  }
+
+  function showDMDisabledScreen() {
+    const dmsLayout = document.querySelector('.dms-layout');
+    if (dmsLayout) {
+      dmsLayout.innerHTML = `
+        <div class="dm-disabled-screen">
+          <div class="dm-disabled-content">
+            <div class="dm-disabled-icon">
+              <i class="fas fa-ban"></i>
+            </div>
+            <h3>Direct Messages Disabled</h3>
+            <p>You have disabled direct messages in your settings.</p>
+            <button class="enable-dms-button" onclick="enableDMs()">
+              <i class="fas fa-check"></i>
+              Enable Direct Messages
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  function hideDMDisabledScreen() {
+    const dmsLayout = document.querySelector('.dms-layout');
+    if (dmsLayout) {
+      // Restore original DM layout structure
+      dmsLayout.innerHTML = `
+        <!-- Conversations Sidebar -->
+        <div class="conversations-sidebar">
+          <div class="conversations-header">
+            <div class="search-container">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" class="conversation-search" placeholder="Search conversations...">
+            </div>
+          </div>
+          <div class="conversations-list">
+            <!-- Conversations will be populated here -->
+          </div>
+        </div>
+
+        <!-- Message Area -->
+        <div class="dm-messages-area">
+          <!-- Active conversation header -->
+          <div class="dm-conversation-header">
+            <div class="dm-user-info">
+              <div class="dm-user-avatar">
+                <i class="fas fa-user"></i>
+                <div class="status-indicator online"></div>
+              </div>
+              <div class="dm-user-details">
+                <span class="dm-user-name"></span>
+                <span class="dm-user-status"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Messages container -->
+          <div class="dm-messages" id="dm-messages">
+          </div>
+
+          <!-- Message input -->
+          <div class="dm-input-container">
+            <input type="text" class="dm-input" placeholder="Type your message..." maxlength="200">
+            <button class="dm-send-button">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  // Global function to enable DMs
+  window.enableDMs = function () {
+    setSetting('allowDirectMessages', true);
+    hideDMDisabledScreen();
+    // Reinitialize DM functionality
+    initializeDMsFunctionality();
+  };
+
+  async function loadLatestDMConversation() {
+    try {
+      // Clear any placeholder content immediately
+      const dmMessages = document.getElementById('dm-messages');
+      if (dmMessages) {
+        dmMessages.innerHTML = '';
+      }
+
+      // Clear conversation header placeholder
+      const dmUserName = document.querySelector('.dm-user-name');
+      const dmUserStatus = document.querySelector('.dm-user-status');
+      if (dmUserName) dmUserName.textContent = '';
+      if (dmUserStatus) dmUserStatus.textContent = '';
+
+      // Wait a moment for conversations to load if they haven't already
+      await new Promise(resolve => setTimeout(resolve, 200));
+
+      // Get the first conversation item (most recent)
+      const firstConversation = document.querySelector('.conversation-item');
+
+      if (firstConversation) {
+        const conversationUsername = firstConversation.getAttribute('data-conversation');
+        if (conversationUsername && conversationUsername !== 'undefined') {
+          await switchDMConversation(conversationUsername);
+        }
+      } else {
+        // No conversations available, show empty state
+        const emptyState = document.createElement('div');
+        emptyState.className = 'dm-empty-state';
+        emptyState.innerHTML = `
+          <div class="empty-state-content">
+            <i class="fas fa-comments empty-state-icon"></i>
+            <h3>No conversations yet</h3>
+            <p>Start messaging your friends to see conversations here!</p>
+          </div>
+        `;
+        dmMessages.appendChild(emptyState);
+      }
+    } catch (error) {
+      console.error('Failed to load latest DM conversation:', error);
+    }
+  }
+
+  async function loadConversationsList() {
+    try {
+      const response = await api.get('/dms/conversations');
+      const conversations = response.conversations || [];
+
+      const conversationsContainer = document.querySelector('.conversations-list');
+      if (!conversationsContainer) return;
+
+      // Clear existing conversations (except search input)
+      const existingItems = conversationsContainer.querySelectorAll('.conversation-item');
+      existingItems.forEach(item => item.remove());
+
+      if (conversations.length === 0) {
+        // Show empty state
+        showEmptyConversationsState();
+        return;
+      }
+
+      // Add conversations from server
+      conversations.forEach(conversation => {
+        const conversationElement = createConversationElement(conversation);
+        conversationsContainer.appendChild(conversationElement);
+      });
+
+      // Re-initialize conversation switching with new elements
+      initializeConversationSwitching();
+
+      // Hide empty state if it's showing
+      hideEmptyConversationsState();
+
+    } catch (error) {
+      console.error('Failed to load conversations:', error);
+      showEmptyConversationsState();
+    }
+  }
+
+  function showEmptyConversationsState() {
+    const conversationsContainer = document.querySelector('.conversations-list');
+    const dmMessagesContainer = document.getElementById('dm-messages');
+
+    if (conversationsContainer) {
+      // Check if empty state already exists
+      if (!conversationsContainer.querySelector('.empty-conversations-state')) {
+        const emptyStateDiv = document.createElement('div');
+        emptyStateDiv.className = 'empty-conversations-state';
+        emptyStateDiv.innerHTML = `
+          <div class="empty-conversations-content">
+            <div class="empty-conversations-icon">
+              <i class="fas fa-comments"></i>
+            </div>
+            <h3>No conversations yet</h3>
+            <p>Start messaging your friends to see conversations here!</p>
+          </div>
+        `;
+        conversationsContainer.appendChild(emptyStateDiv);
+      }
+    }
+
+    if (dmMessagesContainer) {
+      dmMessagesContainer.innerHTML = `
+        <div class="no-conversation-selected">
+          <div class="no-conversation-icon">
+            <i class="fas fa-comment"></i>
+          </div>
+          <h3>Select a conversation</h3>
+          <p>Choose a friend to start messaging or create a new conversation</p>
+        </div>
+      `;
+    }
+  }
+
+  function hideEmptyConversationsState() {
+    const emptyState = document.querySelector('.empty-conversations-state');
+    if (emptyState) {
+      emptyState.remove();
+    }
+  }
+
+  function createConversationElement(conversation) {
+    const conversationDiv = document.createElement('div');
+    conversationDiv.className = 'conversation-item';
+    conversationDiv.setAttribute('data-conversation', conversation.other_user.username);
+
+    const unreadBadge = conversation.unread_count > 0 ?
+      `<span class="unread-badge">${conversation.unread_count}</span>` : '';
+
+    const statusClass = conversation.other_user.status === 'online' ? 'online' :
+      conversation.other_user.status === 'idle' ? 'idle' : 'offline';
+
+    conversationDiv.innerHTML = `
+      <div class="conversation-avatar">
+        <i class="fas fa-user"></i>
+        <span class="status-indicator ${statusClass}"></span>
+      </div>
+      <div class="conversation-content">
+        <div class="conversation-header">
+          <span class="conversation-name">${conversation.other_user.username}</span>
+          <span class="conversation-time">${formatConversationTime(conversation.last_message_time)}</span>
+        </div>
+        <div class="last-message">${conversation.last_message || 'No messages yet'}</div>
+        <div class="conversation-status">${conversation.other_user.status_text}</div>
+      </div>
+      ${unreadBadge}
+    `;
+
+    return conversationDiv;
+  }
+
+  function formatConversationTime(timestamp) {
+    if (!timestamp) return '';
+
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / (1000 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (minutes < 1) return 'now';
+    if (minutes < 60) return `${minutes}m`;
+    if (hours < 24) return `${hours}h`;
+    if (days < 7) return `${days}d`;
+
+    return date.toLocaleDateString();
   }
 
   function initializeConversationSwitching() {
     const conversationItems = document.querySelectorAll('.conversation-item');
 
     conversationItems.forEach(item => {
-      item.addEventListener('click', function () {
-        const conversationId = this.getAttribute('data-conversation');
-        switchDMConversation(conversationId);
+      item.addEventListener('click', async function () {
+        const conversationUsername = this.getAttribute('data-conversation');
+        await switchDMConversation(conversationUsername);
       });
     });
   }
 
-  function switchDMConversation(conversationId) {
+  async function switchDMConversation(conversationUsername) {
     const conversationItems = document.querySelectorAll('.conversation-item');
+
+    // Clear any existing polling
+    if (dmPollingInterval) {
+      clearInterval(dmPollingInterval);
+      dmPollingInterval = null;
+    }
+
+    // Reset DM initial load scroll flag so new conversation scrolls to bottom
+    window.dmInitialLoadScroll = false;
 
     // Remove active class from all conversations
     conversationItems.forEach(item => item.classList.remove('active'));
 
     // Add active class to selected conversation
-    const activeConversation = document.querySelector(`[data-conversation="${conversationId}"]`);
+    const activeConversation = document.querySelector(`[data-conversation="${conversationUsername}"]`);
     if (activeConversation) {
       activeConversation.classList.add('active');
 
@@ -1662,157 +2448,261 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Update conversation header
-    updateDMConversationHeader(conversationId);
+    await updateDMConversationHeader(conversationUsername);
 
-    // Load conversation messages (in a real app, this would fetch from server)
-    loadDMConversation(conversationId);
+    // Ensure header and input are visible for valid conversations
+    showDMInterface();
+
+    // Load conversation messages
+    await loadDMConversation(conversationUsername);
 
     // Update current conversation
-    currentDMConversation = conversationId;
+    currentDMConversation = conversationUsername;
+
+    // Start polling for new messages
+    startDMMessagePolling();
   }
 
-  function updateDMConversationHeader(conversationId) {
-    const dmUserName = document.querySelector('.dm-user-name');
-    const dmUserStatus = document.querySelector('.dm-user-status');
+  function showDMInterface() {
+    const dmInputContainer = document.querySelector('.dm-input-container');
+    const dmConversationHeader = document.querySelector('.dm-conversation-header');
 
-    // Mock user data (in real app, this would come from user data)
-    const userStatuses = {
-      'player123': { name: 'player123', status: 'Online', statusClass: 'online' },
-      'gamer456': { name: 'gamer456', status: 'Online', statusClass: 'online' },
-      'social_butterfly': { name: 'social_butterfly', status: 'Idle - 15 min', statusClass: 'idle' },
-      'chat_lover': { name: 'chat_lover', status: 'Playing ChatFun', statusClass: 'online' },
-      'sleepy_gamer': { name: 'sleepy_gamer', status: 'Last seen 2 hours ago', statusClass: 'offline' }
-    };
-
-    const userData = userStatuses[conversationId] || { name: conversationId, status: 'Unknown', statusClass: 'offline' };
-
-    dmUserName.textContent = userData.name;
-    dmUserStatus.textContent = userData.status;
-
-    // Update status indicator
-    const statusIndicator = document.querySelector('.dm-user-avatar .status-indicator');
-    if (statusIndicator) {
-      statusIndicator.className = `status-indicator ${userData.statusClass}`;
+    // Show input container and header
+    if (dmInputContainer) {
+      dmInputContainer.style.display = 'flex';
+    }
+    if (dmConversationHeader) {
+      dmConversationHeader.style.display = 'block';
     }
   }
 
-  function loadDMConversation(conversationId) {
-    const dmMessages = document.getElementById('dm-messages');
+  async function updateDMConversationHeader(conversationUsername) {
+    const dmUserName = document.querySelector('.dm-user-name');
+    const dmUserStatus = document.querySelector('.dm-user-status');
 
-    // Mock conversations (in real app, this would be fetched from server)
-    const conversations = {
-      'player123': [
-        { type: 'received', text: 'Hey! How\'s it going?', time: '2:30 PM' },
-        { type: 'sent', text: 'Pretty good! Just got that rare item from the forge!', time: '2:32 PM' },
-        { type: 'received', text: 'Nice! Which one did you get?', time: '2:33 PM' },
-        { type: 'sent', text: 'The lightning dagger! It\'s worth 75 coins', time: '2:34 PM' },
-        { type: 'received', text: 'Awesome! Thanks for helping me with that boss earlier by the way', time: '2:44 PM' },
-        { type: 'received', text: 'Thanks for the help earlier!', time: '2:45 PM' }
-      ],
-      'gamer456': [
-        { type: 'received', text: 'Hey want to team up for some battles?', time: '1:15 PM' },
-        { type: 'sent', text: 'Sure! I\'m free right now', time: '1:16 PM' },
-        { type: 'received', text: 'Great! Meet you in the arena', time: '1:18 PM' },
-        { type: 'sent', text: 'On my way!', time: '1:19 PM' },
-        { type: 'received', text: 'Want to play later?', time: '1:30 PM' }
-      ],
-      'social_butterfly': [
-        { type: 'received', text: 'Did you see the new update?', time: '11:45 AM' },
-        { type: 'sent', text: 'Yes! The new features look amazing', time: '11:47 AM' },
-        { type: 'received', text: 'I know right! Can\'t wait to try them', time: '11:48 AM' },
-        { type: 'sent', text: 'Same here! Talk to you later', time: '12:10 PM' },
-        { type: 'received', text: 'See you tomorrow!', time: '12:15 PM' }
-      ],
-      'chat_lover': [
-        { type: 'received', text: 'LMAO that was hilarious! 😂', time: '11:30 AM' },
-        { type: 'sent', text: 'I know right? I couldn\'t stop laughing', time: '11:32 AM' },
-        { type: 'received', text: 'That was hilarious! 😂', time: '11:45 AM' }
-      ],
-      'sleepy_gamer': [
-        { type: 'sent', text: 'Hey, still up for that game?', time: 'Yesterday 10:30 PM' },
-        { type: 'received', text: 'Sorry, getting pretty tired', time: 'Yesterday 10:45 PM' },
-        { type: 'sent', text: 'No worries! Sleep well', time: 'Yesterday 10:46 PM' },
-        { type: 'received', text: 'Good night!', time: 'Yesterday 10:47 PM' }
-      ]
-    };
+    try {
+      // Get conversation data to get user info
+      const convResponse = await api.get(`/dms/conversations/with/${conversationUsername}`);
+      const otherUser = convResponse.other_user;
 
-    const messages = conversations[conversationId] || [];
-
-    // Clear existing messages
-    dmMessages.innerHTML = '';
-
-    // Add messages
-    messages.forEach(message => {
-      const messageDiv = document.createElement('div');
-      messageDiv.className = `dm-message ${message.type}`;
-
-      let avatarHtml = '';
-      if (message.type === 'received') {
-        avatarHtml = `
-          <div class="dm-message-avatar">
-            <i class="fas fa-user"></i>
-          </div>
-        `;
-      } else if (message.type === 'sent') {
-        avatarHtml = `
-          <div class="dm-message-avatar">
-            <i class="fas fa-user"></i>
-          </div>
-        `;
+      if (dmUserName) {
+        dmUserName.textContent = otherUser.username;
       }
 
-      messageDiv.innerHTML = `
-        ${avatarHtml}
-        <div class="dm-message-content">
-          <div class="dm-message-bubble">
-            <span class="dm-message-text">${message.text}</span>
-            <span class="dm-message-time">${message.time}</span>
+      if (dmUserStatus) {
+        dmUserStatus.textContent = otherUser.status_text;
+      }
+
+      // Update status indicator
+      const statusIndicator = document.querySelector('.dm-user-avatar .status-indicator');
+      if (statusIndicator) {
+        statusIndicator.className = `status-indicator ${otherUser.status}`;
+      }
+    } catch (error) {
+      console.error('Failed to update DM header:', error);
+
+      // Fallback to just showing the username
+      if (dmUserName) {
+        dmUserName.textContent = conversationUsername;
+      }
+      if (dmUserStatus) {
+        dmUserStatus.textContent = 'Unknown status';
+      }
+    }
+  }
+
+  async function loadDMConversation(conversationUsername) {
+    const dmMessages = document.getElementById('dm-messages');
+
+    try {
+      // Get or create conversation with the user
+      const convResponse = await api.get(`/dms/conversations/with/${conversationUsername}`);
+      const conversationId = convResponse.conversation_id;
+
+      // Update current conversation ID
+      currentConversationId = conversationId;
+
+      // Get messages for this conversation
+      const messagesResponse = await api.get(`/dms/conversations/${conversationId}/messages`);
+      const messages = messagesResponse.messages || [];
+
+      // Update message count for polling
+      lastMessageCount = messages.length;
+
+      // Clear existing messages
+      dmMessages.innerHTML = '';
+
+      // Show empty state if no messages
+      if (messages.length === 0) {
+        const emptyState = document.createElement('div');
+        emptyState.className = 'dm-empty-state';
+        emptyState.innerHTML = `
+          <div class="empty-state-content">
+            <i class="fas fa-envelope empty-state-icon"></i>
+            <h3>No messages yet</h3>
+            <p>Send the first message to start your conversation!</p>
           </div>
+        `;
+        dmMessages.appendChild(emptyState);
+        return;
+      }
+
+      // Add messages
+      messages.forEach(message => {
+        // Handle different timestamp formats and convert to local time
+        let messageTime;
+        try {
+          let date;
+          if (typeof message.timestamp === 'string') {
+            // ISO string format from server (UTC)
+            date = new Date(message.timestamp);
+          } else if (typeof message.timestamp === 'number') {
+            // Unix timestamp (in seconds or milliseconds)
+            date = new Date(message.timestamp < 1e12 ? message.timestamp * 1000 : message.timestamp);
+          } else {
+            // Fallback for other formats
+            date = new Date(message.timestamp);
+          }
+
+          // Format timestamp
+          messageTime = date.toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+        } catch (error) {
+          console.warn('Error parsing timestamp:', error);
+          messageTime = 'Unknown time';
+        }
+
+        // Use new message format with reactions and replies
+        const messageData = {
+          id: message.id,
+          content: message.content,
+          is_own: message.is_own,
+          time: messageTime,
+          reactions: message.reactions,
+          reply_to: message.reply_to
+        };
+
+        addDMMessage(messageData, false);
+      });
+
+      // Always scroll to bottom when loading a conversation (like initial load)
+      dmMessages.scrollTop = dmMessages.scrollHeight;
+    } catch (error) {
+      console.error('Failed to load DM conversation:', error);
+
+      // Check if the error is due to DMs being disabled
+      if (error.dm_disabled) {
+        showDMDisabledForOtherUser(error.username);
+        return;
+      }
+
+      // Clear messages and show error
+      dmMessages.innerHTML = `
+        <div class="dm-error">
+          <p>Failed to load conversation</p>
         </div>
       `;
-
-      dmMessages.appendChild(messageDiv);
-    });
-
-    // Scroll to bottom
-    dmMessages.scrollTop = dmMessages.scrollHeight;
+    }
   }
 
   function initializeDMMessaging() {
     const dmInput = document.querySelector('.dm-input');
     const dmSendButton = document.querySelector('.dm-send-button');
 
-    function sendDMMessage() {
+    async function sendDMMessage() {
       if (!dmInput.value.trim()) return;
 
       const message = dmInput.value.trim();
-      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      // Add message to conversation
-      addDMMessage('sent', message, currentTime);
+      try {
+        // Find the recipient ID from the current DM conversation
+        const recipientId = await getRecipientIdFromCurrentConversation();
 
-      // Clear input
-      dmInput.value = '';
+        if (!recipientId) {
+          console.error('No recipient found for current conversation');
+          return;
+        }
 
-      // Simulate response after a short delay (for demo purposes)
-      setTimeout(() => {
-        const responses = [
-          'That sounds great!',
-          'I agree!',
-          'Haha, nice one!',
-          'Interesting point!',
-          'Thanks for letting me know!',
-          'Cool!',
-          'Awesome!',
-          'Got it!',
-          'Sure thing!',
-          'No problem!'
-        ];
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        const responseTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // Prepare message data
+        const messageData = {
+          recipient_id: recipientId,
+          content: message
+        };
 
-        addDMMessage('received', randomResponse, responseTime);
-      }, 1000 + Math.random() * 2000);
+        // Add reply_to if there's an active reply
+        if (currentReplyTo) {
+          messageData.reply_to = currentReplyTo;
+        }
+
+        // Send message to server
+        const response = await api.post('/dms/send', messageData);
+
+        if (response.success) {
+          // Clear input
+          dmInput.value = '';
+
+          // Clear reply indicator and get reply data before clearing
+          const dmInputContainer = document.querySelector('.dm-input-container');
+          const replyIndicator = dmInputContainer?.querySelector('.reply-indicator');
+          let replyData = null;
+
+          if (replyIndicator && currentReplyTo) {
+            // Find the original message being replied to
+            const originalMessage = document.querySelector(`[data-message-id="${currentReplyTo}"]`);
+            if (originalMessage) {
+              const originalText = originalMessage.querySelector('.dm-message-text')?.textContent || '';
+              const originalAuthor = originalMessage.classList.contains('sent')
+                ? (window.CURRENT_USERNAME || 'You')
+                : (currentDMConversation || 'Unknown User');
+
+              replyData = {
+                message_id: currentReplyTo,
+                content: originalText.substring(0, 100) + (originalText.length > 100 ? '...' : ''),
+                sender_username: originalAuthor
+              };
+            }
+
+            replyIndicator.remove();
+            dmInputContainer.classList.remove('input-container-with-reply');
+            currentReplyTo = null;
+          }
+
+          // Add the message immediately to the UI with reply data
+          const messageTime = new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          // Create message object for addDMMessage
+          const messageObj = {
+            content: message,
+            timestamp: messageTime,
+            is_own: true,
+            reply_to: replyData
+          };
+
+          addDMMessage(messageObj, false);
+
+          // Update message count
+          lastMessageCount++;
+
+          // Refresh conversations list to update last message and timestamp
+          await loadConversationsList();
+        }
+      } catch (error) {
+        console.error('Failed to send DM:', error);
+
+        // Handle specific error cases
+        if (error.message && error.message.includes('disabled direct messages')) {
+          showNotification('This user has disabled direct messages', 'error');
+        } else if (error.message) {
+          showNotification(error.message, 'error');
+        } else {
+          showNotification('Failed to send message', 'error');
+        }
+      }
     }
 
     // Send message on button click
@@ -1837,13 +2727,192 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
+
+    // Add event delegation for DM reaction clicks and context menu
+    const dmMessages = document.getElementById('dm-messages');
+    dmMessages.addEventListener('click', function (e) {
+      if (e.target.closest('.dm-reaction')) {
+        e.preventDefault();
+        const reactionElement = e.target.closest('.dm-reaction');
+        const emoji = reactionElement.getAttribute('data-emoji');
+        const messageElement = e.target.closest('.dm-message');
+        const messageId = messageElement.getAttribute('data-message-id');
+
+        if (messageId && emoji) {
+          reactToDMMessage(messageId, emoji);
+        }
+      }
+    });
+
+    // Add context menu for DM messages
+    dmMessages.addEventListener('contextmenu', function (e) {
+      console.log('DM context menu triggered', e.target);
+      const messageElement = e.target.closest('.dm-message');
+      console.log('Message element:', messageElement);
+      if (messageElement) {
+        e.preventDefault();
+
+        const messageId = messageElement.getAttribute('data-message-id');
+        console.log('Message ID:', messageId);
+        if (messageId) {
+          // Store current message for context menu actions
+          window.currentDMMessageId = messageId;
+
+          // Show DM context menu
+          const dmContextMenu = document.getElementById('dmContextMenu');
+          dmContextMenu.style.left = e.pageX + 'px';
+          dmContextMenu.style.top = e.pageY + 'px';
+          dmContextMenu.style.display = 'block';
+          console.log('DM context menu shown');
+        } else {
+          console.log('No message ID found');
+        }
+      } else {
+        console.log('No message element found');
+      }
+    });
   }
 
-  function addDMMessage(type, text, time) {
+  async function getRecipientIdFromCurrentConversation() {
+    try {
+      // Get conversation list to find the recipient ID
+      const response = await api.get('/dms/conversations');
+      const conversations = response.conversations || [];
+
+      // Find the current conversation
+      const currentConversation = conversations.find(conv =>
+        conv.other_user.username === currentDMConversation
+      );
+
+      return currentConversation ? currentConversation.other_user.id : null;
+    } catch (error) {
+      console.error('Failed to get recipient ID:', error);
+      return null;
+    }
+  }
+
+  function startDMMessagePolling() {
+    // Clear any existing polling first
+    if (dmPollingInterval) {
+      clearInterval(dmPollingInterval);
+    }
+
+    // Poll for new messages every 3 seconds
+    dmPollingInterval = setInterval(async () => {
+      if (currentConversationId && currentDMConversation) {
+        await checkForNewMessages();
+      }
+    }, 3000);
+  }
+
+  async function checkForNewMessages() {
+    try {
+      if (!currentConversationId) return;
+
+      const messagesResponse = await api.get(`/dms/conversations/${currentConversationId}/messages`);
+      const messages = messagesResponse.messages || [];
+
+      // Check if there are new messages
+      if (messages.length > lastMessageCount) {
+        const dmMessages = document.getElementById('dm-messages');
+
+        // Add only the new messages
+        const newMessages = messages.slice(lastMessageCount);
+        newMessages.forEach(message => {
+          let messageTime;
+          try {
+            let date;
+
+            if (typeof message.timestamp === 'string') {
+              // Enhanced parsing for string timestamps, especially ISO format from server
+              date = new Date(message.timestamp);
+
+              // Validate the parsed date
+              if (isNaN(date.getTime())) {
+                // If ISO parsing fails, try parsing as Unix timestamp if it's a numeric string
+                const numericTimestamp = parseFloat(message.timestamp);
+                if (!isNaN(numericTimestamp)) {
+                  date = new Date(numericTimestamp * 1000);
+                }
+              }
+            } else {
+              // Handle numeric timestamps (assumed to be Unix timestamps)
+              date = new Date(message.timestamp * 1000);
+            }
+
+            // Final validation and format
+            if (date && !isNaN(date.getTime())) {
+              messageTime = date.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+            } else {
+              throw new Error('Invalid timestamp');
+            }
+          } catch (error) {
+            console.warn('Error parsing timestamp:', error, message.timestamp);
+            messageTime = 'Unknown time';
+          }
+
+          // Use new message format with all properties
+          const messageData = {
+            id: message.id,
+            content: message.content,
+            is_own: message.is_own,
+            time: messageTime,
+            reactions: message.reactions,
+            reply_to: message.reply_to
+          };
+
+          addDMMessage(messageData, false);
+        });
+
+        // Update message count
+        lastMessageCount = messages.length;
+
+        // Auto-scroll to bottom if enabled (always scroll when enabled)
+        const settings = getSettings();
+        if (settings.autoScroll) {
+          dmMessages.scrollTop = dmMessages.scrollHeight;
+        }
+
+        // Update conversations list to show updated last message
+        await loadConversationsList();
+      }
+    } catch (error) {
+      console.error('Failed to check for new messages:', error);
+    }
+  }
+
+  function addDMMessage(messageData, shouldScroll = true) {
     const dmMessages = document.getElementById('dm-messages');
+
+    // Handle both old format (type, text, time) and new format (message object)
+    let type, text, time, reactions, replyTo, messageId;
+
+    if (typeof messageData === 'string') {
+      // Old format: addDMMessage(type, text, time)
+      type = messageData;
+      text = arguments[1];
+      time = arguments[2];
+      shouldScroll = arguments[3] !== undefined ? arguments[3] : true;
+      reactions = null;
+      replyTo = null;
+      messageId = null;
+    } else {
+      // New format: addDMMessage(messageObject)
+      type = messageData.is_own ? 'sent' : 'received';
+      text = messageData.content;
+      time = messageData.time || messageData.timestamp;
+      reactions = messageData.reactions;
+      replyTo = messageData.reply_to;
+      messageId = messageData.id;
+      shouldScroll = arguments[1] !== undefined ? arguments[1] : true;
+    }
 
     const messageDiv = document.createElement('div');
     messageDiv.className = `dm-message ${type}`;
+    messageDiv.setAttribute('data-message-id', messageId);
 
     let avatarHtml = '';
     if (type === 'received') {
@@ -1852,26 +2921,55 @@ document.addEventListener('DOMContentLoaded', function () {
           <i class="fas fa-user"></i>
         </div>
       `;
-    } else if (type === 'sent') {
-      avatarHtml = `
-        <div class="dm-message-avatar">
-          <i class="fas fa-user"></i>
+    }
+
+    // Build reply preview if this is a reply
+    let replyHtml = '';
+    if (replyTo) {
+      replyHtml = `
+        <div class="dm-message-reply-preview">
+          <div class="dm-reply-to-username">${replyTo.sender_username}</div>
+          <div class="dm-reply-to-content">${replyTo.content}</div>
         </div>
       `;
+    }
+
+    // Build reactions if present
+    let reactionsHtml = '';
+    if (reactions && Object.keys(reactions).length > 0) {
+      const reactionItems = Object.entries(reactions).map(([emoji, users]) => {
+        const isActive = users.includes(window.USER_ID);
+        return `<span class="dm-reaction ${isActive ? 'active' : ''}" data-emoji="${emoji}">${emoji} <span class="dm-reaction-count">${users.length}</span></span>`;
+      }).join('');
+
+      reactionsHtml = `<div class="dm-message-reactions">${reactionItems}</div>`;
     }
 
     messageDiv.innerHTML = `
       ${avatarHtml}
       <div class="dm-message-content">
+        ${replyHtml}
         <div class="dm-message-bubble">
           <span class="dm-message-text">${text}</span>
           <span class="dm-message-time">${time}</span>
         </div>
+        ${reactionsHtml}
       </div>
     `;
 
     dmMessages.appendChild(messageDiv);
-    dmMessages.scrollTop = dmMessages.scrollHeight;
+
+    // Auto-scroll to bottom if enabled (always scroll when enabled)
+    const settings = getSettings();
+    if (settings.autoScroll && shouldScroll) {
+      dmMessages.scrollTop = dmMessages.scrollHeight;
+    }
+
+    // Always scroll to bottom on initial load
+    if (!window.dmInitialLoadScroll) {
+      dmMessages.scrollTop = dmMessages.scrollHeight;
+      window.dmInitialLoadScroll = true;
+    }
   }
 
   function initializeConversationSearch() {
@@ -1916,6 +3014,161 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
+  // DM Reactions and Replies
+  window.replyToDMMessage = async function (messageId) {
+    // Find the message to reply to
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (!messageElement) return;
+
+    // Get message content from the correct element
+    const messageTextElement = messageElement.querySelector('.dm-message-text');
+    if (!messageTextElement) return;
+
+    const messageContent = messageTextElement.textContent.trim();
+
+    // Determine the message author
+    let messageAuthor;
+    if (messageElement.classList.contains('sent')) {
+      // If it's a sent message, it's from the current user
+      messageAuthor = window.CURRENT_USERNAME || 'You';
+    } else {
+      // If it's a received message, it's from the other user in the conversation
+      messageAuthor = currentDMConversation || 'Unknown User';
+    }
+
+    // Find DM input container
+    const dmInputContainer = document.querySelector('.dm-input-container');
+    if (!dmInputContainer) return;
+
+    // Show reply indicator
+    showReplyIndicator(messageAuthor, messageContent, messageId, dmInputContainer);
+  };
+
+  window.showReactionPicker = function (messageId) {
+    const reactions = ['👍', '👎', '❤️', '😂', '😮', '😢', '😡'];
+    const reactionPicker = document.createElement('div');
+    reactionPicker.className = 'reaction-picker';
+
+    // Use CSS class instead of inline styles for proper theming
+
+    // Close picker when clicking outside
+    const closeHandler = (e) => {
+      if (!reactionPicker.contains(e.target)) {
+        // Safely remove the reaction picker
+        if (reactionPicker.parentNode) {
+          document.body.removeChild(reactionPicker);
+        }
+        document.removeEventListener('click', closeHandler);
+      }
+    };
+
+    reactions.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.textContent = emoji;
+      // CSS styles are now handled by the .reaction-picker button class
+      btn.onclick = () => {
+        reactToDMMessage(messageId, emoji);
+        // Safely remove the reaction picker
+        if (reactionPicker.parentNode) {
+          document.body.removeChild(reactionPicker);
+        }
+        document.removeEventListener('click', closeHandler);
+      };
+      reactionPicker.appendChild(btn);
+    });
+
+    // Position near the message
+    const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (messageElement) {
+      const rect = messageElement.getBoundingClientRect();
+      reactionPicker.style.left = `${rect.left}px`;
+      reactionPicker.style.top = `${rect.top - 50}px`;
+    }
+
+    document.body.appendChild(reactionPicker);
+
+    setTimeout(() => document.addEventListener('click', closeHandler), 100);
+  };
+
+  async function reactToDMMessage(messageId, emoji) {
+    try {
+      const response = await api.post(`/dms/messages/${messageId}/react`, {
+        emoji: emoji
+      });
+
+      if (response.success) {
+        // Update the message reactions in the UI
+        const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (messageElement) {
+          const reactionsContainer = messageElement.querySelector('.dm-message-reactions');
+
+          // Remove existing reactions container
+          if (reactionsContainer) {
+            reactionsContainer.remove();
+          }
+
+          // Add updated reactions if any
+          if (response.reactions && Object.keys(response.reactions).length > 0) {
+            const newReactionsHtml = Object.entries(response.reactions).map(([emojiKey, users]) => {
+              const isActive = users.includes(window.USER_ID);
+              return `<span class="dm-reaction ${isActive ? 'active' : ''}" data-emoji="${emojiKey}">${emojiKey} <span class="dm-reaction-count">${users.length}</span></span>`;
+            }).join('');
+
+            const newReactionsContainer = document.createElement('div');
+            newReactionsContainer.className = 'dm-message-reactions';
+            newReactionsContainer.innerHTML = newReactionsHtml;
+
+            const messageContent = messageElement.querySelector('.dm-message-content');
+            messageContent.appendChild(newReactionsContainer);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to react to message:', error);
+      showNotification('Failed to add reaction', 'error');
+    }
+  }
+
+  function showNotification(message, type = 'info') {
+    // Create a temporary notification
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      padding: 12px 20px;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+      background-color: ${type === 'success' ? '#27ae60' : type === 'error' ? '#e74c3c' : '#3498db'};
+    `;
+
+    document.body.appendChild(notification);
+
+    // Animate in
+    setTimeout(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateX(0)';
+    }, 100);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateX(100%)';
+      setTimeout(() => {
+        if (notification.parentNode) {
+          document.body.removeChild(notification);
+        }
+      }, 300);
+    }, 3000);
+  }
+
   // =====================================
   // SETTINGS FUNCTIONALITY
   // =====================================
@@ -1923,12 +3176,6 @@ document.addEventListener('DOMContentLoaded', function () {
   function initializeSettings() {
     // Load saved settings from localStorage
     loadSettings();
-
-    // Message history limit
-    const messageHistoryLimit = document.getElementById('messageHistoryLimit');
-    messageHistoryLimit.addEventListener('change', function () {
-      setSetting('messageHistoryLimit', this.value);
-    });
 
     // Toggle settings
     const toggleSettings = [
@@ -1939,9 +3186,9 @@ document.addEventListener('DOMContentLoaded', function () {
       'showTimestamps',
       'autoScroll',
       'ctrlEnterToSend',
-      'showOnlineStatus',
       'allowDirectMessages',
-      'contentFilter'
+      'contentFilter',
+      'appearOffline'
     ];
 
     toggleSettings.forEach(settingId => {
@@ -1965,12 +3212,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // Load settings from localStorage and apply them
     const settings = getSettings();
 
-    // Apply message history limit
-    const messageHistoryLimit = document.getElementById('messageHistoryLimit');
-    if (messageHistoryLimit) {
-      messageHistoryLimit.value = settings.messageHistoryLimit;
-    }
-
     // Apply toggle settings
     const toggleSettings = [
       'messageNotifications',
@@ -1980,9 +3221,9 @@ document.addEventListener('DOMContentLoaded', function () {
       'showTimestamps',
       'autoScroll',
       'ctrlEnterToSend',
-      'showOnlineStatus',
       'allowDirectMessages',
       'contentFilter',
+      'appearOffline',
       'developerMode'
     ];
 
@@ -1998,17 +3239,16 @@ document.addEventListener('DOMContentLoaded', function () {
   function getSettings() {
     // Default settings
     const defaults = {
-      messageHistoryLimit: '100',
       messageNotifications: true,
       dmNotifications: true,
       achievementNotifications: false,
       soundNotifications: false,
       showTimestamps: true,
-      autoScroll: true,
+      autoScroll: false,
       ctrlEnterToSend: false,
-      showOnlineStatus: true,
       allowDirectMessages: true,
-      contentFilter: true
+      contentFilter: true,
+      appearOffline: false
     };
 
     // Get saved settings from localStorage
@@ -2028,6 +3268,67 @@ document.addEventListener('DOMContentLoaded', function () {
     const settings = getSettings();
     settings[key] = value;
     localStorage.setItem('chatfun_settings', JSON.stringify(settings));
+
+    // Sync certain settings with server
+    const serverSyncSettings = ['allowDirectMessages', 'contentFilter'];
+    if (serverSyncSettings.includes(key)) {
+      syncSettingWithServer(key, value);
+    }
+  }
+
+  async function syncSettingWithServer(key, value) {
+    try {
+      const settingsToSync = {};
+
+      // Map client setting names to server setting names
+      const settingMap = {
+        'allowDirectMessages': 'allow_direct_messages',
+        'contentFilter': 'content_filter'
+      };
+
+      const serverKey = settingMap[key] || key;
+      settingsToSync[serverKey] = value;
+
+      const response = await window.api.put('/auth/settings', settingsToSync);
+
+      if (response.error) {
+        console.error('Failed to sync setting with server:', response.error);
+      }
+    } catch (error) {
+      console.error('Error syncing setting with server:', error);
+    }
+  }
+
+  function mergeServerSettings(serverSettings) {
+    const localSettings = getSettings();
+
+    // Map server setting names to client setting names
+    const settingMap = {
+      'allow_direct_messages': 'allowDirectMessages',
+      'content_filter': 'contentFilter',
+      'notifications_enabled': 'messageNotifications'
+    };
+
+    let hasChanges = false;
+
+    // Merge server settings into local settings
+    for (const [serverKey, value] of Object.entries(serverSettings)) {
+      const clientKey = settingMap[serverKey] || serverKey;
+      if (localSettings[clientKey] !== value) {
+        localSettings[clientKey] = value;
+        hasChanges = true;
+      }
+    }
+
+    // Save merged settings locally
+    if (hasChanges) {
+      localStorage.setItem('chatfun_settings', JSON.stringify(localSettings));
+
+      // Apply any settings that need immediate UI updates
+      for (const [key, value] of Object.entries(localSettings)) {
+        applyToggleSetting(key, value);
+      }
+    }
   }
 
   function applyToggleSetting(settingId, enabled) {
@@ -2044,7 +3345,36 @@ document.addEventListener('DOMContentLoaded', function () {
         // Re-attach event listeners with new setting
         updateInputEventListeners();
         break;
-      // Add more toggle implementations as needed
+      case 'appearOffline':
+        // Update user's appearance status
+        updateAppearanceStatus(enabled);
+        break;
+      case 'allowDirectMessages':
+        // Handle DM enabled/disabled state
+        const dmsTab = document.getElementById('dms');
+        if (dmsTab && dmsTab.classList.contains('active')) {
+          if (!enabled) {
+            showDMDisabledScreen();
+          } else {
+            hideDMDisabledScreen();
+            // Reinitialize DM functionality
+            setTimeout(() => {
+              initializeDMsFunctionality();
+            }, 100);
+          }
+        }
+        break;
+    }
+  }
+
+  async function updateAppearanceStatus(status) {
+    // Update the user's appearance status on the server
+    try {
+      await window.api.post('/friends/user/appearance', {
+        appearOffline: status
+      });
+    } catch (error) {
+      console.error('Failed to update appearance status:', error);
     }
   }
 
@@ -2272,8 +3602,69 @@ document.addEventListener('DOMContentLoaded', function () {
     a.download = `chatfun-data-${window.CURRENT_USERNAME}-${new Date().toISOString().split('T')[0]}.${extension}`;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    if (a.parentNode) {
+      document.body.removeChild(a);
+    }
     URL.revokeObjectURL(url);
+  }
+
+  function showAddFriendModal() {
+    const modal = document.getElementById('addFriendModal');
+    const closeBtn = document.getElementById('addFriendModalClose');
+    const cancelBtn = document.getElementById('cancelAddFriend');
+    const confirmBtn = document.getElementById('confirmAddFriend');
+    const usernameInput = document.getElementById('friendUsername');
+    const errorDiv = document.getElementById('friendUsernameError');
+
+    // Reset modal
+    usernameInput.value = '';
+    errorDiv.textContent = '';
+    confirmBtn.disabled = false;
+
+    // Show modal
+    modal.style.display = 'flex';
+    setTimeout(() => usernameInput.focus(), 100);
+
+    // Close button handlers
+    closeBtn.onclick = () => closeModal(modal);
+    cancelBtn.onclick = () => closeModal(modal);
+
+    // Input validation
+    usernameInput.oninput = () => {
+      errorDiv.textContent = '';
+      confirmBtn.disabled = !usernameInput.value.trim();
+    };
+
+    // Handle Enter key
+    usernameInput.onkeypress = (e) => {
+      if (e.key === 'Enter' && !confirmBtn.disabled) {
+        confirmBtn.click();
+      }
+    };
+
+    // Confirm button handler
+    confirmBtn.onclick = async () => {
+      const username = usernameInput.value.trim();
+      if (!username) {
+        errorDiv.textContent = 'Please enter a username';
+        return;
+      }
+
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+      try {
+        await sendFriendRequest(username);
+        closeModal(modal);
+        showNotification('Friend request sent!', 'success');
+        // Refresh friend requests
+        loadFriendRequests();
+      } catch (error) {
+        errorDiv.textContent = error.message || 'Failed to send friend request';
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = 'Send Request';
+      }
+    };
   }
 
   function confirmLogout() {
@@ -2293,7 +3684,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function initializeUserData() {
     // Fetch and display user data
     const token = window.getAuthToken();
-    if (!token) return;
+    if (!token) {
+      // No token found, redirect to login
+      window.location.href = 'login.html';
+      return;
+    }
 
     // Set the bearer token for API requests
     window.api.bearerToken = token;
@@ -2311,11 +3706,77 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (data.user && data.user.role) {
           window.USER_ROLE = data.user.role;
+          window.USER_ID = data.user.uuid;
+        }
+
+        // Load user settings from server and merge with local settings
+        if (data.user && data.user.settings) {
+          mergeServerSettings(data.user.settings);
         }
       })
       .catch(error => {
         console.error("Error fetching user data:", error);
+
+        // Check if this is an authentication error
+        if (error.message && error.message.includes('401')) {
+          console.warn('Token validation failed - redirecting to login');
+          // Clear token and redirect (API handler will also do this, but this is a backup)
+          window.clearAuthToken();
+          window.location.href = 'login.html';
+        }
       });
+  }
+
+  // Reply functionality
+  function setupReplyFunctionality() {
+    // Handle close reply buttons
+    document.addEventListener('click', (e) => {
+      if (e.target.classList.contains('close-reply')) {
+        const replyIndicator = e.target.closest('.reply-indicator');
+        if (replyIndicator) {
+          const inputContainer = replyIndicator.closest('.dm-input-container, .chat-input-container');
+          replyIndicator.remove();
+          if (inputContainer) {
+            inputContainer.classList.remove('input-container-with-reply');
+          }
+          currentReplyTo = null;
+        }
+      }
+    });
+  }
+
+  // Show reply indicator
+  function showReplyIndicator(messageAuthor, messageContent, messageId, inputContainer) {
+    // Remove existing reply indicator
+    const existingIndicator = inputContainer.querySelector('.reply-indicator');
+    if (existingIndicator) {
+      existingIndicator.remove();
+      inputContainer.classList.remove('input-container-with-reply');
+    }
+
+    // Create reply indicator
+    const replyIndicator = document.createElement('div');
+    replyIndicator.className = 'reply-indicator';
+    replyIndicator.innerHTML = `
+      <div class="reply-content">
+        <span class="reply-icon">↩</span>
+        <span class="reply-text">
+          Replying to <span class="reply-author">${messageAuthor}</span>: ${messageContent.substring(0, 60)}${messageContent.length > 60 ? '...' : ''}
+        </span>
+      </div>
+      <span class="close-reply">×</span>
+    `;
+
+    // Insert as first child of input container
+    inputContainer.insertBefore(replyIndicator, inputContainer.firstChild);
+    inputContainer.classList.add('input-container-with-reply');
+
+    // Set reply context
+    currentReplyTo = messageId;
+
+    // Focus input
+    const input = inputContainer.querySelector('input');
+    if (input) input.focus();
   }
 
   // =====================================
@@ -2328,11 +3789,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const token = window.getAuthToken();
     if (!token) {
       // Redirect to login page if not logged in
+      console.warn('No authentication token found - redirecting to login');
       window.location.href = 'login.html';
       return;
     }
 
+    // Set the bearer token for API requests early
+    window.api.bearerToken = token;
+
+    // Initialize user data first (this will validate the token)
     initializeUserData();
+
+    // Initialize other app functionality
     initializeTabSwitching();
     initializeUserPermissions();
     initializeChatFunctionality();
@@ -2344,11 +3812,34 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeItemsFunctionality();
     initializeFriendsFunctionality();
     initializeDMsFunctionality();
+    setupReplyFunctionality();
     initializeSettings();
   }
 
   // Start the application
   initializeApp();
+
+  // Set up periodic token validation (every 5 minutes)
+  setInterval(() => {
+    const token = window.getAuthToken();
+    if (!token) {
+      console.warn('Token lost during session - redirecting to login');
+      window.location.href = 'login.html';
+      return;
+    }
+
+    // Make a lightweight API call to validate token is still valid
+    if (window.api) {
+      window.api.bearerToken = token;
+      window.api.get('/auth/me')
+        .catch(error => {
+          if (error.message && (error.message.includes('401') || error.message.includes('Token has expired'))) {
+            console.warn('Token validation failed during periodic check');
+            // API handler will redirect, but this is a backup
+          }
+        });
+    }
+  }, 5 * 60 * 1000); // 5 minutes
 
   // Clean up polling when leaving the page
   window.addEventListener('beforeunload', function () {

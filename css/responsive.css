@@ -141,9 +141,34 @@
     gap: var(--spacing-sm);
   }
 
+  .request-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .accept-friend-btn,
+  .decline-friend-btn,
+  .cancel-request-btn {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-width: 70px;
+  }
+
   .friend-actions {
     width: 100%;
     justify-content: flex-end;
+  }
+
+  .message-friend-btn,
+  .remove-friend-btn {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-width: 70px;
+  }
+
+  /* Adjust friend actions spacing on mobile */
+  .friend-actions {
+    gap: 6px;
   }
 
   .dm-message {

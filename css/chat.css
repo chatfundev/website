@@ -146,3 +146,207 @@ body.hide-timestamps .message-time,
   font-family: monospace;
   font-size: var(--font-size-lg);
 }
+
+/* Empty States */
+.empty-state,
+.dm-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+}
+
+.empty-state-content {
+  color: var(--text-secondary);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-state-content h3 {
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-color);
+}
+
+.empty-state-content p {
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* DM Reactions */
+.dm-message-reactions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.dm-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-duration) ease;
+}
+
+.dm-reaction:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.dm-reaction.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.dm-reaction-count {
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+/* DM Replies */
+.dm-message-reply-preview {
+  background-color: var(--surface-color);
+  border-left: 3px solid var(--primary-color);
+  padding: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  font-size: var(--font-size-sm);
+  opacity: 0.8;
+}
+
+.dm-reply-to-username {
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 2px;
+}
+
+.dm-reply-to-content {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* DM Messages maintain relative positioning for reactions */
+.dm-message {
+  position: relative;
+}
+
+.dm-context-menu .dm-context-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+/* Reply indicator - inside input container */
+.reply-indicator {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px 8px 0 0;
+  padding: 8px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted-text);
+  position: relative;
+  border-bottom: none;
+}
+
+.reply-indicator .reply-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-indicator .reply-icon {
+  font-size: 12px;
+  color: var(--primary-color);
+  opacity: 0.7;
+}
+
+.reply-indicator .reply-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-indicator .reply-author {
+  font-weight: 500;
+  color: var(--text-color);
+}
+
+.reply-indicator .close-reply {
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  font-size: 16px;
+  line-height: 1;
+  opacity: 0.6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+}
+
+.reply-indicator .close-reply:hover {
+  background-color: var(--hover-bg);
+  opacity: 1;
+}
+
+/* Adjust input container when reply is active */
+.input-container-with-reply .message-input {
+  border-radius: 0 0 8px 8px;
+  border-top: none;
+}
+
+.message-input-container {
+  position: relative;
+}
+
+/* Reaction Picker */
+.reaction-picker {
+  position: fixed;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.reaction-picker button {
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: all var(--transition-duration) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.reaction-picker button:hover {
+  background-color: var(--hover-bg);
+  transform: scale(1.1);
+}

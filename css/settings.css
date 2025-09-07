@@ -5,13 +5,6 @@
   margin: 0 auto;
 }
 
-.settings-subtitle {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  margin-top: var(--spacing-xs);
-  margin-bottom: var(--spacing-xl);
-}
-
 .settings-section {
   background-color: var(--surface-color);
   border: 1px solid var(--border-color);

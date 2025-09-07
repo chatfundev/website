@@ -64,44 +64,109 @@
       }
 
       .password-requirements {
-        margin-top: 8px;
+        margin-top: 12px;
+        margin-bottom: 8px;
         font-size: 0.875rem;
         color: #666;
+        animation: slideInContainer 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      .password-requirements.removing {
+        animation: slideOutContainer 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes slideInContainer {
+        0% {
+          opacity: 0;
+          transform: translateY(-10px);
+          max-height: 0;
+        }
+
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+          max-height: 100px;
+        }
+      }
+
+      @keyframes slideOutContainer {
+        0% {
+          opacity: 1;
+          transform: translateY(0);
+          max-height: 100px;
+        }
+
+        100% {
+          opacity: 0;
+          transform: translateY(-10px);
+          max-height: 0;
+        }
       }
 
       .requirement {
         display: flex;
         align-items: center;
-        gap: 6px;
-        margin: 4px 0;
+        gap: 8px;
+        margin: 6px 0;
+        padding: 4px 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+        transform: translateX(-10px);
+        animation: slideInRequirement 0.4s ease-out 0.1s forwards;
       }
 
-      .requirement.valid {
-        color: #27ae60;
+      @keyframes slideInRequirement {
+        0% {
+          opacity: 0;
+          transform: translateX(-20px);
+        }
+
+        100% {
+          opacity: 0.8;
+          transform: translateX(0);
+        }
       }
 
       .requirement.invalid {
         color: #e74c3c;
       }
 
-      .requirement i {
-        font-size: 0.75rem;
-      }
-
       .password-match-indicator {
-        margin-top: 8px;
+        margin-top: 12px;
+        margin-bottom: 8px;
         font-size: 0.875rem;
         display: flex;
         align-items: center;
-        gap: 6px;
-      }
-
-      .password-match-indicator.valid {
-        color: #27ae60;
-      }
-
-      .password-match-indicator.invalid {
+        gap: 8px;
+        padding: 4px 0;
         color: #e74c3c;
+        animation: slideInContainer 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      .password-match-indicator.removing {
+        animation: slideOutContainer 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      /* Enhanced button transitions */
+      .login-button {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .login-button:disabled {
+        background-color: #ccc !important;
+        cursor: not-allowed;
+        opacity: 0.6;
+        transform: translateY(2px);
+      }
+
+      .login-button:not(:disabled) {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .login-button:not(:disabled):hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
       }
     </style>
   </head>
@@ -120,35 +185,19 @@
         <div class="form-group">
           <label for="username">username</label>
           <input type="text" id="username" name="username" placeholder="enter username" required>
-          <div id="username-requirements" class="password-requirements" style="display: none;">
-            <div class="requirement" id="req-username-length">
-              <i class="fas fa-times"></i>
-              <span>At least 3 characters</span>
-            </div>
-          </div>
         </div>
 
         <div class="form-group">
           <label for="password">password</label>
           <input type="password" id="password" name="password" placeholder="enter password" required>
-          <div id="password-requirements" class="password-requirements" style="display: none;">
-            <div class="requirement" id="req-length">
-              <i class="fas fa-times"></i>
-              <span>At least 6 characters</span>
-            </div>
-          </div>
         </div>
 
         <div class="form-group">
           <label for="confirm-password">confirm password</label>
           <input type="password" id="confirm-password" name="confirm-password" placeholder="confirm password" required>
-          <div id="password-match" class="password-match-indicator" style="display: none;">
-            <i class="fas fa-times"></i>
-            <span>Passwords do not match</span>
-          </div>
         </div>
 
-        <button type="submit" class="login-button" id="registerBtn">
+        <button type="submit" class="login-button" id="registerBtn" disabled>
           <span class="btn-text">register</span>
         </button>
       </form>
@@ -173,119 +222,197 @@
         const passwordInput = document.getElementById('password');
         const confirmPasswordInput = document.getElementById('confirm-password');
 
+        // Initialize form state
+        checkFormValidity();
+
+        // Helper function to create requirements container
+        function createRequirementsContainer(id, className = 'password-requirements') {
+          const container = document.createElement('div');
+          container.id = id;
+          container.className = className;
+          return container;
+        }
+
+        // Helper function to create requirement item
+        function createRequirement(text) {
+          const requirement = document.createElement('div');
+          requirement.className = 'requirement invalid';
+          requirement.innerHTML = `<span>${text}</span>`;
+          return requirement;
+        }
+
+        // Helper function to remove element with animation
+        function removeElementWithAnimation(element) {
+          if (!element) return;
+
+          element.classList.add('removing');
+          setTimeout(() => {
+            if (element.parentNode) {
+              element.parentNode.removeChild(element);
+            }
+          }, 300);
+        }
+
         // Username validation
         usernameInput.addEventListener('input', function () {
           const username = this.value.trim();
-          const requirements = document.getElementById('username-requirements');
-          const lengthReq = document.getElementById('req-username-length');
+          const existingRequirements = document.getElementById('username-requirements');
 
-          if (username.length > 0) {
-            requirements.style.display = 'block';
+          if (username.length > 0 && username.length < 3) {
+            // Show requirements only when there's input but it doesn't meet criteria
+            if (!existingRequirements) {
+              const container = createRequirementsContainer('username-requirements');
+              const requirement = createRequirement('at least 3 characters');
+              container.appendChild(requirement);
 
-            if (username.length >= 3) {
-              lengthReq.classList.remove('invalid');
-              lengthReq.classList.add('valid');
-              lengthReq.querySelector('i').className = 'fas fa-check';
-            } else {
-              lengthReq.classList.remove('valid');
-              lengthReq.classList.add('invalid');
-              lengthReq.querySelector('i').className = 'fas fa-times';
+              // Insert after the username input
+              this.parentNode.appendChild(container);
             }
           } else {
-            requirements.style.display = 'none';
+            // Remove requirements when empty or when requirements are met
+            if (existingRequirements) {
+              removeElementWithAnimation(existingRequirements);
+            }
           }
+
+          // Check if form should be enabled
+          checkFormValidity();
         });
 
         // Password validation
         passwordInput.addEventListener('input', function () {
           const password = this.value;
-          const requirements = document.getElementById('password-requirements');
-          const lengthReq = document.getElementById('req-length');
+          const existingRequirements = document.getElementById('password-requirements');
 
-          if (password.length > 0) {
-            requirements.style.display = 'block';
+          if (password.length > 0 && password.length < 6) {
+            // Show requirements only when there's input but it doesn't meet criteria
+            if (!existingRequirements) {
+              const container = createRequirementsContainer('password-requirements');
+              const requirement = createRequirement('at least 6 characters');
+              container.appendChild(requirement);
 
-            if (password.length >= 6) {
-              lengthReq.classList.remove('invalid');
-              lengthReq.classList.add('valid');
-              lengthReq.querySelector('i').className = 'fas fa-check';
-            } else {
-              lengthReq.classList.remove('valid');
-              lengthReq.classList.add('invalid');
-              lengthReq.querySelector('i').className = 'fas fa-times';
+              // Insert after the password input
+              this.parentNode.appendChild(container);
             }
           } else {
-            requirements.style.display = 'none';
+            // Remove requirements when empty or when requirements are met
+            if (existingRequirements) {
+              removeElementWithAnimation(existingRequirements);
+            }
           }
 
           // Check password match if confirm password is filled
           checkPasswordMatch();
+          checkFormValidity();
         });
 
         // Password confirmation validation
-        confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+        confirmPasswordInput.addEventListener('input', function () {
+          checkPasswordMatch();
+          checkFormValidity();
+        });
 
         function checkPasswordMatch() {
           const password = passwordInput.value;
           const confirmPassword = confirmPasswordInput.value;
-          const matchIndicator = document.getElementById('password-match');
+          const existingIndicator = document.getElementById('password-match');
 
           if (confirmPassword.length > 0) {
-            matchIndicator.style.display = 'flex';
-
-            if (password === confirmPassword) {
-              matchIndicator.classList.remove('invalid');
-              matchIndicator.classList.add('valid');
-              matchIndicator.querySelector('i').className = 'fas fa-check';
-              matchIndicator.querySelector('span').textContent = 'Passwords match';
+            if (password === confirmPassword && password.length > 0) {
+              // Passwords match - remove the indicator
+              if (existingIndicator) {
+                removeElementWithAnimation(existingIndicator);
+              }
             } else {
-              matchIndicator.classList.remove('valid');
-              matchIndicator.classList.add('invalid');
-              matchIndicator.querySelector('i').className = 'fas fa-times';
-              matchIndicator.querySelector('span').textContent = 'Passwords do not match';
+              // Passwords don't match - show the indicator
+              if (!existingIndicator) {
+                const indicator = createRequirementsContainer('password-match', 'password-match-indicator');
+                indicator.innerHTML = '<span>passwords do not match</span>';
+
+                // Insert after the confirm password input
+                confirmPasswordInput.parentNode.appendChild(indicator);
+              }
             }
           } else {
-            matchIndicator.style.display = 'none';
+            // No confirm password entered - remove the indicator
+            if (existingIndicator) {
+              removeElementWithAnimation(existingIndicator);
+            }
+          }
+        }
+
+        function checkFormValidity() {
+          const username = usernameInput.value.trim();
+          const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
+
+          // Check all requirements
+          const usernameValid = username.length >= 3;
+          const passwordValid = password.length >= 6;
+          const passwordsMatch = password === confirmPassword && confirmPassword.length > 0;
+
+          const formValid = usernameValid && passwordValid && passwordsMatch;
+
+          // Enable/disable button with smooth transition
+          registerBtn.disabled = !formValid;
+
+          if (formValid) {
+            registerBtn.style.opacity = '1';
+            registerBtn.style.transform = 'translateY(0)';
+          } else {
+            registerBtn.style.opacity = '0.6';
+            registerBtn.style.transform = 'translateY(2px)';
           }
         }
 
         registerForm.addEventListener('submit', async function (e) {
           e.preventDefault();
 
+          // Clear any existing messages
+          clearMessages();
+
           const username = usernameInput.value.trim();
           const password = passwordInput.value;
           const confirmPassword = confirmPasswordInput.value;
 
-          // Validation
+          // Check form validity first
+          const usernameValid = username.length >= 3;
+          const passwordValid = password.length >= 6;
+          const passwordsMatch = password === confirmPassword;
+
+          // Validation with specific error messages
           if (!username || !password || !confirmPassword) {
-            showError('Please fill in all fields');
+            showError('please fill in all fields');
             return;
           }
 
-          if (username.length < 3) {
-            showError('Username must be at least 3 characters');
+          if (!usernameValid) {
+            showError('username must be at least 3 characters');
             return;
           }
 
-          if (password.length < 6) {
-            showError('Password must be at least 6 characters');
+          if (!passwordValid) {
+            showError('password must be at least 6 characters');
             return;
           }
 
-          if (password !== confirmPassword) {
-            showError('Passwords do not match');
+          if (!passwordsMatch) {
+            showError('passwords do not match');
             return;
           }
 
-          // Disable button and show loading
+          // Disable button and show loading text
           registerBtn.disabled = true;
-          btnText.innerHTML = '<div class="loading-spinner"></div> creating account...';
+          btnText.textContent = 'registering...';
 
           try {
             const result = await register(username, password);
 
             if (result.success) {
               showSuccess('Account created successfully! Redirecting...');
+
+              // Keep button disabled and update text
+              btnText.textContent = 'redirecting...';
 
               // Redirect to app after a short delay
               setTimeout(() => {

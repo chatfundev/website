@@ -110,6 +110,9 @@
         loginForm.addEventListener('submit', async function (e) {
           e.preventDefault();
 
+          // Clear any existing messages
+          clearMessages();
+
           const username = document.getElementById('username').value.trim();
           const password = document.getElementById('password').value;
 
@@ -119,15 +122,18 @@
             return;
           }
 
-          // Disable button and show loading
+          // Disable button and show loading text
           loginBtn.disabled = true;
-          btnText.innerHTML = '<div class="loading-spinner"></div> signing in...';
+          btnText.textContent = 'logging in...';
 
           try {
             const result = await login(username, password);
 
             if (result.success) {
               showSuccess('Login successful! Redirecting...');
+
+              // Keep button disabled and update text
+              btnText.textContent = 'redirecting...';
 
               // Redirect to app after a short delay
               setTimeout(() => {

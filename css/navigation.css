@@ -25,13 +25,6 @@
   color: var(--background-color);
 }
 
-.nav-item.settings {
-  margin-top: auto;
-  border-top: 1px solid var(--border-color);
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-}
-
 .nav-icon {
   font-size: var(--font-size-base);
   width: 20px;

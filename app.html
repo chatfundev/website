@@ -58,8 +58,7 @@
             <span class="nav-text">dms</span>
           </div>
 
-          <!-- Separator and Mod/Admin sections -->
-          <div class="nav-separator"></div>
+          <!-- Mod/Admin sections -->
           <div class="nav-item mod-only" data-tab="reports" style="display: none;">
             <span class="nav-icon"><i class="fas fa-flag"></i></span>
             <span class="nav-text">reports</span>
@@ -73,7 +72,8 @@
             <span class="nav-text">admin tools</span>
           </div>
 
-          <!-- Settings at bottom with separator -->
+          <!-- Settings separator and settings -->
+          <div class="nav-separator"></div>
           <div class="nav-item settings" data-tab="settings">
             <span class="nav-icon"><i class="fas fa-cog"></i></span>
             <span class="nav-text">settings</span>
@@ -88,38 +88,11 @@
           <div class="chat-header">
             <h2>global chat</h2>
             <div class="chat-info">
-              <span class="online-count">42 online</span>
+              <span class="online-count" id="online-count">Loading...</span>
             </div>
           </div>
           <div class="chat-messages" id="chat-messages">
-            <div class="message" data-message-id="msg-1" data-author="player123">
-              <span class="message-user">player123:</span>
-              <span class="message-text">hey everyone!</span>
-              <span class="message-time">2:30 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-2" data-author="gamer456">
-              <span class="message-user">gamer456:</span>
-              <span class="message-text">what's up?</span>
-              <span class="message-time">2:31 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-3" data-author="player123">
-              <span class="message-user">
-                <span class="message-role">[<i class="fa fa-tools"></i> admin]</span> admin789:</span>
-              <span class="message-text">good afternoon.</span>
-              <span class="message-time">2:33 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-4" data-author="mod123">
-              <span class="message-user">
-                <span class="message-role">[<i class="fa fa-shield"></i> mod]</span> mod123:</span>
-              <span class="message-text">yo!</span>
-              <span class="message-time">2:35 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-5" data-author="owner456">
-              <span class="message-user">
-                <span class="message-role">[<i class="fa fa-crown"></i> owner]</span> owner456:</span>
-              <span class="message-text">what's good?</span>
-              <span class="message-time">2:36 PM</span>
-            </div>
+            <!-- Will be loaded -->
           </div>
           <div class="chat-input-container">
             <input type="text" class="chat-input" placeholder="type your message..." maxlength="200">
@@ -360,7 +333,10 @@
           <div class="tab-header">
             <h2>friends</h2>
             <div class="friends-info">
-              <span class="online-friends-count">5 online</span>
+              <span class="online-friends-count">Loading...</span>
+              <button class="add-friend-btn" id="sendFriendRequestBtn">
+                <i class="fas fa-user-plus"></i> Add Friend
+              </button>
             </div>
           </div>
 
@@ -368,73 +344,26 @@
           <div class="friends-section">
             <div class="friends-section-header">
               <h3>Friend Requests</h3>
-              <span class="request-count">2 pending</span>
+              <span class="request-count">Loading...</span>
             </div>
 
             <div class="friend-requests-tabs">
               <button class="request-tab-btn active" data-request-type="incoming">
-                <i class="fas fa-arrow-down"></i> Incoming (2)
+                <i class="fas fa-arrow-down"></i> Incoming (0)
               </button>
               <button class="request-tab-btn" data-request-type="outgoing">
-                <i class="fas fa-arrow-up"></i> Outgoing (1)
+                <i class="fas fa-arrow-up"></i> Outgoing (0)
               </button>
             </div>
 
             <!-- Incoming Requests -->
             <div class="friend-requests-list incoming-requests active">
-              <div class="friend-request-item">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">gaming_pro_42</span>
-                  <span class="request-time">2 hours ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small success accept-friend-btn">
-                    <i class="fas fa-check"></i> Accept
-                  </button>
-                  <button class="btn small danger decline-friend-btn">
-                    <i class="fas fa-times"></i> Decline
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-request-item">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">chat_master_99</span>
-                  <span class="request-time">1 day ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small success accept-friend-btn">
-                    <i class="fas fa-check"></i> Accept
-                  </button>
-                  <button class="btn small danger decline-friend-btn">
-                    <i class="fas fa-times"></i> Decline
-                  </button>
-                </div>
-              </div>
+              <!-- Will be loaded -->
             </div>
 
             <!-- Outgoing Requests -->
             <div class="friend-requests-list outgoing-requests">
-              <div class="friend-request-item">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">cool_player_123</span>
-                  <span class="request-time">3 hours ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary cancel-request-btn">
-                    <i class="fas fa-times"></i> Cancel
-                  </button>
-                </div>
-              </div>
+              <!-- Will be loaded -->
             </div>
           </div>
 
@@ -442,209 +371,17 @@
           <div class="friends-section">
             <div class="friends-section-header">
               <h3>Friends</h3>
-              <span class="friends-count">12 total</span>
+              <span class="friends-count" id="friends-total-count">0 total</span>
             </div>
 
             <div class="friends-filter">
-              <button class="filter-btn active" data-filter="all">All (12)</button>
-              <button class="filter-btn" data-filter="online">Online (5)</button>
-              <button class="filter-btn" data-filter="offline">Offline (7)</button>
+              <button class="filter-btn active" data-filter="all" id="filter-all">All (0)</button>
+              <button class="filter-btn" data-filter="online" id="filter-online">Online (0)</button>
+              <button class="filter-btn" data-filter="offline" id="filter-offline">Offline (0)</button>
             </div>
 
             <div class="friends-list">
-              <!-- Online Friends -->
-              <div class="friend-item online" data-status="online">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator online"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">player123</span>
-                  <span class="friend-status">Playing ChatFun</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small primary message-friend-btn" data-friend="player123">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item online" data-status="online">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator online"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">gamer456</span>
-                  <span class="friend-status">Online</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small primary message-friend-btn" data-friend="gamer456">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item online" data-status="online">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator idle"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">social_butterfly</span>
-                  <span class="friend-status">Idle - 15 min</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small primary message-friend-btn" data-friend="social_butterfly">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item online" data-status="online">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator online"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">chat_lover</span>
-                  <span class="friend-status">Playing ChatFun</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small primary message-friend-btn" data-friend="chat_lover">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item online" data-status="online">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator online"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">fun_person</span>
-                  <span class="friend-status">Online</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small primary message-friend-btn" data-friend="fun_person">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <!-- Offline Friends -->
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">sleepy_gamer</span>
-                  <span class="friend-status">Last seen 2 hours ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="sleepy_gamer">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">night_owl</span>
-                  <span class="friend-status">Last seen yesterday</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="night_owl">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">weekend_warrior</span>
-                  <span class="friend-status">Last seen 3 days ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="weekend_warrior">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">busy_bee</span>
-                  <span class="friend-status">Last seen 1 week ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="busy_bee">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">casual_player</span>
-                  <span class="friend-status">Last seen 2 weeks ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="casual_player">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">mystery_user</span>
-                  <span class="friend-status">Last seen 1 month ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="mystery_user">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
-
-              <div class="friend-item offline" data-status="offline">
-                <div class="friend-avatar">
-                  <i class="fas fa-user"></i>
-                  <div class="status-indicator offline"></div>
-                </div>
-                <div class="friend-info">
-                  <span class="friend-name">old_timer</span>
-                  <span class="friend-status">Last seen 2 months ago</span>
-                </div>
-                <div class="friend-actions">
-                  <button class="btn small secondary message-friend-btn" data-friend="old_timer">
-                    <i class="fas fa-comment"></i> Message
-                  </button>
-                </div>
-              </div>
+              <!-- Will be loaded -->
             </div>
           </div>
         </div>
@@ -653,9 +390,6 @@
         <div class="tab-content" id="dms">
           <div class="tab-header">
             <h2>direct messages</h2>
-            <div class="dms-info">
-              <span class="unread-count">3 unread</span>
-            </div>
           </div>
 
           <div class="dms-layout">
@@ -839,6 +573,17 @@
                 </div>
               </div>
 
+              <!-- Reply indicator -->
+              <div class="reply-indicator" id="dm-reply-indicator" style="display: none;">
+                <div class="reply-content">
+                  <span class="reply-text">Replying to <strong class="reply-username"></strong>: <span
+                      class="reply-message"></span></span>
+                  <button class="reply-cancel" onclick="cancelDMReply()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
               <!-- Message input -->
               <div class="dm-input-container">
                 <input type="text" class="dm-input" placeholder="Type your message..." maxlength="200">
@@ -977,7 +722,6 @@
         <div class="tab-content" id="settings">
           <div class="tab-header">
             <h2>settings</h2>
-            <p class="settings-subtitle">customize your chatfun experience</p>
           </div>
           <div class="settings-sections">
             <!-- Notifications Settings -->
@@ -1055,7 +799,7 @@
                     <span class="setting-description">automatically scroll down for new messages</span>
                   </div>
                   <div class="toggle-container">
-                    <input type="checkbox" class="toggle-checkbox" id="autoScroll" checked>
+                    <input type="checkbox" class="toggle-checkbox" id="autoScroll">
                     <span class="toggle-slider"></span>
                   </div>
                 </label>
@@ -1072,20 +816,6 @@
                   </div>
                 </label>
               </div>
-              <div class="setting-item">
-                <div class="setting-row">
-                  <div class="setting-info">
-                    <span class="setting-title">message history limit</span>
-                    <span class="setting-description">number of recent messages to keep loaded</span>
-                  </div>
-                  <select class="setting-select" id="messageHistoryLimit">
-                    <option value="50">50 messages</option>
-                    <option value="100" selected>100 messages</option>
-                    <option value="200">200 messages</option>
-                    <option value="500">500 messages</option>
-                  </select>
-                </div>
-              </div>
             </div>
 
             <!-- Privacy Settings -->
@@ -1094,11 +824,11 @@
               <div class="setting-item">
                 <label class="setting-label toggle-setting">
                   <div class="setting-info">
-                    <span class="setting-title">show online status</span>
-                    <span class="setting-description">let others see when you're online</span>
+                    <span class="setting-title">appear offline</span>
+                    <span class="setting-description">always show as offline to other users</span>
                   </div>
                   <div class="toggle-container">
-                    <input type="checkbox" class="toggle-checkbox" id="showOnlineStatus" checked>
+                    <input type="checkbox" class="toggle-checkbox" id="appearOffline">
                     <span class="toggle-slider"></span>
                   </div>
                 </label>
@@ -1200,6 +930,16 @@
       </div>
       <div class="context-menu-item" id="undoReportActions">
         <i class="fas fa-undo"></i> Undo Actions
+      </div>
+    </div>
+
+    <!-- DM Context Menu -->
+    <div id="dmContextMenu" class="context-menu">
+      <div class="context-menu-item" id="replyDMMessage">
+        <i class="fas fa-reply"></i> Reply
+      </div>
+      <div class="context-menu-item" id="reactDMMessage">
+        <i class="fas fa-smile"></i> React
       </div>
     </div>
 
@@ -1702,6 +1442,32 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelDownloadData">Cancel</button>
           <button class="btn success" id="confirmDownloadData">Download Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div id="addFriendModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add Friend</h3>
+          <span class="modal-close" id="addFriendModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon primary">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <p><strong>Send a Friend Request</strong></p>
+          <p>Enter the username of the person you'd like to add as a friend.</p>
+          <div class="input-group">
+            <label for="friendUsername">Username:</label>
+            <input type="text" id="friendUsername" placeholder="Enter username..." maxlength="50" autocomplete="off">
+            <div class="input-error" id="friendUsernameError"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelAddFriend">Cancel</button>
+          <button class="btn primary" id="confirmAddFriend">Send Request</button>
         </div>
       </div>
     </div>
