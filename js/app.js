@@ -424,15 +424,11 @@ document.addEventListener('DOMContentLoaded', function () {
         const showDelete = isMod || isOwnMessage;
         deleteMenuItem.style.display = showDelete ? 'block' : 'none';
 
-        // User actions: show for mods/admins, but not for own messages
-        const showUserActions = isMod && !isOwnMessage;
-        userActionsMenuItem.style.display = showUserActions ? 'block' : 'none';
-
         // Hide undo actions for regular messages
         undoReportActionsMenuItem.style.display = 'none';
 
         // Only show context menu if at least one item is visible
-        if (showReport || showDelete || showUserActions) {
+        if (showReport || showDelete) {
           // Position and show context menu
           contextMenu.style.left = e.pageX + 'px';
           contextMenu.style.top = e.pageY + 'px';
@@ -506,18 +502,6 @@ document.addEventListener('DOMContentLoaded', function () {
       const contextMenu = document.getElementById('messageContextMenu');
       contextMenu.style.display = 'none';
       deleteModal.style.display = 'flex';
-    });
-
-    // User actions functionality
-    userActionsMenuItem.addEventListener('click', function () {
-      const contextMenu = document.getElementById('messageContextMenu');
-      contextMenu.style.display = 'none';
-      document.getElementById('targetUsername').textContent = currentMessageAuthor;
-
-      // Reset form
-      resetUserActionsForm();
-      toggleActionFields();
-      userActionsModal.style.display = 'flex';
     });
 
     // Undo report actions functionality
@@ -2231,7 +2215,7 @@ document.addEventListener('DOMContentLoaded', function () {
           </div>
 
           <!-- Messages container -->
-          <div class="dm-messages" id="dm-messages">
+          <div class="chat-messages" id="dm-messages">
           </div>
 
           <!-- Message input -->
@@ -2603,7 +2587,9 @@ document.addEventListener('DOMContentLoaded', function () {
           is_own: message.is_own,
           time: messageTime,
           reactions: message.reactions,
-          reply_to: message.reply_to
+          reply_to: message.reply_to,
+          badge: message.badge,
+          sender: message.sender
         };
 
         addDMMessage(messageData, false);
@@ -2757,7 +2743,7 @@ document.addEventListener('DOMContentLoaded', function () {
         e.preventDefault();
         const reactionElement = e.target.closest('.dm-reaction');
         const emoji = reactionElement.getAttribute('data-emoji');
-        const messageElement = e.target.closest('.dm-message');
+        const messageElement = e.target.closest('.message'); // Changed from .dm-message to .message
         const messageId = messageElement.getAttribute('data-message-id');
 
         if (messageId && emoji) {
@@ -2769,9 +2755,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Add context menu for DM messages
     dmMessages.addEventListener('contextmenu', function (e) {
       console.log('DM context menu triggered', e.target);
-      const messageElement = e.target.closest('.dm-message');
+      const messageElement = e.target.closest('.message'); // Changed from .dm-message to .message
       console.log('Message element:', messageElement);
-      if (messageElement) {
+      if (messageElement && messageElement.parentElement.id === 'dm-messages') { // Ensure it's a DM message
         e.preventDefault();
 
         const messageId = messageElement.getAttribute('data-message-id');
@@ -2883,7 +2869,8 @@ document.addEventListener('DOMContentLoaded', function () {
             is_own: message.is_own,
             time: messageTime,
             reactions: message.reactions,
-            reply_to: message.reply_to
+            reply_to: message.reply_to,
+            sender: message.sender // Include sender info with badge and avatar
           };
 
           addDMMessage(messageData, false);
@@ -2938,19 +2925,52 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const messageDiv = document.createElement('div');
-    messageDiv.className = `dm-message ${type}`;
+    messageDiv.className = 'message'; // Use same class as global chat
     messageDiv.setAttribute('data-message-id', messageId);
 
-    let avatarHtml = '';
+    // For DMs, always show both users in conversation style
+    let username, badge, userId, userHasAvatar;
+
     if (type === 'received') {
-      console.log(`Creating received message avatar: senderId=${senderId}, hasAvatar=${hasAvatar}`);
-      avatarHtml = createAvatarElement(senderId, hasAvatar, 'dm-message-avatar');
+      console.log(`Creating received message: senderId=${senderId}, hasAvatar=${hasAvatar}`);
+      username = messageData.sender ? messageData.sender.username : 'Unknown';
+      badge = messageData.badge;
+      userId = senderId;
+      userHasAvatar = hasAvatar;
     } else if (type === 'sent') {
-      // For sent messages, use current user's avatar info
-      console.log(`Creating sent message avatar: userId=${window.USER_ID}, hasAvatar=${window.CURRENT_USER_HAS_AVATAR}`);
-      avatarHtml = createAvatarElement(window.USER_ID, window.CURRENT_USER_HAS_AVATAR, 'dm-message-avatar');
+      // For sent messages, use current user's info
+      console.log(`Creating sent message: userId=${window.USER_ID}, hasAvatar=${window.CURRENT_USER_HAS_AVATAR}`);
+      username = window.CURRENT_USERNAME;
+      badge = window.USER_ROLE === 'user' ? null : window.USER_ROLE;
+      userId = window.USER_ID;
+      userHasAvatar = window.CURRENT_USER_HAS_AVATAR;
     }
-    console.log(`Avatar HTML: ${avatarHtml}`);
+
+    // Format timestamp
+    const timestamp = new Date();
+    let timeString;
+    if (typeof time === 'string' && time.includes(':')) {
+      timeString = time; // Already formatted
+    } else {
+      timeString = timestamp.toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
+
+    // Badge icons (same as global chat)
+    const badgeIcons = {
+      mod: '<i class="fa fa-shield"></i>',
+      admin: '<i class="fa fa-tools"></i>',
+      owner: '<i class="fa fa-crown"></i>',
+      shadowbanned: '<i class="fa fa-user-slash"></i>'
+    };
+
+    // Add badge if exists
+    let badgeHtml = '';
+    if (badge && badge !== 'user') {
+      badgeHtml = `<span class="message-role">[${badgeIcons[badge]} ${badge}]</span> `;
+    }
 
     // Build reply preview if this is a reply
     let replyHtml = '';
@@ -2974,12 +2994,14 @@ document.addEventListener('DOMContentLoaded', function () {
       reactionsHtml = `<div class="dm-message-reactions">${reactionItems}</div>`;
     }
 
+    // Use same layout as global chat
     messageDiv.innerHTML = `
-      <div class="dm-message-content">
+      ${createAvatarElement(userId, userHasAvatar, 'message-avatar')}
+      <div class="message-content">
         ${replyHtml}
-        <div class="dm-message-bubble">
-          <span class="dm-message-text">${text}</span>
-        </div>
+        <span class="message-user">${badgeHtml}${username}:</span>
+        <span class="message-text">${text}</span>
+        <span class="message-time">${timeString}</span>
         ${reactionsHtml}
       </div>
     `;
@@ -3047,20 +3069,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const messageElement = document.querySelector(`[data-message-id="${messageId}"]`);
     if (!messageElement) return;
 
-    // Get message content from the correct element
-    const messageTextElement = messageElement.querySelector('.dm-message-text');
+    // Get message content from the correct element (now using global chat format)
+    const messageTextElement = messageElement.querySelector('.message-text');
     if (!messageTextElement) return;
 
     const messageContent = messageTextElement.textContent.trim();
 
-    // Determine the message author
-    let messageAuthor;
-    if (messageElement.classList.contains('sent')) {
-      // If it's a sent message, it's from the current user
-      messageAuthor = window.CURRENT_USERNAME || 'You';
-    } else {
-      // If it's a received message, it's from the other user in the conversation
-      messageAuthor = currentDMConversation || 'Unknown User';
+    // Get message author from the message-user element
+    const messageUserElement = messageElement.querySelector('.message-user');
+    let messageAuthor = 'Unknown User';
+    if (messageUserElement) {
+      // Extract username from the format "[badge] username:" 
+      const userText = messageUserElement.textContent;
+      const colonIndex = userText.lastIndexOf(':');
+      if (colonIndex > 0) {
+        messageAuthor = userText.substring(0, colonIndex).replace(/^\[[^\]]*\]\s*/, '').trim();
+      }
     }
 
     // Find DM input container
@@ -3145,8 +3169,12 @@ document.addEventListener('DOMContentLoaded', function () {
             newReactionsContainer.className = 'dm-message-reactions';
             newReactionsContainer.innerHTML = newReactionsHtml;
 
-            const messageContent = messageElement.querySelector('.dm-message-content');
-            messageContent.appendChild(newReactionsContainer);
+            const messageContent = messageElement.querySelector('.message-content');
+            if (messageContent) {
+              messageContent.appendChild(newReactionsContainer);
+            } else {
+              console.error('Could not find message content element');
+            }
           }
         }
       }

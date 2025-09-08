@@ -21,7 +21,7 @@
       </div>
       <div class="topbar-right">
         <div class="user-info">
-          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          Signed in as:
           <span class="username" id="username">username</span>
         </div>
       </div>
@@ -424,13 +424,14 @@
               </div>
 
               <!-- Messages container -->
-              <div class="dm-messages" id="dm-messages">
+              <div class="chat-messages" id="dm-messages">
                 <!-- Messages will be loaded here -->
               </div>
 
               <!-- Reply indicator -->
               <div class="reply-indicator" id="dm-reply-indicator" style="display: none;">
                 <div class="reply-content">
+                  <i class="fas fa-reply reply-icon"></i>
                   <span class="reply-text">Replying to <strong class="reply-username"></strong>: <span
                       class="reply-message"></span></span>
                   <button class="reply-cancel" onclick="cancelDMReply()">
@@ -742,7 +743,7 @@
                       </div>
                     </div>
                     <div class="avatar-buttons">
-                      <button class="btn secondary setting-button" id="uploadAvatarBtn" onclick="showAvatarUpload()">
+                      <button class="btn secondary setting-button" id="uploadAvatarBtn">
                         <i class="fas fa-upload"></i> upload
                       </button>
                       <button class="btn danger setting-button" id="removeAvatarBtn" style="display: none;">
@@ -815,37 +816,6 @@
     <!-- Hidden file input for avatar upload -->
     <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
 
-    <!-- Avatar Crop Modal - REMOVED -->
-    <!--
-    <div id="avatarCropModal" class="modal">
-      <div class="modal-content avatar-crop-modal">
-        <div class="modal-header">
-          <h3>Crop Profile Picture</h3>
-          <span class="close" id="avatarCropClose">&times;</span>
-        </div>
-        <div class="avatar-crop-container">
-          <div class="crop-preview-container">
-            <canvas id="cropCanvas" width="400" height="400"></canvas>
-            <div class="crop-circle"></div>
-          </div>
-          <div class="crop-controls">
-            <div class="crop-control-group">
-              <label for="zoomSlider">Zoom:</label>
-              <input type="range" id="zoomSlider" min="0.5" max="4" step="0.1" value="1">
-            </div>
-            <div class="crop-control-group">
-              <label>Position: Click and drag the image</label>
-            </div>
-            <div class="crop-buttons">
-              <button class="btn secondary" id="cancelCrop">Cancel</button>
-              <button class="btn primary" id="confirmCrop">Upload</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    -->
-
     <!-- Context Menu -->
     <div id="messageContextMenu" class="context-menu">
       <div class="context-menu-item" id="reportMessage">
@@ -853,9 +823,6 @@
       </div>
       <div class="context-menu-item" id="deleteMessage">
         <i class="fas fa-trash"></i> Delete Message
-      </div>
-      <div class="context-menu-item" id="userActions">
-        <i class="fas fa-user-shield"></i> User Actions
       </div>
       <div class="context-menu-item" id="undoReportActions">
         <i class="fas fa-undo"></i> Undo Actions
