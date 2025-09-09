@@ -121,12 +121,18 @@ document.addEventListener('DOMContentLoaded', function () {
     muteExpiry = expiryEpochSeconds * 1000; // Convert to milliseconds
 
     // Replace input with countdown
-    chatInputContainer.innerHTML = `
-      <div class="mute-countdown-container">
-        <span class="mute-message">You are muted for: </span>
-        <span class="mute-timer" id="muteTimer"></span>
-      </div>
-    `;
+    const muteContainer = document.createElement('div');
+    muteContainer.className = 'mute-countdown-container';
+
+    const muteMessage = createSafeElement('span', 'You are muted for: ', 'mute-message');
+    const muteTimer = createSafeElement('span', '', 'mute-timer');
+    muteTimer.id = 'muteTimer';
+
+    muteContainer.appendChild(muteMessage);
+    muteContainer.appendChild(muteTimer);
+
+    chatInputContainer.innerHTML = '';
+    chatInputContainer.appendChild(muteContainer);
 
     // Start countdown
     updateMuteCountdown();
@@ -161,10 +167,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Restore original input
-    chatInputContainer.innerHTML = `
-      <input type="text" class="chat-input" placeholder="type your message..." maxlength="200">
-      <button class="send-button">send</button>
-    `;
+    const chatInput = document.createElement('input');
+    chatInput.type = 'text';
+    chatInput.className = 'chat-input';
+    chatInput.placeholder = 'type your message...';
+    chatInput.maxLength = 200;
+
+    const sendButton = document.createElement('button');
+    sendButton.className = 'send-button';
+    sendButton.textContent = 'send';
+
+    chatInputContainer.innerHTML = '';
+    chatInputContainer.appendChild(chatInput);
+    chatInputContainer.appendChild(sendButton);
 
     // Reattach event listeners
     attachChatEventListeners();
@@ -263,13 +278,21 @@ document.addEventListener('DOMContentLoaded', function () {
     if (messages.length === 0) {
       const emptyState = document.createElement('div');
       emptyState.className = 'empty-state';
-      emptyState.innerHTML = `
-        <div class="empty-state-content">
-          <i class="fas fa-comments empty-state-icon"></i>
-          <h3>No messages yet</h3>
-          <p>Be the first to start the conversation!</p>
-        </div>
-      `;
+
+      const emptyStateContent = document.createElement('div');
+      emptyStateContent.className = 'empty-state-content';
+
+      const icon = document.createElement('i');
+      icon.className = 'fas fa-comments empty-state-icon';
+
+      const heading = createSafeElement('h3', 'No messages yet');
+      const paragraph = createSafeElement('p', 'Be the first to start the conversation!');
+
+      emptyStateContent.appendChild(icon);
+      emptyStateContent.appendChild(heading);
+      emptyStateContent.appendChild(paragraph);
+
+      emptyState.appendChild(emptyStateContent);
       chatMessages.appendChild(emptyState);
       return;
     }
@@ -279,6 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
       messageDiv.className = 'message';
       messageDiv.setAttribute('data-author', message.username);
       messageDiv.setAttribute('data-message-id', message.uuid);
+      messageDiv.setAttribute('data-message-author', message.username);
 
       // Format timestamp
       const timestamp = new Date(message.timestamp);
@@ -287,27 +311,52 @@ document.addEventListener('DOMContentLoaded', function () {
         minute: '2-digit'
       });
 
-      badgeIcons = {
+      const badgeIcons = {
         mod: '<i class="fa fa-shield"></i>',
         admin: '<i class="fa fa-tools"></i>',
         owner: '<i class="fa fa-crown"></i>',
         shadowbanned: '<i class="fa fa-user-slash"></i>'
-      }
+      };
+
+      // Create avatar element
+      const avatarElement = createAvatarElement(message.user_id, message.has_avatar, 'message-avatar');
+
+      // Create message content container
+      const messageContent = document.createElement('div');
+      messageContent.className = 'message-content';
+
+      // Create user span with badge
+      const userSpan = document.createElement('span');
+      userSpan.className = 'message-user';
 
       // Add badge if exists
-      let badgeHtml = '';
-      if (message.badge) {
-        badgeHtml = `<span class="message-role">[${badgeIcons[message.badge]} ${message.badge}]</span> `;
+      let badgeText = '';
+      if (message.badge && message.badge !== 'user') {
+        badgeText = `[${badgeIcons[message.badge]} ${message.badge}] `;
       }
 
-      messageDiv.innerHTML = `
-        ${createAvatarElement(message.user_id, message.has_avatar, 'message-avatar')}
-        <div class="message-content">
-          <span class="message-user">${badgeHtml}${message.username}:</span>
-          <span class="message-text">${message.content}</span>
-          <span class="message-time">${timeString}</span>
-        </div>
-      `;
+      // Safely set user text
+      if (badgeText) {
+        userSpan.innerHTML = badgeText;
+        const usernameText = document.createTextNode(`${message.username}:`);
+        userSpan.appendChild(usernameText);
+      } else {
+        userSpan.textContent = `${message.username}:`;
+      }
+
+      // Create message text span with safe content
+      const messageTextSpan = createSafeElement('span', message.content, 'message-text');
+
+      // Create time span
+      const timeSpan = createSafeElement('span', timeString, 'message-time');
+
+      // Assemble the message
+      messageContent.appendChild(userSpan);
+      messageContent.appendChild(messageTextSpan);
+      messageContent.appendChild(timeSpan);
+
+      messageDiv.appendChild(avatarElement);
+      messageDiv.appendChild(messageContent);
 
       chatMessages.appendChild(messageDiv);
     });
@@ -2364,23 +2413,51 @@ document.addEventListener('DOMContentLoaded', function () {
     conversationDiv.className = 'conversation-item';
     conversationDiv.setAttribute('data-conversation', conversation.other_user.username);
 
-    const unreadBadge = conversation.unread_count > 0 ?
-      `<span class="unread-badge">${conversation.unread_count}</span>` : '';
-
     const statusClass = conversation.other_user.status === 'online' ? 'online' :
       conversation.other_user.status === 'idle' ? 'idle' : 'offline';
 
-    conversationDiv.innerHTML = `
-      ${createAvatarElement(conversation.other_user.id, conversation.other_user.has_avatar, 'conversation-avatar').replace('</div>', `<span class="status-indicator ${statusClass}"></span></div>`)}
-      <div class="conversation-content">
-        <div class="conversation-header">
-          <span class="conversation-name">${conversation.other_user.username}</span>
-        </div>
-        <div class="last-message">${conversation.last_message || 'No messages yet'}</div>
-        <div class="conversation-status">${conversation.other_user.status_text}</div>
-      </div>
-      ${unreadBadge}
-    `;
+    // Create avatar element with status indicator
+    const avatarContainer = createAvatarElement(conversation.other_user.id, conversation.other_user.has_avatar, 'conversation-avatar');
+    const statusIndicator = document.createElement('span');
+    statusIndicator.className = `status-indicator ${statusClass}`;
+
+    // Parse the avatar HTML and add status indicator
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = avatarContainer;
+    const avatarDiv = tempDiv.firstChild;
+    avatarDiv.appendChild(statusIndicator);
+
+    // Create conversation content
+    const conversationContent = document.createElement('div');
+    conversationContent.className = 'conversation-content';
+
+    // Create header
+    const conversationHeader = document.createElement('div');
+    conversationHeader.className = 'conversation-header';
+
+    const conversationName = createSafeElement('span', conversation.other_user.username, 'conversation-name');
+    conversationHeader.appendChild(conversationName);
+
+    // Create unread badge if needed
+    if (conversation.unread_count > 0) {
+      const unreadBadge = createSafeElement('span', conversation.unread_count.toString(), 'unread-badge');
+      conversationHeader.appendChild(unreadBadge);
+    }
+
+    // Create last message
+    const lastMessage = createSafeElement('div', conversation.last_message || 'No messages yet', 'last-message');
+
+    // Create status text
+    const conversationStatus = createSafeElement('div', conversation.other_user.status_text, 'conversation-status');
+
+    // Assemble conversation content
+    conversationContent.appendChild(conversationHeader);
+    conversationContent.appendChild(lastMessage);
+    conversationContent.appendChild(conversationStatus);
+
+    // Assemble full conversation element
+    conversationDiv.appendChild(avatarDiv);
+    conversationDiv.appendChild(conversationContent);
 
     return conversationDiv;
   }
@@ -2973,38 +3050,90 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Build reply preview if this is a reply
-    let replyHtml = '';
+    let replyContainer = null;
     if (replyTo) {
-      replyHtml = `
-        <div class="dm-message-reply-preview">
-          <div class="dm-reply-to-username">${replyTo.sender_username}</div>
-          <div class="dm-reply-to-content">${replyTo.content}</div>
-        </div>
-      `;
+      replyContainer = document.createElement('div');
+      replyContainer.className = 'dm-message-reply-preview';
+
+      const replyUsername = createSafeElement('div', replyTo.sender_username, 'dm-reply-to-username');
+      const replyContent = createSafeElement('div', replyTo.content, 'dm-reply-to-content');
+
+      replyContainer.appendChild(replyUsername);
+      replyContainer.appendChild(replyContent);
     }
 
     // Build reactions if present
-    let reactionsHtml = '';
+    let reactionsContainer = null;
     if (reactions && Object.keys(reactions).length > 0) {
-      const reactionItems = Object.entries(reactions).map(([emoji, users]) => {
-        const isActive = users.includes(window.USER_ID);
-        return `<span class="dm-reaction ${isActive ? 'active' : ''}" data-emoji="${emoji}">${emoji} <span class="dm-reaction-count">${users.length}</span></span>`;
-      }).join('');
+      reactionsContainer = document.createElement('div');
+      reactionsContainer.className = 'dm-message-reactions';
 
-      reactionsHtml = `<div class="dm-message-reactions">${reactionItems}</div>`;
+      Object.entries(reactions).forEach(([emoji, users]) => {
+        const isActive = users.includes(window.USER_ID);
+        const reactionSpan = document.createElement('span');
+        reactionSpan.className = `dm-reaction ${isActive ? 'active' : ''}`;
+        reactionSpan.setAttribute('data-emoji', emoji);
+
+        const emojiText = document.createTextNode(emoji + ' ');
+        const countSpan = createSafeElement('span', users.length.toString(), 'dm-reaction-count');
+
+        reactionSpan.appendChild(emojiText);
+        reactionSpan.appendChild(countSpan);
+        reactionsContainer.appendChild(reactionSpan);
+      });
     }
 
-    // Use same layout as global chat
-    messageDiv.innerHTML = `
-      ${createAvatarElement(userId, userHasAvatar, 'message-avatar')}
-      <div class="message-content">
-        ${replyHtml}
-        <span class="message-user">${badgeHtml}${username}:</span>
-        <span class="message-text">${text}</span>
-        <span class="message-time">${timeString}</span>
-        ${reactionsHtml}
-      </div>
-    `;
+    // Create avatar element
+    const avatarElement = createAvatarElement(userId, userHasAvatar, 'message-avatar');
+
+    // Create message content container
+    const messageContent = document.createElement('div');
+    messageContent.className = 'message-content';
+
+    // Add reply preview if exists
+    if (replyContainer) {
+      messageContent.appendChild(replyContainer);
+    }
+
+    // Create user span with badge
+    const userSpan = document.createElement('span');
+    userSpan.className = 'message-user';
+
+    // Add badge if exists
+    if (badge && badge !== 'user') {
+      const badgeIcons = {
+        mod: '<i class="fa fa-shield"></i>',
+        admin: '<i class="fa fa-tools"></i>',
+        owner: '<i class="fa fa-crown"></i>',
+        shadowbanned: '<i class="fa fa-user-slash"></i>'
+      };
+      const badgeText = `[${badgeIcons[badge]} ${badge}] `;
+      userSpan.innerHTML = badgeText;
+      const usernameText = document.createTextNode(`${username}:`);
+      userSpan.appendChild(usernameText);
+    } else {
+      userSpan.textContent = `${username}:`;
+    }
+
+    // Create message text span with safe content
+    const messageTextSpan = createSafeElement('span', text, 'message-text');
+
+    // Create time span
+    const timeSpan = createSafeElement('span', timeString, 'message-time');
+
+    // Assemble the message content
+    messageContent.appendChild(userSpan);
+    messageContent.appendChild(messageTextSpan);
+    messageContent.appendChild(timeSpan);
+
+    // Add reactions if present
+    if (reactionsContainer) {
+      messageContent.appendChild(reactionsContainer);
+    }
+
+    // Assemble the full message
+    messageDiv.appendChild(avatarElement);
+    messageDiv.appendChild(messageContent);
 
     dmMessages.appendChild(messageDiv);
 
