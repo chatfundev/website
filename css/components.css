@@ -24,6 +24,7 @@
   background-color: var(--primary-hover);
 }
 
+/* Button Variants */
 .btn.secondary {
   background-color: var(--surface-color);
   color: var(--text-color);
@@ -44,6 +45,34 @@
   background-color: transparent;
   border: 2px solid var(--danger-hover);
   transition: border-color var(--transition-duration-slow) ease;
+}
+
+.btn.success {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+  color: white;
+}
+
+.btn.success:hover {
+  background-color: var(--success-hover);
+  border-color: var(--success-hover);
+}
+
+.btn.warning {
+  background-color: var(--warning-color);
+  border-color: var(--warning-color);
+  color: white;
+}
+
+.btn.warning:hover {
+  background-color: var(--warning-hover);
+  border-color: var(--warning-hover);
+}
+
+/* Button Sizes */
+.btn.small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-sm);
 }
 
 /* Checkbox Styles */

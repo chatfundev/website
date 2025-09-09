@@ -20,11 +20,14 @@
   color: var(--text-color);
   font-family: var(--font-family);
   font-size: var(--font-size-base);
+  transition: all 0.2s ease;
 }
 
 .form-group input:focus {
   outline: none;
   border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  transform: translateY(-1px);
 }
 
 .form-group input::placeholder {
@@ -64,9 +67,113 @@
   font-size: var(--font-size-base);
   cursor: pointer;
   font-weight: bold;
-  transition: background-color var(--transition-duration) ease;
+  transition: all var(--transition-duration) ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.login-button:hover {
+.login-button:hover:not(:disabled) {
   background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.login-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-button:disabled {
+  background-color: var(--border-color);
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Error and Success Message Containers */
+.error-container,
+.success-container {
+  margin-bottom: var(--spacing-lg);
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 0;
+  overflow: hidden;
+}
+
+.error-container.show,
+.success-container.show {
+  opacity: 1;
+  transform: translateY(0);
+  max-height: 100px;
+}
+
+.error-message,
+.success-message {
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: slideInBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #c33;
+}
+
+.success-message {
+  background-color: #efe;
+  border: 1px solid #cfc;
+  color: #363;
+}
+
+.error-message i,
+.success-message i {
+  margin-right: var(--spacing-xs);
+  font-size: var(--font-size-lg);
+}
+
+.error-message i {
+  color: #e74c3c;
+}
+
+.success-message i {
+  color: #27ae60;
+}
+
+/* Slide in bounce animation */
+@keyframes slideInBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: translateY(2px) scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Fade out animation */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
 }

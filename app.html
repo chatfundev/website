@@ -7,7 +7,6 @@
     <title>ChatFun - App</title>
     <link rel="icon" type="image/svg+xml" href="images/logo.svg">
     <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/app.css">
     <script src="https://kit.fontawesome.com/ac9ab6562b.js" crossorigin="anonymous"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +24,7 @@
       </div>
       <div class="topbar-right">
         <div class="user-info">
-          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          Signed in as:
           <span class="username" id="username">username</span>
         </div>
       </div>
@@ -36,6 +35,7 @@
       <!-- Sidebar -->
       <div class="sidebar">
         <nav class="sidebar-nav">
+          <!-- Main navigation items -->
           <div class="nav-item active" data-tab="chat">
             <span class="nav-icon"><i class="fas fa-comments"></i></span>
             <span class="nav-text">chat</span>
@@ -52,15 +52,31 @@
             <span class="nav-icon"><i class="fas fa-box"></i></span>
             <span class="nav-text">items</span>
           </div>
-          <!-- Mod/Admin sections (hidden by default) -->
-          <div class="nav-item mod-only" data-tab="mod-dash" style="display: none;">
-            <span class="nav-icon"><i class="fas fa-shield-alt"></i></span>
-            <span class="nav-text">mod dash</span>
+          <div class="nav-item" data-tab="friends">
+            <span class="nav-icon"><i class="fas fa-users"></i></span>
+            <span class="nav-text">friends</span>
           </div>
-          <div class="nav-item admin-only" data-tab="admin-dash" style="display: none;">
+          <div class="nav-item" data-tab="dms">
+            <span class="nav-icon"><i class="fas fa-envelope"></i></span>
+            <span class="nav-text">dms</span>
+          </div>
+
+          <!-- Mod/Admin sections -->
+          <div class="nav-item mod-only" data-tab="reports" style="display: none;">
+            <span class="nav-icon"><i class="fas fa-flag"></i></span>
+            <span class="nav-text">reports</span>
+          </div>
+          <div class="nav-item admin-only" data-tab="server-stats" style="display: none;">
+            <span class="nav-icon"><i class="fas fa-server"></i></span>
+            <span class="nav-text">server stats</span>
+          </div>
+          <div class="nav-item admin-only" data-tab="other-admin-stuff" style="display: none;">
             <span class="nav-icon"><i class="fas fa-tools"></i></span>
-            <span class="nav-text">admin dash</span>
+            <span class="nav-text">admin tools</span>
           </div>
+
+          <!-- Settings separator and settings -->
+          <div class="nav-separator"></div>
           <div class="nav-item settings" data-tab="settings">
             <span class="nav-icon"><i class="fas fa-cog"></i></span>
             <span class="nav-text">settings</span>
@@ -75,38 +91,11 @@
           <div class="chat-header">
             <h2>global chat</h2>
             <div class="chat-info">
-              <span class="online-count">42 online</span>
+              <span class="online-count" id="online-count">Loading...</span>
             </div>
           </div>
           <div class="chat-messages" id="chat-messages">
-            <div class="message" data-message-id="msg-1" data-author="player123">
-              <span class="message-user">player123:</span>
-              <span class="message-text">hey everyone!</span>
-              <span class="message-time">2:30 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-2" data-author="gamer456">
-              <span class="message-user">gamer456:</span>
-              <span class="message-text">what's up?</span>
-              <span class="message-time">2:31 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-3" data-author="player123">
-              <span class="message-user">
-                <span class="message-role">[<i class="fa fa-tools"></i> admin]</span> admin789:</span>
-              <span class="message-text">good afternoon.</span>
-              <span class="message-time">2:33 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-4" data-author="mod123">
-              <span class="message-user">
-                <span class="message-role">[<i class="fa fa-shield"></i> mod]</span> mod123:</span>
-              <span class="message-text">yo!</span>
-              <span class="message-time">2:35 PM</span>
-            </div>
-            <div class="message" data-message-id="msg-5" data-author="owner456">
-              <span class="message-user">
-                <span class="message-role">[<i class="fa fa-crown"></i> owner]</span> owner456:</span>
-              <span class="message-text">what's good?</span>
-              <span class="message-time">2:36 PM</span>
-            </div>
+            <!-- Will be loaded -->
           </div>
           <div class="chat-input-container">
             <input type="text" class="chat-input" placeholder="type your message..." maxlength="200">
@@ -184,94 +173,355 @@
         <!-- Items Tab -->
         <div class="tab-content" id="items">
           <div class="tab-header">
-            <h2>items</h2>
+            <h2>inventory</h2>
             <div class="currency-info">
-              <span>💰 coins: 250</span>
+              <span><i class="fas fa-coins"></i> coins: 250</span>
             </div>
           </div>
+
+          <div class="create-item-section">
+            <button class="btn" id="createRandomBtn">Forge Item - 50 Coins</button>
+          </div>
+
           <div class="items-grid">
-            <div class="item owned">
-              <div class="item-icon">🎨</div>
-              <div class="item-info">
-                <h3>rainbow text</h3>
-                <p>make your text colorful</p>
-                <span class="item-status">owned</span>
+            <!-- Variation 1: Basic item -->
+            <div class="item">
+              <div class="item-header">
+                <span class="item-name">Blazing Shortsword</span>
+                <span class="item-rarity">RARE</span>
+                <div class="actions-dropdown">
+                  <button class="actions-btn" tabindex="0">Actions</button>
+                  <div class="actions-menu">
+                    <div class="actions-menu-item" tabindex="0" class="item-sell-button">Sell Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-reforge-button">Reforge Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-rune-button">Apply Rune</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-body">
+                <div class="item-runes">
+                  <span class="rune hydro">Hydro Rune</span>
+                  <span class="rune-level">III</span>
+                  <span class="rune galactic">Galactic Rune</span>
+                  <span class="rune-level">IV</span>
+                </div>
+                <div class="item-worth"><i class="fas fa-coins"></i> 12K coins</div>
+                <div class="value-breakdown">
+                  <div class="breakdown-title">Value Breakdown</div>
+                  <ul>
+                    <li><span class="breakdown-label">Base Item</span> <span class="breakdown-value">5K</span></li>
+                    <li><span class="breakdown-label">Hydro Rune III</span> <span class="breakdown-value">+3K</span>
+                    </li>
+                    <li><span class="breakdown-label">Galactic Rune IV</span> <span class="breakdown-value">+4K</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="item-edition">
+                  <span class="edition-label">Edition</span>
+                  <span class="edition-number">#1</span>
+                  <span class="edition-label">Forged By</span>
+                  <span class="forged-by">proplayer919</span>
+                </div>
               </div>
             </div>
-            <div class="item available">
-              <div class="item-icon">✨</div>
-              <div class="item-info">
-                <h3>sparkle effect</h3>
-                <p>add sparkles to your messages</p>
-                <span class="item-price">50 coins</span>
+
+            <!-- Variation 2: With Rune Multipliers -->
+            <div class="item">
+              <div class="item-header">
+                <span class="item-name">Blazing Shortsword</span>
+                <span class="item-rarity">RARE</span>
+                <div class="actions-dropdown">
+                  <button class="actions-btn" tabindex="0">Actions</button>
+                  <div class="actions-menu">
+                    <div class="actions-menu-item" tabindex="0" class="item-sell-button">Sell Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-reforge-button">Reforge Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-rune-button">Apply Rune</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-body">
+                <div class="item-runes">
+                  <span class="rune hydro">Hydro Rune</span>
+                  <span class="rune-level">III</span>
+                  <span class="rune-multiplier">x1.2</span>
+                  <span class="rune galactic">Galactic Rune</span>
+                  <span class="rune-level">IV</span>
+                  <span class="rune-multiplier">x1.5</span>
+                </div>
+                <div class="item-worth"><i class="fas fa-coins"></i> 18K coins</div>
+                <div class="value-breakdown">
+                  <div class="breakdown-title">Value Breakdown</div>
+                  <ul>
+                    <li><span class="breakdown-label">Base Item</span> <span class="breakdown-value">5K</span></li>
+                    <li><span class="breakdown-label">Hydro Rune III (x1.2)</span> <span
+                        class="breakdown-value">+3.6K</span></li>
+                    <li><span class="breakdown-label">Galactic Rune IV (x1.5)</span> <span
+                        class="breakdown-value">+6K</span></li>
+                    <li><span class="breakdown-label">Synergy Bonus</span> <span class="breakdown-value">+3.4K</span>
+                    </li>
+                  </ul>
+                </div>
+                <div class="item-edition">
+                  <span class="edition-label">Edition</span>
+                  <span class="edition-number">#1</span>
+                  <span class="edition-label">Forged By</span>
+                  <span class="forged-by">proplayer919</span>
+                </div>
               </div>
             </div>
-            <div class="item available">
-              <div class="item-icon">👑</div>
-              <div class="item-info">
-                <h3>crown badge</h3>
-                <p>show your royal status</p>
-                <span class="item-price">100 coins</span>
+
+            <!-- Variation 3: With Rune Multipliers & Reforge Stats -->
+            <div class="item">
+              <div class="item-header">
+                <span class="item-name">Blazing Shortsword</span>
+                <span class="item-rarity">RARE</span>
+                <div class="actions-dropdown">
+                  <button class="actions-btn" tabindex="0">Actions</button>
+                  <div class="actions-menu">
+                    <div class="actions-menu-item" tabindex="0" class="item-sell-button">Sell Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-reforge-button">Reforge Item</div>
+                    <div class="actions-menu-item" tabindex="0" class="item-rune-button">Apply Rune</div>
+                  </div>
+                </div>
+              </div>
+              <div class="item-body">
+                <div class="item-runes">
+                  <span class="rune hydro">Hydro Rune</span>
+                  <span class="rune-level">III</span>
+                  <span class="rune-multiplier">x1.2</span>
+                  <span class="rune galactic">Galactic Rune</span>
+                  <span class="rune-level">IV</span>
+                  <span class="rune-multiplier">x1.5</span>
+                </div>
+                <div class="reforge-stats">
+                  <div class="reforge-title">Reforge Stats</div>
+                  <ul>
+                    <li><span class="reforge-stat-label">Rune Success Rate</span> <span
+                        class="reforge-stat-value reforge-stat-value-positive">+18%</span></li>
+                    <li><span class="reforge-stat-label">Rune Catastrophic Fail Rate</span> <span
+                        class="reforge-stat-value reforge-stat-value-negative">-65%</span></li>
+                  </ul>
+                </div>
+                <div class="item-worth"><i class="fas fa-coins"></i> 21K coins</div>
+                <div class="value-breakdown">
+                  <div class="breakdown-title">Value Breakdown</div>
+                  <ul>
+                    <li><span class="breakdown-label">Base Item</span> <span class="breakdown-value">5K</span></li>
+                    <li><span class="breakdown-label">Hydro Rune III (x1.2)</span> <span
+                        class="breakdown-value">+3.6K</span></li>
+                    <li><span class="breakdown-label">Galactic Rune IV (x1.5)</span> <span
+                        class="breakdown-value">+6K</span></li>
+                    <li><span class="breakdown-label">Synergy Bonus</span> <span class="breakdown-value">+3.4K</span>
+                    </li>
+                    <li><span class="breakdown-label">Reforge Stats</span> <span class="breakdown-value">+3K</span></li>
+                  </ul>
+                </div>
+                <div class="item-edition">
+                  <span class="edition-label">Edition</span>
+                  <span class="edition-number">#1</span>
+                  <span class="edition-label">Forged By</span>
+                  <span class="forged-by">proplayer919</span>
+                </div>
+                <div class="item-extra">
+                  <span class="extra-label">Last Reforged</span>
+                  <span class="extra-value">2025-08-29</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Mod Dashboard Tab -->
-        <div class="tab-content" id="mod-dash">
+        <!-- Friends Tab -->
+        <div class="tab-content" id="friends">
           <div class="tab-header">
-            <h2>moderator dashboard</h2>
+            <h2>friends</h2>
+            <div class="friends-info">
+              <span class="online-friends-count">Loading...</span>
+              <button class="add-friend-btn" id="sendFriendRequestBtn">
+                <i class="fas fa-user-plus"></i> Add Friend
+              </button>
+            </div>
+          </div>
+
+          <!-- Friend Requests Section -->
+          <div class="friends-section">
+            <div class="friends-section-header">
+              <h3>Friend Requests</h3>
+              <span class="request-count">Loading...</span>
+            </div>
+
+            <div class="friend-requests-tabs">
+              <button class="request-tab-btn active" data-request-type="incoming">
+                <i class="fas fa-arrow-down"></i> Incoming (0)
+              </button>
+              <button class="request-tab-btn" data-request-type="outgoing">
+                <i class="fas fa-arrow-up"></i> Outgoing (0)
+              </button>
+            </div>
+
+            <!-- Incoming Requests -->
+            <div class="friend-requests-list incoming-requests active">
+              <!-- Will be loaded -->
+            </div>
+
+            <!-- Outgoing Requests -->
+            <div class="friend-requests-list outgoing-requests">
+              <!-- Will be loaded -->
+            </div>
+          </div>
+
+          <!-- Friends List Section -->
+          <div class="friends-section">
+            <div class="friends-section-header">
+              <h3>Friends</h3>
+              <span class="friends-count" id="friends-total-count">0 total</span>
+            </div>
+
+            <div class="friends-filter">
+              <button class="filter-btn active" data-filter="all" id="filter-all">All (0)</button>
+              <button class="filter-btn" data-filter="online" id="filter-online">Online (0)</button>
+              <button class="filter-btn" data-filter="offline" id="filter-offline">Offline (0)</button>
+            </div>
+
+            <div class="friends-list">
+              <!-- Will be loaded -->
+            </div>
+          </div>
+        </div>
+
+        <!-- DMs Tab -->
+        <div class="tab-content" id="dms">
+          <div class="tab-header">
+            <h2>direct messages</h2>
+          </div>
+
+          <div class="dms-layout">
+            <!-- Conversations List -->
+            <div class="conversations-sidebar">
+              <div class="conversations-header">
+                <div class="search-container">
+                  <i class="fas fa-search search-icon"></i>
+                  <input type="text" class="conversation-search" placeholder="Search conversations...">
+                </div>
+              </div>
+
+              <div class="conversations-list">
+                <!-- Conversations will be loaded here -->
+              </div>
+            </div>
+
+            <!-- Message Area -->
+            <div class="dm-messages-area">
+              <!-- Active conversation header -->
+              <div class="dm-conversation-header">
+                <div class="dm-user-info">
+                  <div class="dm-user-avatar">
+                    <i class="fas fa-user"></i>
+                    <div class="status-indicator online"></div>
+                  </div>
+                  <div class="dm-user-details">
+                    <span class="dm-user-name">Loading...</span>
+                    <span class="dm-user-status">Loading...</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Messages container -->
+              <div class="chat-messages" id="dm-messages">
+                <!-- Messages will be loaded here -->
+              </div>
+
+              <!-- Reply indicator -->
+              <div class="reply-indicator" id="dm-reply-indicator" style="display: none;">
+                <div class="reply-content">
+                  <i class="fas fa-reply reply-icon"></i>
+                  <span class="reply-text">Replying to <strong class="reply-username"></strong>: <span
+                      class="reply-message"></span></span>
+                  <button class="reply-cancel" onclick="cancelDMReply()">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Message input -->
+              <div class="dm-input-container">
+                <input type="text" class="dm-input" placeholder="Type your message..." maxlength="200">
+                <button class="dm-send-button">
+                  <i class="fas fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports Tab (for mods+) -->
+        <div class="tab-content" id="reports">
+          <div class="tab-header">
+            <h2>reports</h2>
           </div>
           <div class="mod-tools">
             <div class="tool-section">
-              <h3>recent reports</h3>
-              <div class="reports-list">
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                  </div>
+              <div class="reports-controls">
+                <div class="reports-tabs">
+                  <button class="reports-tab-btn active" data-category="all">All Reports</button>
+                  <button class="reports-tab-btn" data-category="pending">Awaiting Review</button>
+                  <button class="reports-tab-btn" data-category="completed">Completed</button>
                 </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                  </div>
+                <div class="reports-stats">
+                  <span class="reports-count">Total: <span id="totalReports">0</span></span>
                 </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                  </div>
+              </div>
+
+              <div class="reports-filter">
+                <div class="filter-row">
+                  <input type="text" id="reportSearchInput" placeholder="Search by username, reason, or submitter..."
+                    class="search-input">
+                  <select id="reasonFilter" class="filter-select">
+                    <option value="">All Reasons</option>
+                    <option value="spam">Spam</option>
+                    <option value="harassment">Harassment</option>
+                    <option value="inappropriate">Inappropriate Content</option>
+                    <option value="misinformation">Misinformation</option>
+                    <option value="cheating">Cheating</option>
+                  </select>
+                  <button id="clearFilters" class="btn secondary small">Clear Filters</button>
                 </div>
+              </div>
+
+              <div class="reports-help">
+                <i class="fas fa-info-circle"></i>
+                <span>Use the action buttons on each report to take moderation actions. Use pagination to navigate
+                  through
+                  reports.</span>
+              </div>
+
+              <div class="reports-list" id="reportsList">
+                <!-- Reports will be dynamically loaded here -->
+              </div>
+
+              <div class="reports-pagination">
+                <button class="pagination-btn" id="prevPage" disabled>
+                  <i class="fas fa-chevron-left"></i> Previous
+                </button>
+                <span class="pagination-info">
+                  Page <span id="currentPage">1</span> of <span id="totalPages">1</span>
+                </span>
+                <button class="pagination-btn" id="nextPage" disabled>
+                  Next <i class="fas fa-chevron-right"></i>
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Admin Dashboard Tab -->
-        <div class="tab-content" id="admin-dash">
+        <!-- Server Stats Tab (for admins) -->
+        <div class="tab-content" id="server-stats">
           <div class="tab-header">
-            <h2>administrator dashboard</h2>
+            <h2>server stats</h2>
           </div>
           <div class="admin-tools">
             <div class="tool-section">
-              <h3>server stats</h3>
+              <h3>server statistics</h3>
               <div class="stats-grid">
                 <div class="stat-item">
                   <span class="stat-label">total users</span>
@@ -285,47 +535,43 @@
                   <span class="stat-label">messages today</span>
                   <span class="stat-value">8,456</span>
                 </div>
+                <div class="stat-item">
+                  <span class="stat-label">server uptime</span>
+                  <span class="stat-value">7d 14h</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">memory usage</span>
+                  <span class="stat-value">68%</span>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">cpu usage</span>
+                  <span class="stat-value">32%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Admin Tools Tab (for admins) -->
+        <div class="tab-content" id="other-admin-stuff">
+          <div class="tab-header">
+            <h2>admin tools</h2>
+          </div>
+          <div class="admin-tools">
+            <div class="tool-section">
+              <h3>user management</h3>
+              <div class="admin-actions">
+                <button class="btn-primary">manage users</button>
+                <button class="btn-secondary">view ban list</button>
+                <button class="btn-secondary">system announcements</button>
               </div>
             </div>
             <div class="tool-section">
-              <h3>recent reports</h3>
-              <div class="reports-list">
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                    <button class="btn-ban">ban</button>
-                  </div>
-                </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                    <button class="btn-ban">ban</button>
-                  </div>
-                </div>
-                <div class="report-item">
-                  <div class="report-users">
-                    <span class="report-user"><span class="report-user-label">submitter: </span>user123</span>
-                    <span class="report-user"><span class="report-user-label">reported: </span>user456</span>
-                  </div>
-                  <span class="report-reason">spam</span>
-                  <div class="report-actions">
-                    <button class="btn-warn">warn</button>
-                    <button class="btn-mute">mute</button>
-                    <button class="btn-ban">ban</button>
-                  </div>
-                </div>
+              <h3>server management</h3>
+              <div class="admin-actions">
+                <button class="btn-secondary">maintenance mode</button>
+                <button class="btn-secondary">backup database</button>
+                <button class="btn-danger">restart server</button>
               </div>
             </div>
           </div>
@@ -337,35 +583,227 @@
             <h2>settings</h2>
           </div>
           <div class="settings-sections">
+            <!-- Notifications Settings -->
             <div class="settings-section">
-              <h3>notifications</h3>
+              <h3><i class="fas fa-bell"></i> notifications</h3>
               <div class="setting-item">
-                <label class="setting-label">
-                  <div class="checkbox-container">
-                    <input type="checkbox" class="checkbox" checked>
-                    <span class="checkbox-label">message notifications</span>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">message notifications</span>
+                    <span class="setting-description">get notified when someone mentions you</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="messageNotifications" checked>
+                    <span class="toggle-slider"></span>
                   </div>
                 </label>
               </div>
               <div class="setting-item">
-                <label class="setting-label">
-                  <div class="checkbox-container">
-                    <input type="checkbox" class="checkbox">
-                    <span class="checkbox-label">achievement notifications</span>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">direct message notifications</span>
+                    <span class="setting-description">receive alerts for private messages</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="dmNotifications" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">achievement notifications</span>
+                    <span class="setting-description">celebrate your milestones and rewards</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="achievementNotifications">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">sound notifications</span>
+                    <span class="setting-description">play sounds for important events</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="soundNotifications">
+                    <span class="toggle-slider"></span>
                   </div>
                 </label>
               </div>
             </div>
+
+            <!-- Chat Settings -->
             <div class="settings-section">
-              <h3>account</h3>
+              <h3><i class="fas fa-comments"></i> chat preferences</h3>
               <div class="setting-item">
-                <button class="btn secondary">change password</button>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">show timestamps</span>
+                    <span class="setting-description">display message send times</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="showTimestamps" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
               </div>
               <div class="setting-item">
-                <button class="btn danger">logout</button>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">auto-scroll to new messages</span>
+                    <span class="setting-description">automatically scroll down for new messages</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="autoScroll">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
               </div>
               <div class="setting-item">
-                <button class="btn danger">delete account</button>
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">ctrl+enter to send</span>
+                    <span class="setting-description">send messages with ctrl+enter instead of enter</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="ctrlEnterToSend">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-shield-alt"></i> privacy & safety</h3>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">appear offline</span>
+                    <span class="setting-description">always show as offline to other users</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="appearOffline">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">allow direct messages</span>
+                    <span class="setting-description">receive private messages from other users</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="allowDirectMessages" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">filter inappropriate content</span>
+                    <span class="setting-description">automatically hide potentially offensive messages</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="contentFilter" checked>
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="setting-item">
+                <label class="setting-label toggle-setting">
+                  <div class="setting-info">
+                    <span class="setting-title">hide profile pictures</span>
+                    <span class="setting-description">show default avatars instead of profile pictures</span>
+                  </div>
+                  <div class="toggle-container">
+                    <input type="checkbox" class="toggle-checkbox" id="hideProfilePictures">
+                    <span class="toggle-slider"></span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Profile Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-user-circle"></i> profile</h3>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">profile picture</span>
+                    <span class="setting-description">upload a custom profile picture (max 5MB)</span>
+                  </div>
+                  <div class="profile-picture-controls">
+                    <div class="current-avatar" id="currentAvatar">
+                      <div class="default-avatar">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    </div>
+                    <div class="avatar-buttons">
+                      <button class="btn secondary setting-button" id="uploadAvatarBtn">
+                        <i class="fas fa-upload"></i> upload
+                      </button>
+                      <button class="btn danger setting-button" id="removeAvatarBtn" style="display: none;">
+                        <i class="fas fa-trash"></i> remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Account Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-user-cog"></i> account management</h3>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">change password</span>
+                    <span class="setting-description">update your account password</span>
+                  </div>
+                  <button class="btn secondary setting-button" id="changePasswordBtn">
+                    <i class="fas fa-key"></i> change
+                  </button>
+                </div>
+              </div>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">download data</span>
+                    <span class="setting-description">export your chat history and account data</span>
+                  </div>
+                  <button class="btn secondary setting-button" id="exportDataBtn">
+                    <i class="fas fa-download"></i> export
+                  </button>
+                </div>
+              </div>
+              <div class="setting-item danger-zone">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">logout</span>
+                    <span class="setting-description">sign out of your account</span>
+                  </div>
+                  <button class="btn danger setting-button" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> logout
+                  </button>
+                </div>
+              </div>
+              <div class="setting-item danger-zone">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">delete account</span>
+                    <span class="setting-description">permanently delete your account and all data</span>
+                  </div>
+                  <button class="btn danger setting-button" id="deleteAccountBtn">
+                    <i class="fas fa-trash"></i> delete
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -374,6 +812,12 @@
     </div>
 
     <script src="js/app.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/items.js"></script>
+
+    <!-- Hidden file input for avatar upload -->
+    <input type="file" id="avatarInput" accept="image/*" style="display: none;" onchange="handleAvatarUpload(event)">
 
     <!-- Context Menu -->
     <div id="messageContextMenu" class="context-menu">
@@ -383,8 +827,18 @@
       <div class="context-menu-item" id="deleteMessage">
         <i class="fas fa-trash"></i> Delete Message
       </div>
-      <div class="context-menu-item" id="userActions">
-        <i class="fas fa-user-shield"></i> User Actions
+      <div class="context-menu-item" id="undoReportActions">
+        <i class="fas fa-undo"></i> Undo Actions
+      </div>
+    </div>
+
+    <!-- DM Context Menu -->
+    <div id="dmContextMenu" class="context-menu">
+      <div class="context-menu-item" id="replyDMMessage">
+        <i class="fas fa-reply"></i> Reply
+      </div>
+      <div class="context-menu-item" id="reactDMMessage">
+        <i class="fas fa-smile"></i> React
       </div>
     </div>
 
@@ -401,6 +855,23 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelDelete">Cancel</button>
           <button class="btn danger" id="confirmDelete">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Avatar Modal -->
+    <div id="deleteAvatarModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Delete Profile Picture</h3>
+          <span class="modal-close" id="deleteAvatarModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete your profile picture? This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelDeleteAvatar">Cancel</button>
+          <button class="btn danger" id="confirmDeleteAvatar">Delete</button>
         </div>
       </div>
     </div>
@@ -607,6 +1078,312 @@
         <div class="modal-footer">
           <button class="btn secondary" id="cancelUserActions">Cancel</button>
           <button class="btn primary" id="confirmUserActions">Apply Actions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Undo Report Actions Modal -->
+    <div id="undoReportModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Undo Report Actions</h3>
+          <span class="modal-close" id="undoReportModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="undo-report-info">
+            <p>This will undo the following actions taken on <strong id="undoTargetUser"></strong>:</p>
+            <div class="actions-taken" id="actionsTaken">
+              <!-- Actions will be listed here -->
+            </div>
+            <div class="warning-message">
+              <i class="fas fa-exclamation-triangle"></i>
+              <span>This action cannot be undone and will reopen the report for review.</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelUndoReport">Cancel</button>
+          <button class="btn danger" id="confirmUndoReport">Undo Actions</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forge New Item Modal -->
+    <div id="createItemModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Forge New Item</h3>
+          <span class="modal-close" id="createItemModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="create-item-info">
+            <div class="item-preview">
+              <i class="fas fa-gift"></i>
+              <p>You will receive a completely random item!</p>
+            </div>
+            <div class="cost-info">
+              <span class="cost-label">Cost:</span>
+              <span class="cost-amount">50 <i class="fas fa-coins"></i></span>
+            </div>
+            <div class="balance-info">
+              <span class="balance-label">Your balance:</span>
+              <span class="balance-amount" id="currentBalanceDisplay">250 <i class="fas fa-coins"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelCreateItem">Cancel</button>
+          <button class="btn primary" id="confirmCreateItem">Create Item</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insufficient Coins Modal -->
+    <div id="insufficientCoinsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3><i class="fas fa-exclamation-triangle"></i> Insufficient Coins</h3>
+          <span class="modal-close" id="insufficientCoinsModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="insufficient-coins-info">
+            <div class="insufficient-coins-preview">
+              <i class="fas fa-coins insufficient-coins-icon"></i>
+              <p>You don't have enough coins to create this item!</p>
+            </div>
+            <div class="coins-breakdown">
+              <div class="cost-info">
+                <span class="cost-label">Required:</span>
+                <span class="cost-amount" id="requiredCoinsDisplay">50 <i class="fas fa-coins"></i></span>
+              </div>
+              <div class="balance-info">
+                <span class="balance-label">Your balance:</span>
+                <span class="balance-amount" id="currentCoinsDisplay">0 <i class="fas fa-coins"></i></span>
+              </div>
+              <div class="shortage-info">
+                <span class="shortage-label">You need:</span>
+                <span class="shortage-amount" id="neededCoinsDisplay">50 <i class="fas fa-coins"></i> more</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn primary" id="closeInsufficientCoinsModal">Got It</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sell Item Modal -->
+    <div id="sellItemModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Sell Item</h3>
+          <span class="modal-close" id="sellItemModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="sell-item-info">
+            <div class="item-details">
+              <div class="item-name-display" id="sellItemName">Item Name</div>
+              <div class="item-rarity-display" id="sellItemRarity">Rarity</div>
+            </div>
+            <div class="sell-price-info">
+              <span class="sell-label">You will receive:</span>
+              <span class="sell-amount" id="sellItemPrice">0 <i class="fas fa-coins"></i></span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelSellItem">Cancel</button>
+          <button class="btn danger" id="confirmSellItem">Sell Item</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Password</h3>
+          <span class="modal-close" id="changePasswordModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <form id="changePasswordForm">
+            <div class="form-group">
+              <label for="currentPassword">Current Password</label>
+              <input type="password" id="currentPassword" name="currentPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="password" id="newPassword" name="newPassword" required>
+            </div>
+            <div class="form-group">
+              <label for="confirmNewPassword">Confirm New Password</label>
+              <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+            </div>
+            <div class="password-requirements">
+              <h4>Password Requirements:</h4>
+              <ul>
+                <li>At least 8 characters long</li>
+                <li>Contains at least one uppercase letter</li>
+                <li>Contains at least one lowercase letter</li>
+                <li>Contains at least one number</li>
+                <li>Contains at least one special character</li>
+              </ul>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelChangePassword">Cancel</button>
+          <button class="btn primary" id="confirmChangePassword" form="changePasswordForm">Change Password</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Clear Cache Modal -->
+    <div id="clearCacheModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Clear Cache</h3>
+          <span class="modal-close" id="clearCacheModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon warning">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <p><strong>Are you sure you want to clear the application cache?</strong></p>
+          <p>This will:</p>
+          <ul>
+            <li>Clear all stored application data</li>
+            <li>Reset your preferences (except login credentials)</li>
+            <li>Reload the application</li>
+          </ul>
+          <p class="warning-text">You will remain logged in, but all temporary data will be lost.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelClearCache">Cancel</button>
+          <button class="btn warning" id="confirmClearCache">Clear Cache</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Logout Modal -->
+    <div id="logoutModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Sign Out</h3>
+          <span class="modal-close" id="logoutModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon info">
+            <i class="fas fa-sign-out-alt"></i>
+          </div>
+          <p><strong>Are you sure you want to sign out?</strong></p>
+          <p>You will be redirected to the login page and will need to enter your credentials again to access ChatFun.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelLogout">Cancel</button>
+          <button class="btn primary" id="confirmLogout">Sign Out</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div id="deleteAccountModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Delete Account</h3>
+          <span class="modal-close" id="deleteAccountModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon danger">
+            <i class="fas fa-exclamation-triangle"></i>
+          </div>
+          <p><strong>This action cannot be undone!</strong></p>
+          <p>Deleting your account will permanently:</p>
+          <ul>
+            <li>Remove all your messages and chat history</li>
+            <li>Delete your profile and achievements</li>
+            <li>Remove you from all friend lists</li>
+            <li>Delete all your items and coins</li>
+          </ul>
+          <div class="confirmation-input">
+            <label for="deleteConfirmation">Type <strong>"DELETE"</strong> to confirm:</label>
+            <input type="text" id="deleteConfirmation" placeholder="Type DELETE to confirm" autocomplete="off">
+          </div>
+          <p class="danger-text">This action is permanent and cannot be reversed.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelDeleteAccount">Cancel</button>
+          <button class="btn danger" id="confirmDeleteAccount" disabled>Delete Account</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Download Data Modal -->
+    <div id="downloadDataModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Download Your Data</h3>
+          <span class="modal-close" id="downloadDataModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon success">
+            <i class="fas fa-download"></i>
+          </div>
+          <p><strong>Export your ChatFun data</strong></p>
+          <p>This will create a downloadable file containing:</p>
+          <ul>
+            <li>Your profile information</li>
+            <li>Settings and preferences</li>
+            <li>Friend list and connections</li>
+            <li>Achievement history</li>
+            <li>Items and coin balance</li>
+          </ul>
+          <div class="data-format-selection">
+            <label>Choose export format:</label>
+            <div class="format-options">
+              <label class="format-option">
+                <input type="radio" name="exportFormat" value="json" checked>
+                <span>JSON (recommended)</span>
+              </label>
+              <label class="format-option">
+                <input type="radio" name="exportFormat" value="csv">
+                <span>CSV (spreadsheet)</span>
+              </label>
+            </div>
+          </div>
+          <p class="info-text">Your data export will begin immediately after confirmation.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelDownloadData">Cancel</button>
+          <button class="btn success" id="confirmDownloadData">Download Data</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div id="addFriendModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Add Friend</h3>
+          <span class="modal-close" id="addFriendModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon primary">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <p><strong>Send a Friend Request</strong></p>
+          <p>Enter the username of the person you'd like to add as a friend.</p>
+          <div class="input-group">
+            <label for="friendUsername">Username:</label>
+            <input type="text" id="friendUsername" placeholder="Enter username..." maxlength="50" autocomplete="off">
+            <div class="input-error" id="friendUsernameError"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelAddFriend">Cancel</button>
+          <button class="btn primary" id="confirmAddFriend">Send Request</button>
         </div>
       </div>
     </div>

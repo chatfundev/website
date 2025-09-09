@@ -23,7 +23,7 @@
 .reason p {
   color: var(--text-color);
   line-height: 1.6;
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-lg);
 }
 
 .consequences {
@@ -34,7 +34,7 @@
 .consequences h3 {
   color: var(--text-color);
   margin-bottom: var(--spacing-md);
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-lg);
   text-transform: lowercase;
 }
 
@@ -58,7 +58,7 @@
   font-weight: bold;
   position: absolute;
   left: 0;
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-lg);
 }
 
 .contact-info {
@@ -83,7 +83,7 @@
 /* Responsive design */
 @media (max-width: 480px) {
   .termination-message {
-    font-size: var(--font-size-large);
+    font-size: var(--font-size-lg);
   }
 
   .consequences ul {

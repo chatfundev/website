@@ -1,0 +1,380 @@
+/* Chat Styles */
+
+.chat-info {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+  margin-bottom: var(--spacing-md);
+}
+
+.chat-messages {
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  height: 400px;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.message {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius);
+  position: relative;
+  cursor: default;
+  align-items: center;
+}
+
+.message:hover {
+  background-color: var(--background-color);
+  transition: background-color var(--transition-duration) ease;
+}
+
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  background-color: var(--background-color);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  flex-shrink: 0;
+}
+
+.message-content {
+  display: flex;
+  gap: var(--spacing-xs);
+  flex: 1;
+  align-items: baseline;
+}
+
+.message-user {
+  color: var(--primary-color);
+  font-weight: bold;
+  min-width: 80px;
+}
+
+.message-role {
+  color: var(--text-secondary);
+  font-size: var(--font-size-base);
+}
+
+.message-text {
+  color: var(--text-color);
+  flex: 1;
+}
+
+.message-time {
+  color: var(--text-secondary);
+  font-size: 12px;
+  margin-left: auto;
+}
+
+/* Hide timestamps when body has class */
+body.hide-timestamps .message-time,
+.hide-timestamps .message-timestamp {
+  display: none !important;
+}
+
+/* Chat Input */
+.chat-input-container {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.chat-input {
+  flex: 1;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.chat-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.send-button {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background-color: var(--primary-color);
+  border: none;
+  border-radius: var(--border-radius);
+  color: var(--background-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color var(--transition-duration) ease;
+}
+
+.send-button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Mute Countdown */
+.mute-countdown-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--danger-color);
+  border-radius: var(--border-radius);
+  color: var(--danger-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.mute-message {
+  color: var(--danger-color);
+  margin-right: var(--spacing-xs);
+}
+
+.mute-timer {
+  color: var(--danger-color);
+  font-weight: bold;
+  font-family: monospace;
+  font-size: var(--font-size-lg);
+}
+
+/* Empty States */
+.empty-state,
+.dm-empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  text-align: center;
+}
+
+.empty-state-content {
+  color: var(--text-secondary);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.5;
+}
+
+.empty-state-content h3 {
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-color);
+}
+
+.empty-state-content p {
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* DM Reactions */
+.dm-message-reactions {
+  display: flex;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.dm-reaction {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 6px;
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+  transition: all var(--transition-duration) ease;
+}
+
+.dm-reaction:hover {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.dm-reaction.active {
+  background-color: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.dm-reaction-count {
+  font-weight: bold;
+  font-size: 0.8em;
+}
+
+/* DM Replies */
+.dm-message-reply-preview {
+  background-color: var(--surface-color);
+  border-left: 3px solid var(--primary-color);
+  padding: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  font-size: var(--font-size-sm);
+  opacity: 0.8;
+}
+
+.dm-reply-to-username {
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 2px;
+}
+
+.dm-reply-to-content {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* DM Messages maintain relative positioning for reactions */
+.dm-message {
+  position: relative;
+}
+
+.dm-context-menu .dm-context-item:hover {
+  background-color: var(--hover-bg);
+  color: var(--text-color);
+}
+
+/* Reply indicator - inside input container */
+.reply-indicator {
+  background-color: var(--surface-color);
+  border: 1px solid var(--primary-color);
+  border-left: 3px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm) var(--spacing-md);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--font-size-sm);
+  color: var(--text-color);
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  right: 0;
+  margin-bottom: var(--spacing-xs);
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.2s ease-out;
+}
+
+.reply-indicator .reply-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex: 1;
+  min-width: 0;
+}
+
+.reply-indicator .reply-icon {
+  font-size: var(--font-size-sm);
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.reply-indicator .reply-text {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.reply-indicator .reply-username {
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+.reply-indicator .reply-message {
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.reply-indicator .reply-cancel {
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-duration) ease;
+  font-size: var(--font-size-base);
+  line-height: 1;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.reply-indicator .reply-cancel:hover {
+  background-color: var(--background-color);
+  opacity: 1;
+  color: var(--text-color);
+}
+
+/* Adjust input container when reply is active */
+.dm-input-container {
+  position: relative;
+}
+
+/* Slide up animation for reply indicator */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-input-container {
+  position: relative;
+}
+
+/* Reaction Picker */
+.reaction-picker {
+  position: fixed;
+  background-color: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.reaction-picker button {
+  background: transparent;
+  border: none;
+  border-radius: var(--border-radius-sm);
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: all var(--transition-duration) ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+.reaction-picker button:hover {
+  background-color: var(--hover-bg);
+  transform: scale(1.1);
+}
