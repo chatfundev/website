@@ -62,6 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
           currentConversationId = null;
         }
 
+        // Clean up social spy when leaving social spy tab
+        if (tabId !== 'socialspy' && window.socialSpyFunctions) {
+          window.socialSpyFunctions.cleanupSocialSpy();
+        }
+
         // Clear message cache when leaving chat tab to ensure fresh data on return
         if (tabId !== 'chat') {
           currentMessages = [];
@@ -81,6 +86,13 @@ document.addEventListener('DOMContentLoaded', function () {
             showDMDisabledScreen();
           } else {
             await loadLatestDMConversation();
+          }
+        }
+
+        // If entering social spy tab, initialize it
+        if (tabId === 'socialspy') {
+          if (window.socialSpyFunctions) {
+            window.socialSpyFunctions.initializeSocialSpy();
           }
         }
 
