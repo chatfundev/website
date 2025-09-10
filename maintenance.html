@@ -1,69 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatFun - Maintenance</title>
-    <link rel="icon" type="image/svg+xml" href="images/logo.svg">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/maintenance.css">
-    <script src="https://kit.fontawesome.com/ac9ab6562b.js" crossorigin="anonymous"></script>
-  </head>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatFun - Maintenance</title>
+  <link rel="icon" type="image/svg+xml" href="images/logo.svg">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/maintenance.css">
+  <script src="https://kit.fontawesome.com/ac9ab6562b.js" crossorigin="anonymous"></script>
+</head>
 
-  <body>
-    <div class="container maintenance-container">
-      <div class="header">
-        <div class="logo-container">
-          <img src="images/logo.svg" alt="ChatFun Logo" class="logo-image">
-          <h1>chatfun</h1>
-        </div>
-      </div>
-
-      <div class="maintenance-content">
-        <div class="maintenance-icon"><i class="fas fa-wrench"></i></div>
-        <h2>under maintenance</h2>
-        <p class="maintenance-message">
-          we're currently performing some maintenance to improve your experience.
-          we'll be back online shortly!
-        </p>
-
-        <div class="maintenance-details">
-          <p><strong>expected duration:</strong> 15-30 minutes</p>
-          <p><strong>what we're doing:</strong> server upgrades and bug fixes</p>
-        </div>
-
-        <div class="maintenance-status">
-          <div class="status-indicator"></div>
-          <span>maintenance in progress...</span>
-        </div>
-      </div>
-
-      <div class="maintenance-actions">
-        <button class="btn" onclick="refreshPage()">refresh page</button>
-        <a href="mailto:support@chatfun.dev" class="btn secondary">contact support</a>
-      </div>
-
-      <div class="maintenance-footer">
-        <p>sorry for the inconvenience!</p>
-        <p class="last-updated">last updated: <span id="timestamp"></span></p>
+<body>
+  <div class="container maintenance-container">
+    <div class="header">
+      <div class="logo-container">
+        <img src="images/logo.svg" alt="ChatFun Logo" class="logo-image">
+        <h1>chatfun</h1>
       </div>
     </div>
 
-    <script>
-      // Update timestamp
+    <div class="maintenance-content">
+      <div class="maintenance-icon"><i class="fas fa-wrench"></i></div>
+      <h2>under maintenance</h2>
+      <p class="maintenance-message">
+        we're currently performing some maintenance to improve your experience.
+        we'll be back online shortly!
+      </p>
+
+      <div class="maintenance-details">
+        <p><strong>expected duration:</strong> 15-30 minutes</p>
+        <p><strong>what we're doing:</strong> server upgrades and bug fixes</p>
+      </div>
+
+      <div class="maintenance-status">
+        <div class="status-indicator"></div>
+        <span>maintenance in progress...</span>
+      </div>
+    </div>
+
+    <div class="maintenance-actions">
+      <button class="btn" onclick="refreshPage()">refresh page</button>
+      <a href="mailto:support@chatfun.dev" class="btn secondary">contact support</a>
+    </div>
+
+    <div class="maintenance-footer">
+      <p>sorry for the inconvenience!</p>
+      <p class="last-updated">last updated: <span id="timestamp"></span></p>
+    </div>
+  </div>
+
+  <script>
+    // Update timestamp
+    document.getElementById('timestamp').textContent = new Date().toLocaleString();
+
+    // Refresh page function
+    function refreshPage() {
+      window.location.reload();
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
       document.getElementById('timestamp').textContent = new Date().toLocaleString();
-
-      // Refresh page function
-      function refreshPage() {
-        window.location.reload();
-      }
-
-      // Auto-refresh every 30 seconds
-      setInterval(() => {
-        document.getElementById('timestamp').textContent = new Date().toLocaleString();
-      }, 30000);
-    </script>
-  </body>
+    }, 30000);
+  </script>
+</body>
 
 </html>
