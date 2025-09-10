@@ -20,7 +20,7 @@
   --border-color: #404040;
 
   /* Typography */
-  --font-family: 'Courier New', monospace;
+  --font-family: VeraMono, monospace;
   --font-size-xs: 10px;
   --font-size-sm: 12px;
   --font-size-base: 14px;
