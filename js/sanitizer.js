@@ -63,12 +63,22 @@ function createSafeTextNode(content) {
  * @returns {HTMLElement} - The created element
  */
 function createSafeElement(tagName, textContent, className) {
-  const element = document.createElement(tagName);
-  if (textContent) {
-    element.textContent = textContent;
+  try {
+    if (!tagName || typeof tagName !== 'string') {
+      console.error('Invalid tagName provided to createSafeElement:', tagName);
+      return null;
+    }
+
+    const element = document.createElement(tagName);
+    if (textContent !== null && textContent !== undefined) {
+      element.textContent = String(textContent);
+    }
+    if (className && typeof className === 'string') {
+      element.className = className;
+    }
+    return element;
+  } catch (error) {
+    console.error('Error creating safe element:', error);
+    return null;
   }
-  if (className) {
-    element.className = className;
-  }
-  return element;
 }

@@ -62,6 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
           currentConversationId = null;
         }
 
+        // Clear message cache when leaving chat tab to ensure fresh data on return
+        if (tabId !== 'chat') {
+          currentMessages = [];
+        }
+
         // Remove active class from all nav items and tab contents
         navItems.forEach(nav => nav.classList.remove('active'));
         tabContents.forEach(content => content.classList.remove('active'));
@@ -191,6 +196,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let lastMessageId = null;
   let messagePollingInterval = null;
+  let currentMessages = []; // Cache current messages to avoid unnecessary re-renders
+
+  // Helper function to compare two message arrays for equality
+  function messagesAreEqual(oldMessages, newMessages) {
+    if (oldMessages.length !== newMessages.length) {
+      return false;
+    }
+
+    for (let i = 0; i < oldMessages.length; i++) {
+      const oldMsg = oldMessages[i];
+      const newMsg = newMessages[i];
+
+      // Compare key properties that would affect rendering
+      if (
+        oldMsg.uuid !== newMsg.uuid ||
+        oldMsg.username !== newMsg.username ||
+        oldMsg.content !== newMsg.content ||
+        oldMsg.timestamp !== newMsg.timestamp ||
+        oldMsg.badge !== newMsg.badge ||
+        oldMsg.user_id !== newMsg.user_id ||
+        oldMsg.has_avatar !== newMsg.has_avatar
+      ) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   async function sendMessage() {
     // Check if user is muted
@@ -220,6 +253,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Clear input on successful send
       currentChatInput.value = '';
+
+      // Immediately fetch new messages to show the sent message
+      await fetchMessages();
 
     } catch (error) {
       console.error('Failed to send message:', error);
@@ -271,6 +307,20 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   function updateChatMessages(messages) {
+    // Check if chatMessages element exists
+    if (!chatMessages) {
+      console.error('chatMessages element not found');
+      return;
+    }
+
+    // Check if messages have actually changed to avoid unnecessary re-renders
+    if (messagesAreEqual(currentMessages, messages)) {
+      return; // No changes, skip re-rendering
+    }
+
+    // Update the cached messages
+    currentMessages = [...messages];
+
     // Clear existing messages
     chatMessages.innerHTML = '';
 
@@ -288,20 +338,31 @@ document.addEventListener('DOMContentLoaded', function () {
       const heading = createSafeElement('h3', 'No messages yet');
       const paragraph = createSafeElement('p', 'Be the first to start the conversation!');
 
-      emptyStateContent.appendChild(icon);
-      emptyStateContent.appendChild(heading);
-      emptyStateContent.appendChild(paragraph);
+      // Validate elements before appending
+      if (heading && paragraph) {
+        emptyStateContent.appendChild(icon);
+        emptyStateContent.appendChild(heading);
+        emptyStateContent.appendChild(paragraph);
 
-      emptyState.appendChild(emptyStateContent);
-      chatMessages.appendChild(emptyState);
+        emptyState.appendChild(emptyStateContent);
+        chatMessages.appendChild(emptyState);
+      } else {
+        console.error('Failed to create safe elements for empty state');
+      }
       return;
     }
 
     messages.forEach(message => {
+      // Validate message data
+      if (!message || !message.username || !message.content) {
+        console.warn('Invalid message data:', message);
+        return;
+      }
+
       const messageDiv = document.createElement('div');
       messageDiv.className = 'message';
       messageDiv.setAttribute('data-author', message.username);
-      messageDiv.setAttribute('data-message-id', message.uuid);
+      messageDiv.setAttribute('data-message-id', message.uuid || '');
       messageDiv.setAttribute('data-message-author', message.username);
 
       // Format timestamp
@@ -330,14 +391,12 @@ document.addEventListener('DOMContentLoaded', function () {
       userSpan.className = 'message-user';
 
       // Add badge if exists
-      let badgeText = '';
       if (message.badge && message.badge !== 'user') {
-        badgeText = `[${badgeIcons[message.badge]} ${message.badge}] `;
-      }
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'message-role';
+        badgeSpan.innerHTML = `[${badgeIcons[message.badge]} ${message.badge}] `;
+        userSpan.appendChild(badgeSpan);
 
-      // Safely set user text
-      if (badgeText) {
-        userSpan.innerHTML = badgeText;
         const usernameText = document.createTextNode(`${message.username}:`);
         userSpan.appendChild(usernameText);
       } else {
@@ -345,20 +404,25 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // Create message text span with safe content
-      const messageTextSpan = createSafeElement('span', message.content, 'message-text');
+      const messageTextSpan = createSafeElement('span', message.content || '', 'message-text');
 
       // Create time span
       const timeSpan = createSafeElement('span', timeString, 'message-time');
 
-      // Assemble the message
-      messageContent.appendChild(userSpan);
-      messageContent.appendChild(messageTextSpan);
-      messageContent.appendChild(timeSpan);
+      // Validate elements before appending
+      if (messageTextSpan && timeSpan && avatarElement) {
+        // Assemble the message
+        messageContent.appendChild(userSpan);
+        messageContent.appendChild(messageTextSpan);
+        messageContent.appendChild(timeSpan);
 
-      messageDiv.appendChild(avatarElement);
-      messageDiv.appendChild(messageContent);
+        messageDiv.appendChild(avatarElement);
+        messageDiv.appendChild(messageContent);
 
-      chatMessages.appendChild(messageDiv);
+        chatMessages.appendChild(messageDiv);
+      } else {
+        console.error('Failed to create message elements for message:', message);
+      }
     });
 
     // Auto-scroll to bottom if enabled (always scroll when enabled)
@@ -2420,12 +2484,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const avatarContainer = createAvatarElement(conversation.other_user.id, conversation.other_user.has_avatar, 'conversation-avatar');
     const statusIndicator = document.createElement('span');
     statusIndicator.className = `status-indicator ${statusClass}`;
-
-    // Parse the avatar HTML and add status indicator
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = avatarContainer;
-    const avatarDiv = tempDiv.firstChild;
-    avatarDiv.appendChild(statusIndicator);
+    avatarContainer.appendChild(statusIndicator);
 
     // Create conversation content
     const conversationContent = document.createElement('div');
@@ -2456,28 +2515,10 @@ document.addEventListener('DOMContentLoaded', function () {
     conversationContent.appendChild(conversationStatus);
 
     // Assemble full conversation element
-    conversationDiv.appendChild(avatarDiv);
+    conversationDiv.appendChild(avatarContainer);
     conversationDiv.appendChild(conversationContent);
 
     return conversationDiv;
-  }
-
-  function formatConversationTime(timestamp) {
-    if (!timestamp) return '';
-
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (minutes < 1) return 'now';
-    if (minutes < 60) return `${minutes}m`;
-    if (hours < 24) return `${hours}h`;
-    if (days < 7) return `${days}d`;
-
-    return date.toLocaleDateString();
   }
 
   function initializeConversationSwitching() {
@@ -2567,13 +2608,15 @@ document.addEventListener('DOMContentLoaded', function () {
 
       // Update avatar
       if (dmUserAvatar) {
-        const avatarHtml = createAvatarElement(otherUser.id, otherUser.has_avatar, 'dm-user-avatar');
-        // Extract the avatar content and add status indicator
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = avatarHtml;
-        const avatarElement = tempDiv.firstElementChild;
-        avatarElement.innerHTML += `<div class="status-indicator ${otherUser.status}"></div>`;
-        dmUserAvatar.innerHTML = avatarElement.innerHTML;
+        const avatarElement = createAvatarElement(otherUser.id, otherUser.has_avatar, 'dm-user-avatar');
+        // Add status indicator
+        const statusIndicator = document.createElement('div');
+        statusIndicator.className = `status-indicator ${otherUser.status}`;
+        avatarElement.appendChild(statusIndicator);
+
+        // Clear and set the avatar
+        dmUserAvatar.innerHTML = '';
+        dmUserAvatar.appendChild(avatarElement);
       }
 
       // Update status indicator (fallback)
@@ -2775,6 +2818,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
           // Refresh conversations list to update last message and timestamp
           await loadConversationsList();
+
+          // Immediately check for new messages to ensure the sent message appears
+          await checkForNewMessages();
         }
       } catch (error) {
         console.error('Failed to send DM:', error);
@@ -3035,20 +3081,6 @@ document.addEventListener('DOMContentLoaded', function () {
       });
     }
 
-    // Badge icons (same as global chat)
-    const badgeIcons = {
-      mod: '<i class="fa fa-shield"></i>',
-      admin: '<i class="fa fa-tools"></i>',
-      owner: '<i class="fa fa-crown"></i>',
-      shadowbanned: '<i class="fa fa-user-slash"></i>'
-    };
-
-    // Add badge if exists
-    let badgeHtml = '';
-    if (badge && badge !== 'user') {
-      badgeHtml = `<span class="message-role">[${badgeIcons[badge]} ${badge}]</span> `;
-    }
-
     // Build reply preview if this is a reply
     let replyContainer = null;
     if (replyTo) {
@@ -3107,13 +3139,18 @@ document.addEventListener('DOMContentLoaded', function () {
         owner: '<i class="fa fa-crown"></i>',
         shadowbanned: '<i class="fa fa-user-slash"></i>'
       };
-      const badgeText = `[${badgeIcons[badge]} ${badge}] `;
-      userSpan.innerHTML = badgeText;
+      const badgeSpan = document.createElement('span');
+      badgeSpan.className = 'message-role';
+      badgeSpan.innerHTML = `[${badgeIcons[badge]} ${badge}] `;
+      userSpan.appendChild(badgeSpan);
+
       const usernameText = document.createTextNode(`${username}:`);
       userSpan.appendChild(usernameText);
     } else {
       userSpan.textContent = `${username}:`;
     }
+
+    console.log("Created user span:", userSpan.outerHTML);
 
     // Create message text span with safe content
     const messageTextSpan = createSafeElement('span', text, 'message-text');
@@ -4263,20 +4300,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const avatarUrl = getAvatarUrl(userId, hasAvatar);
     if (!hasAvatar) console.log(`Avatar URL: ${avatarUrl}`);
 
+    const avatarContainer = document.createElement('div');
+    avatarContainer.className = className;
+
     if (avatarUrl) {
-      return `
-        <div class="${className}">
-          <img src="${avatarUrl}" alt="Avatar" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-          <div class="default-avatar" style="display: none;"><i class="fas fa-user"></i></div>
-        </div>
-      `;
+      const img = document.createElement('img');
+      img.src = avatarUrl;
+      img.alt = 'Avatar';
+      img.onerror = function () {
+        this.style.display = 'none';
+        this.nextElementSibling.style.display = 'flex';
+      };
+
+      const defaultAvatar = document.createElement('div');
+      defaultAvatar.className = 'default-avatar';
+      defaultAvatar.style.display = 'none';
+      defaultAvatar.innerHTML = '<i class="fas fa-user"></i>';
+
+      avatarContainer.appendChild(img);
+      avatarContainer.appendChild(defaultAvatar);
     } else {
-      return `
-        <div class="${className}">
-          <div class="default-avatar"><i class="fas fa-user"></i></div>
-        </div>
-      `;
+      const defaultAvatar = document.createElement('div');
+      defaultAvatar.className = 'default-avatar';
+      defaultAvatar.innerHTML = '<i class="fas fa-user"></i>';
+      avatarContainer.appendChild(defaultAvatar);
     }
+
+    return avatarContainer;
   }
 
   function showAddFriendModal() {
@@ -4388,6 +4438,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Load current avatar
         loadCurrentAvatar();
+
+        // Initialize user permissions after role is set
+        initializeUserPermissions();
       })
       .catch(error => {
         console.error("Error fetching user data:", error);
@@ -4477,7 +4530,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Initialize other app functionality
     initializeTabSwitching();
-    initializeUserPermissions();
     initializeChatFunctionality();
     initializeContextMenu();
     initializeModals();
