@@ -1,0 +1,584 @@
+/* Social Spy Styles */
+
+.socialspy-subtitle {
+  color: var(--text-color-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.25rem;
+  font-style: italic;
+}
+
+.socialspy-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 140px);
+  position: relative;
+}
+
+/* Centered Input Screen (like DM disabled) */
+.socialspy-input-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+}
+
+.socialspy-input-content {
+  text-align: center;
+  padding: 2rem;
+  max-width: 500px;
+}
+
+.socialspy-input-icon {
+  margin-bottom: 1.5rem;
+}
+
+.socialspy-input-icon i {
+  font-size: 4rem;
+  color: var(--primary-color);
+  opacity: 0.8;
+}
+
+.socialspy-input-content h3 {
+  color: var(--text-color);
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.socialspy-input-content p {
+  color: var(--text-color-secondary);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.socialspy-username-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.socialspy-username-input {
+  padding: 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--input-background);
+  color: var(--text-color);
+  font-size: 1.1rem;
+  text-align: center;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: var(--font-family);
+}
+
+.socialspy-username-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+}
+
+.socialspy-start-button {
+  padding: 1rem 2rem;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: background-color 0.2s, transform 0.1s;
+  font-family: var(--font-family);
+}
+
+.socialspy-start-button:hover {
+  background: var(--primary-color-hover);
+  transform: translateY(-1px);
+}
+
+.socialspy-start-button:active {
+  transform: translateY(0);
+}
+
+.spy-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Main Spy Area */
+.socialspy-main {
+  flex: 1;
+  background: var(--card-background);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  overflow: hidden;
+}
+
+.socialspy-target-info {
+  background: var(--card-background);
+  color: var(--text-color);
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.target-user-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spy-icon {
+  font-size: 1.2rem;
+}
+
+.target-username {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.spy-badge {
+  background: var(--primary-color);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.spy-back-button {
+  background: var(--secondary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  transition: background-color 0.2s;
+  font-family: var(--font-family);
+}
+
+.spy-back-button:hover {
+  background: var(--hover-color);
+}
+
+.socialspy-dms-layout {
+  display: flex;
+  height: calc(100% - 80px);
+}
+
+/* Conversations sidebar - reuse existing DM styles */
+.socialspy-dms-layout .conversations-sidebar {
+  width: 300px;
+  background: var(--sidebar-background);
+  border-right: 1px solid var(--border-color);
+}
+
+.socialspy-dms-layout .dm-messages-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Spy mode indicator */
+.spy-mode-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--danger-color);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Conversation items styling for spy mode */
+.no-conversations {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+
+.no-conversations i {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.5;
+}
+
+.conversation-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.conversation-item:hover {
+  background: var(--hover-color);
+}
+
+.conversation-item.active {
+  background: var(--primary-color);
+  color: white;
+}
+
+.conversation-avatar {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--avatar-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+}
+
+.conversation-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.conversation-avatar i {
+  color: var(--text-color-secondary);
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--card-background);
+}
+
+.status-indicator.online {
+  background: #28a745;
+}
+
+.status-indicator.idle {
+  background: #ffc107;
+}
+
+.status-indicator.offline {
+  background: #6c757d;
+}
+
+.conversation-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.conversation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.conversation-username {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conversation-time {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+}
+
+.conversation-preview {
+  font-size: 0.9rem;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.unread-badge {
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+/* Social Spy placeholder */
+.socialspy-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--text-color-secondary);
+  padding: 2rem;
+}
+
+.socialspy-placeholder i {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.socialspy-placeholder h3 {
+  margin-bottom: 0.5rem;
+  color: var(--text-color);
+}
+
+.socialspy-placeholder p {
+  margin-bottom: 1.5rem;
+}
+
+.spy-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 193, 7, 0.1);
+  color: #ffc107;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  border: 1px solid rgba(255, 193, 7, 0.3);
+}
+
+/* Read-only input area */
+.socialspy-readonly {
+  background: var(--input-background);
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.readonly-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-color-secondary);
+  font-style: italic;
+}
+
+.readonly-message i {
+  color: var(--danger-color);
+}
+
+/* No messages placeholder */
+.no-messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-color-secondary);
+  text-align: center;
+}
+
+.no-messages i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+/* Social Spy specific message styling */
+.socialspy-dms-layout .message.target-user {
+  background: rgba(var(--primary-color-rgb), 0.1);
+  border-left: 3px solid var(--primary-color);
+}
+
+.socialspy-dms-layout .message.other-user {
+  background: rgba(108, 117, 125, 0.1);
+  border-left: 3px solid #6c757d;
+}
+
+.spy-indicator {
+  background: var(--danger-color);
+  color: white;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+/* Message styling */
+.message {
+  display: flex;
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  border-radius: var(--border-radius);
+}
+
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--avatar-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.message-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.message-avatar i {
+  color: var(--text-color-secondary);
+}
+
+.message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.message-username {
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.message-time {
+  font-size: 0.8rem;
+  color: var(--text-color-secondary);
+}
+
+.user-badge {
+  background: var(--badge-background);
+  color: var(--badge-color);
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
+  font-weight: 500;
+}
+
+.message-text {
+  color: var(--text-color);
+  word-wrap: break-word;
+  line-height: 1.4;
+}
+
+.message-reply {
+  background: rgba(var(--primary-color-rgb), 0.1);
+  border-left: 3px solid var(--primary-color);
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  font-size: 0.9rem;
+}
+
+.reply-username {
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.reply-content {
+  color: var(--text-color-secondary);
+  margin-left: 0.5rem;
+}
+
+.message-reactions {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.reaction {
+  background: var(--hover-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 0.2rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+}
+
+.reaction-emoji {
+  font-size: 1rem;
+}
+
+.reaction-count {
+  color: var(--text-color-secondary);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .socialspy-input-content {
+    padding: 1.5rem;
+  }
+
+  .socialspy-input-icon i {
+    font-size: 3rem;
+  }
+
+  .socialspy-input-content h3 {
+    font-size: 1.3rem;
+  }
+
+  .socialspy-username-input-group {
+    gap: 0.75rem;
+  }
+
+  .socialspy-dms-layout {
+    flex-direction: column;
+  }
+
+  .socialspy-dms-layout .conversations-sidebar {
+    width: 100%;
+    height: 200px;
+  }
+
+  .target-user-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .spy-back-button {
+    margin-left: 0;
+    width: 100%;
+    justify-content: center;
+  }
+}
