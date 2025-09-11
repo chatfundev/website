@@ -48,3 +48,121 @@
   --transition-duration: 0.2s;
   --transition-duration-slow: 0.4s;
 }
+
+/* ChatFun Default Theme (Dark) */
+.chatfun-theme {
+  --primary-color: #ff9500;
+  --primary-hover: #ffb84d;
+  --primary-color-rgb: 255, 149, 0;
+  --primary-color-opacity: rgba(255, 149, 0, 0.15);
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --success-color: #2ecc71;
+  --success-hover: #27ae60;
+  --warning-color: #f39c12;
+  --warning-hover: #e67e22;
+  --background-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --text-primary: #d4d4d4;
+  --text-secondary: #808080;
+  --surface-color: #2d2d2d;
+  --surface-hover: #404040;
+  --border-color: #404040;
+}
+
+/* Catppuccin Mocha Theme */
+.catppuccin-mocha-theme {
+  /* Primary colors using Catppuccin Blue */
+  --primary-color: #89b4fa;
+  --primary-hover: #74c7ec;
+  --primary-color-rgb: 137, 180, 250;
+  --primary-color-opacity: rgba(137, 180, 250, 0.15);
+  
+  /* Status colors using Catppuccin palette */
+  --danger-color: #f38ba8;
+  --danger-hover: #eba0ac;
+  --success-color: #a6e3a1;
+  --success-hover: #94e2d5;
+  --warning-color: #f9e2af;
+  --warning-hover: #fab387;
+  
+  /* Background and surface colors */
+  --background-color: #1e1e2e; /* Base */
+  --surface-color: #313244;    /* Surface 0 */
+  --surface-hover: #45475a;    /* Surface 1 */
+  --border-color: #585b70;     /* Surface 2 */
+  
+  /* Text colors */
+  --text-color: #cdd6f4;       /* Text */
+  --text-primary: #cdd6f4;     /* Text */
+  --text-secondary: #bac2de;   /* Subtext 1 */
+  
+  /* Additional Catppuccin colors for future use */
+  --catppuccin-rosewater: #f5e0dc;
+  --catppuccin-flamingo: #f2cdcd;
+  --catppuccin-pink: #f5c2e7;
+  --catppuccin-mauve: #cba6f7;
+  --catppuccin-red: #f38ba8;
+  --catppuccin-maroon: #eba0ac;
+  --catppuccin-peach: #fab387;
+  --catppuccin-yellow: #f9e2af;
+  --catppuccin-green: #a6e3a1;
+  --catppuccin-teal: #94e2d5;
+  --catppuccin-sky: #89dceb;
+  --catppuccin-sapphire: #74c7ec;
+  --catppuccin-blue: #89b4fa;
+  --catppuccin-lavender: #b4befe;
+  --catppuccin-text: #cdd6f4;
+  --catppuccin-subtext1: #bac2de;
+  --catppuccin-subtext0: #a6adc8;
+  --catppuccin-overlay2: #9399b2;
+  --catppuccin-overlay1: #7f849c;
+  --catppuccin-overlay0: #6c7086;
+  --catppuccin-surface2: #585b70;
+  --catppuccin-surface1: #45475a;
+  --catppuccin-surface0: #313244;
+  --catppuccin-base: #1e1e2e;
+  --catppuccin-mantle: #181825;
+  --catppuccin-crust: #11111b;
+}
+
+/* Legacy theme classes for backward compatibility */
+.light-theme {
+  --primary-color: #ff9500;
+  --primary-hover: #ffb84d;
+  --primary-color-rgb: 255, 149, 0;
+  --primary-color-opacity: rgba(255, 149, 0, 0.15);
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --success-color: #28a745;
+  --success-hover: #218838;
+  --warning-color: #ffc107;
+  --warning-hover: #e0a800;
+  --background-color: #ffffff;
+  --text-color: #333333;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --surface-color: #f8f9fa;
+  --surface-hover: #e9ecef;
+  --border-color: #dee2e6;
+}
+
+.dark-theme {
+  --primary-color: #ff9500;
+  --primary-hover: #ffb84d;
+  --primary-color-rgb: 255, 149, 0;
+  --primary-color-opacity: rgba(255, 149, 0, 0.15);
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --success-color: #2ecc71;
+  --success-hover: #27ae60;
+  --warning-color: #f39c12;
+  --warning-hover: #e67e22;
+  --background-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --text-primary: #d4d4d4;
+  --text-secondary: #808080;
+  --surface-color: #2d2d2d;
+  --surface-hover: #404040;
+  --border-color: #404040;
+}
