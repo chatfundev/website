@@ -15,6 +15,10 @@
   animation: modalBackdropFadeIn 0.3s ease-out;
 }
 
+.modal[style*="block"] {
+  display: flex !important;
+}
+
 @keyframes modalBackdropFadeIn {
   from {
     background-color: rgba(0, 0, 0, 0);
@@ -381,4 +385,43 @@
 
 .modal-body li:last-child {
   margin-bottom: 0;
+}
+
+/* Theme Dropdown Styling */
+.input-group .theme-dropdown {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: var(--surface-color);
+  border: 2px solid var(--border-color);
+  border-radius: var(--border-radius);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23808080' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right var(--spacing-md) center;
+  background-size: 16px;
+  padding-right: calc(var(--spacing-md) + 24px);
+}
+
+.input-group .theme-dropdown:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-1px);
+}
+
+.input-group .theme-dropdown:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+  transform: translateY(-1px);
+}
+
+.input-group .theme-dropdown option {
+  background-color: var(--surface-color);
+  color: var(--text-primary);
+  padding: var(--spacing-sm);
 }

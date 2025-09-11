@@ -1,3 +1,5 @@
+// to do: fix
+
 document.addEventListener('DOMContentLoaded', function () {
   // =====================================
   // CONFIGURATION & GLOBAL VARIABLES
@@ -2720,8 +2722,7 @@ document.addEventListener('DOMContentLoaded', function () {
           time: messageTime,
           reactions: message.reactions,
           reply_to: message.reply_to,
-          badge: message.badge,
-          sender: message.sender
+          sender: message.sender // Include sender info with badge and avatar
         };
 
         addDMMessage(messageData, false);
@@ -3438,6 +3439,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Button event listeners
     document.getElementById('changePasswordBtn')?.addEventListener('click', showChangePasswordModal);
     document.getElementById('exportDataBtn')?.addEventListener('click', showDownloadDataModal);
+    document.getElementById('changeThemeBtn')?.addEventListener('click', showThemeModal);
     document.getElementById('logoutBtn')?.addEventListener('click', showLogoutModal);
     document.getElementById('deleteAccountBtn')?.addEventListener('click', showDeleteAccountModal);
 
@@ -3834,6 +3836,102 @@ document.addEventListener('DOMContentLoaded', function () {
       exportUserData(format);
       closeModal(modal);
     };
+  }
+
+  function showThemeModal() {
+    const modal = document.getElementById('themeModal');
+    const closeBtn = document.getElementById('themeModalClose');
+    const cancelBtn = document.getElementById('cancelThemeChange');
+    const confirmBtn = document.getElementById('confirmThemeChange');
+    const themeSelect = document.getElementById('themeSelect');
+
+    // Populate the dropdown with available themes
+    populateThemeDropdown();
+
+    // Show the modal
+    modal.style.display = 'block';
+
+    // Set dropdown to current theme (default to chatfun)
+    const currentTheme = localStorage.getItem('theme') || 'chatfun';
+    themeSelect.value = currentTheme;
+
+    // Close modal handlers
+    closeBtn.onclick = () => { modal.style.display = 'none'; };
+    cancelBtn.onclick = () => { modal.style.display = 'none'; };
+
+    // Apply theme handler
+    confirmBtn.onclick = () => {
+      const selectedTheme = themeSelect.value;
+      applyTheme(selectedTheme);
+      localStorage.setItem('theme', selectedTheme);
+      modal.style.display = 'none';
+    };
+
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        modal.style.display = 'none';
+      }
+    };
+  }
+  
+  // =====================================
+  // THEME SYSTEM
+  // =====================================
+  
+  // Define available themes - makes it easy to add new themes
+  const AVAILABLE_THEMES = {
+    'chatfun': {
+      name: 'ChatFun (Default)',
+      className: 'chatfun-theme'
+    },
+    'catppuccin-mocha': {
+      name: 'Catppuccin Mocha',
+      className: 'catppuccin-mocha-theme'
+    }
+    // Add new themes here in the future:
+    // 'theme-id': {
+    //   name: 'Theme Display Name',
+    //   className: 'css-class-name'
+    // }
+  };
+  
+  function applyTheme(themeId) {
+    const body = document.body;
+    
+    // Remove all existing theme classes
+    Object.values(AVAILABLE_THEMES).forEach(theme => {
+      body.classList.remove(theme.className);
+    });
+    
+    // Remove legacy theme classes for compatibility
+    body.classList.remove('light-theme', 'dark-theme');
+    
+    // Apply the new theme
+    if (AVAILABLE_THEMES[themeId]) {
+      body.classList.add(AVAILABLE_THEMES[themeId].className);
+      console.log('Applied theme:', themeId, '->', AVAILABLE_THEMES[themeId].name);
+    } else {
+      // Fallback to default theme if invalid theme is provided
+      console.warn('Unknown theme:', themeId, 'falling back to chatfun');
+      body.classList.add(AVAILABLE_THEMES['chatfun'].className);
+    }
+  }
+  
+  function populateThemeDropdown() {
+    const themeSelect = document.getElementById('themeSelect');
+    if (!themeSelect) return;
+    
+    // Clear existing options
+    themeSelect.innerHTML = '';
+    
+    // Add options for each available theme
+    Object.entries(AVAILABLE_THEMES).forEach(([themeId, themeInfo]) => {
+      const option = document.createElement('option');
+      option.value = themeId;
+      option.textContent = themeInfo.name;
+      themeSelect.appendChild(option);
+    });
   }
 
   function exportUserData(format = 'json') {
@@ -4423,7 +4521,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    // Set the bearer token for API requests
+    // Set the bearer token for API requests early
     window.api.bearerToken = token;
 
     window.api.get('/auth/me')
@@ -4520,6 +4618,16 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // =====================================
+  // THEME FUNCTIONALITY
+  // =====================================
+  
+  function initializeTheme() {
+    // Load saved theme from localStorage or default to 'chatfun'
+    const savedTheme = localStorage.getItem('theme') || 'chatfun';
+    applyTheme(savedTheme);
+  }
+
+  // =====================================
   // INITIALIZATION
   // =====================================
 
@@ -4553,6 +4661,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeDMsFunctionality();
     setupReplyFunctionality();
     initializeSettings();
+    initializeTheme();
   }
 
   // Start the application
@@ -4585,3 +4694,4 @@ document.addEventListener('DOMContentLoaded', function () {
     stopMessagePolling();
   });
 });
+

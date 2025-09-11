@@ -816,7 +816,7 @@
                 </label>
               </div>
             </div>
-
+            
             <!-- Profile Settings -->
             <div class="settings-section">
               <h3><i class="fas fa-user-circle"></i> profile</h3>
@@ -841,6 +841,22 @@
                       </button>
                     </div>
                   </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Appearance Settings -->
+            <div class="settings-section">
+              <h3><i class="fas fa-paint-brush"></i> appearance</h3>
+              <div class="setting-item">
+                <div class="setting-row">
+                  <div class="setting-info">
+                    <span class="setting-title">change theme</span>
+                    <span class="setting-description">change your theme</span>
+                  </div>
+                  <button class="btn secondary setting-button" id="changeThemeBtn">
+                    <i class="fas fa-paint-brush"></i> change
+                  </button>
                 </div>
               </div>
             </div>
@@ -1477,6 +1493,31 @@
       </div>
     </div>
 
+    <div id="themeModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Change Theme</h3>
+          <span class="modal-close" id="themeModalClose">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="modal-icon primary">
+            <i class="fas fa-paint-brush"></i>
+          </div>
+          <p><strong>Change your chatfun theme!</strong></p>
+          <p>Select a theme for your chatfun experience.</p>
+          <div class="input-group">
+            <label for="themeSelect">Theme:</label>
+            <select id="themeSelect" class="theme-dropdown">
+              <!-- Options will be populated by JavaScript -->
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn secondary" id="cancelThemeChange">Cancel</button>
+          <button class="btn primary" id="confirmThemeChange">Apply Theme</button>
+        </div>
+      </div>
+    </div>
   </body>
 
 </html>
