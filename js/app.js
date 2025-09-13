@@ -504,6 +504,17 @@ document.addEventListener('DOMContentLoaded', function () {
       // Create message text span with safe content
       const messageTextSpan = createSafeElement('span', message.content || '', 'message-text');
 
+      // Add deleted styling if message is deleted
+      const deletedTexts = [
+        "Deleted by sender",
+        "Removed by a moderator",
+        "Message removed due to message limit"
+      ];
+
+      if (messageTextSpan && deletedTexts.includes(message.content)) {
+        messageTextSpan.classList.add('deleted');
+      }
+
       // Create time span
       const timeSpan = createSafeElement('span', timeString, 'message-time');
 
@@ -624,8 +635,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Show/hide menu items based on permissions
         const isOwnMessage = currentMessageAuthor === window.CURRENT_USERNAME;
-        const isMod = window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin';
-        const isAdmin = window.USER_ROLE === 'admin';
+        const isMod = window.USER_ROLE === 'mod' || window.USER_ROLE === 'admin' || window.USER_ROLE === 'owner';
+        const isAdmin = window.USER_ROLE === 'admin' || window.USER_ROLE === 'owner';
 
         // Report message: show for everyone, but not for own messages
         const showReport = !isOwnMessage;
@@ -678,7 +689,9 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('dmContextMenu').style.display = 'none';
       });
     }
-  }  // =====================================
+  }
+
+  // =====================================
   // MODAL FUNCTIONALITY
   // =====================================
 
@@ -726,13 +739,43 @@ document.addEventListener('DOMContentLoaded', function () {
     initializeModalCloseHandlers(reportModal, deleteModal, userActionsModal);
   }
 
+  async function deleteMessage(messageId) {
+    try {
+      const response = await window.api.delete(`/messages/${messageId}`);
+
+      if (response.success) {
+        // Show success notification
+        showNotification('Message deleted successfully', 'success');
+
+        // Refresh messages to show the updated content
+        if (window.loadMessages) {
+          window.loadMessages();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+
+      // Show appropriate error message
+      let errorMessage = 'Failed to delete message';
+      if (error.message.includes('15 seconds')) {
+        errorMessage = 'Can only delete own messages within 15 seconds of sending';
+      } else if (error.message.includes('Permission denied')) {
+        errorMessage = 'You do not have permission to delete this message';
+      } else if (error.message.includes('already deleted')) {
+        errorMessage = 'Message has already been deleted';
+      }
+
+      showNotification(errorMessage, 'error');
+    }
+  }
+
   function initializeModalCloseHandlers(reportModal, deleteModal, userActionsModal) {
     // Delete modal event listeners
     document.getElementById('deleteModalClose').addEventListener('click', () => closeModal(deleteModal));
     document.getElementById('cancelDelete').addEventListener('click', () => closeModal(deleteModal));
-    document.getElementById('confirmDelete').addEventListener('click', function () {
-      if (currentMessageElement) {
-        currentMessageElement.remove();
+    document.getElementById('confirmDelete').addEventListener('click', async function () {
+      if (currentMessageId) {
+        await deleteMessage(currentMessageId);
       }
       closeModal(deleteModal);
     });
@@ -3260,6 +3303,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Create message text span with safe content
     const messageTextSpan = createSafeElement('span', text, 'message-text');
+
+    // Add deleted styling if message is deleted
+    const deletedTexts = [
+      "Deleted by sender",
+      "Removed by a moderator",
+      "Message removed due to message limit"
+    ];
+
+    if (messageTextSpan && deletedTexts.includes(text)) {
+      messageTextSpan.classList.add('deleted');
+    }
 
     // Create time span
     const timeSpan = createSafeElement('span', timeString, 'message-time');

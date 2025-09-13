@@ -180,5 +180,6 @@ class APIHandler {
 }
 
 // Export for use in other modules
-const api = new APIHandler('https://api.chatfun.lol:5000/api');
+const baseURL = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? 'http://localhost:5000/api' : 'https://api.chatfun.lol:5000/api';
+const api = new APIHandler(baseURL);
 window.api = api;
