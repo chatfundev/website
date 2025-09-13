@@ -69,6 +69,13 @@
   flex: 1;
 }
 
+/* Style for deleted messages */
+.message-text.deleted {
+  font-style: italic;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
 .message-time {
   color: var(--text-secondary);
   font-size: 12px;
