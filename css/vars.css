@@ -272,3 +272,24 @@
   --surface-hover: #21262d;
   --border-color: #30363d;
 }
+
+/* BACKWARD COMPATIBILITY */
+.dark-theme {
+  --primary-color: #ff9500;
+  --primary-hover: #ffb84d;
+  --primary-color-rgb: 255, 149, 0;
+  --primary-color-opacity: rgba(255, 149, 0, 0.15);
+  --danger-color: #dc3545;
+  --danger-hover: #c82333;
+  --success-color: #2ecc71;
+  --success-hover: #27ae60;
+  --warning-color: #f39c12;
+  --warning-hover: #e67e22;
+  --background-color: #1e1e1e;
+  --text-color: #d4d4d4;
+  --text-primary: #d4d4d4;
+  --text-secondary: #808080;
+  --surface-color: #2d2d2d;
+  --surface-hover: #404040;
+  --border-color: #404040;
+}
