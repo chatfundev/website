@@ -1,5 +1,3 @@
-// to do: fix
-
 document.addEventListener('DOMContentLoaded', function () {
   // =====================================
   // CONFIGURATION & GLOBAL VARIABLES
@@ -139,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function muteUser(expiryEpochSeconds) {
     muteExpiry = expiryEpochSeconds * 1000; // Convert to milliseconds
 
-    // Replace input with countdown
+    // Replace chat input with countdown
     const muteContainer = document.createElement('div');
     muteContainer.className = 'mute-countdown-container';
 
@@ -153,9 +151,15 @@ document.addEventListener('DOMContentLoaded', function () {
     chatInputContainer.innerHTML = '';
     chatInputContainer.appendChild(muteContainer);
 
+    // Also mute DM input if it exists
+    muteDMInput(expiryEpochSeconds);
+
     // Start countdown
     updateMuteCountdown();
-    muteCountdownInterval = setInterval(updateMuteCountdown, 1000);
+    muteCountdownInterval = setInterval(() => {
+      updateMuteCountdown();
+      updateDMMuteCountdown();
+    }, 1000);
   }
 
   function updateMuteCountdown() {
@@ -185,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
       muteCountdownInterval = null;
     }
 
-    // Restore original input
+    // Restore original chat input
     const chatInput = document.createElement('input');
     chatInput.type = 'text';
     chatInput.className = 'chat-input';
@@ -200,8 +204,78 @@ document.addEventListener('DOMContentLoaded', function () {
     chatInputContainer.appendChild(chatInput);
     chatInputContainer.appendChild(sendButton);
 
+    // Also restore DM input
+    unmuteDMInput();
+
     // Reattach event listeners
     attachChatEventListeners();
+
+    // Refresh user data to update account standing and status
+    refreshUserStatus();
+  }
+
+  // DM Mute functionality
+  function muteDMInput(expiryEpochSeconds) {
+    const dmInputContainer = document.querySelector('.dm-input-container');
+    if (!dmInputContainer) return;
+
+    // Replace DM input with countdown
+    const muteContainer = document.createElement('div');
+    muteContainer.className = 'mute-countdown-container dm-mute-countdown';
+
+    const muteMessage = createSafeElement('span', 'You are muted for: ', 'mute-message');
+    const muteTimer = createSafeElement('span', '', 'mute-timer');
+    muteTimer.id = 'dmMuteTimer';
+
+    muteContainer.appendChild(muteMessage);
+    muteContainer.appendChild(muteTimer);
+
+    // Store original DM input content
+    const originalDMInput = dmInputContainer.innerHTML;
+    window.originalDMInput = originalDMInput;
+
+    dmInputContainer.innerHTML = '';
+    dmInputContainer.appendChild(muteContainer);
+  }
+
+  function updateDMMuteCountdown() {
+    const now = Date.now();
+    const timeLeft = muteExpiry - now;
+
+    if (timeLeft <= 0) {
+      unmuteDMInput();
+      return;
+    }
+
+    const minutes = Math.floor(timeLeft / (1000 * 60));
+    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+    const timerElement = document.getElementById('dmMuteTimer');
+    if (timerElement) {
+      timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+  }
+
+  function unmuteDMInput() {
+    const dmInputContainer = document.querySelector('.dm-input-container');
+    if (!dmInputContainer) return;
+
+    // Restore original DM input if it was stored
+    if (window.originalDMInput) {
+      dmInputContainer.innerHTML = window.originalDMInput;
+      window.originalDMInput = null;
+    } else {
+      // Fallback: create basic DM input structure
+      dmInputContainer.innerHTML = `
+        <input type="text" class="dm-input" placeholder="Type your message..." maxlength="200">
+        <button class="dm-send-button">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      `;
+    }
+
+    // Reattach DM event listeners
+    initializeDMMessaging();
   }
 
   // =====================================
@@ -278,6 +352,14 @@ document.addEventListener('DOMContentLoaded', function () {
       if (error.message && (error.message.includes('401') || error.message.includes('Token has expired'))) {
         console.warn('Authentication failed while sending message');
         // API handler will redirect, but this is a backup
+        return;
+      }
+
+      // Check if this is a mute error
+      if (error.message && error.message.includes('muted')) {
+        showNotification('You are currently muted and cannot send messages.', 'error');
+        // Refresh user status to update mute info
+        refreshUserStatus();
         return;
       }
 
@@ -2753,6 +2835,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const dmSendButton = document.querySelector('.dm-send-button');
 
     async function sendDMMessage() {
+      // Check if user is muted
+      if (muteExpiry && Date.now() < muteExpiry) {
+        return; // User is still muted, don't send message
+      }
+
       if (!dmInput.value.trim()) return;
 
       const message = dmInput.value.trim();
@@ -2839,7 +2926,11 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('Failed to send DM:', error);
 
         // Handle specific error cases
-        if (error.message && error.message.includes('disabled direct messages')) {
+        if (error.message && error.message.includes('muted')) {
+          showNotification('You are currently muted and cannot send messages', 'error');
+          // Refresh user status to update mute info
+          refreshUserStatus();
+        } else if (error.message && error.message.includes('disabled direct messages')) {
           showNotification('This user has disabled direct messages', 'error');
         } else if (error.message) {
           showNotification(error.message, 'error');
@@ -3868,17 +3959,17 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     // Close modal when clicking outside
-    window.onclick = function(event) {
+    window.onclick = function (event) {
       if (event.target === modal) {
         modal.style.display = 'none';
       }
     };
   }
-  
+
   // =====================================
   // THEME SYSTEM
   // =====================================
-  
+
   // Define available themes - makes it easy to add new themes
   const AVAILABLE_THEMES = {
     'chatfun': {
@@ -3923,18 +4014,18 @@ document.addEventListener('DOMContentLoaded', function () {
     //   className: 'css-class-name'
     // }
   };
-  
+
   function applyTheme(themeId) {
     const body = document.body;
-    
+
     // Remove all existing theme classes
     Object.values(AVAILABLE_THEMES).forEach(theme => {
       body.classList.remove(theme.className);
     });
-    
+
     // Remove legacy theme classes for compatibility
     body.classList.remove('light-theme', 'dark-theme');
-    
+
     // Apply the new theme
     if (AVAILABLE_THEMES[themeId]) {
       body.classList.add(AVAILABLE_THEMES[themeId].className);
@@ -3945,14 +4036,14 @@ document.addEventListener('DOMContentLoaded', function () {
       body.classList.add(AVAILABLE_THEMES['chatfun'].className);
     }
   }
-  
+
   function populateThemeDropdown() {
     const themeSelect = document.getElementById('themeSelect');
     if (!themeSelect) return;
-    
+
     // Clear existing options
     themeSelect.innerHTML = '';
-    
+
     // Add options for each available theme
     Object.entries(AVAILABLE_THEMES).forEach(([themeId, themeInfo]) => {
       const option = document.createElement('option');
@@ -4574,6 +4665,11 @@ document.addEventListener('DOMContentLoaded', function () {
           mergeServerSettings(data.user.settings);
         }
 
+        // Apply status restrictions if user is suspended or terminated
+        if (data.user) {
+          applyStatusRestrictions(data.user);
+        }
+
         // Load current avatar
         loadCurrentAvatar();
 
@@ -4590,6 +4686,38 @@ document.addEventListener('DOMContentLoaded', function () {
           window.clearAuthToken();
           window.location.href = 'login.html';
         }
+      });
+  }
+
+  // Function to refresh user status without full page reload
+  function refreshUserStatus() {
+    if (!window.api || !window.getAuthToken()) {
+      return;
+    }
+
+    window.api.get('/auth/me')
+      .then(data => {
+        if (data.user) {
+          // Update global status
+          window.USER_STATUS = {
+            suspended: data.user.suspended || false,
+            suspended_until: data.user.suspended_until,
+            suspended_reason: data.user.suspended_reason,
+            terminated: data.user.terminated || false,
+            terminated_at: data.user.terminated_at,
+            terminated_reason: data.user.terminated_reason,
+            muted: data.user.muted || false,
+            muted_until: data.user.muted_until,
+            muted_reason: data.user.muted_reason,
+            strikes: data.user.strikes || 0
+          };
+
+          // Update account standing display
+          updateAccountStanding(data.user);
+        }
+      })
+      .catch(error => {
+        console.error("Error refreshing user status:", error);
       });
   }
 
@@ -4648,7 +4776,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // =====================================
   // THEME FUNCTIONALITY
   // =====================================
-  
+
   function initializeTheme() {
     // Load saved theme from localStorage or default to 'chatfun'
     const savedTheme = localStorage.getItem('theme') || 'chatfun';
@@ -4717,9 +4845,329 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }, 5 * 60 * 1000); // 5 minutes
 
+  // Set up periodic status validation (every 5 seconds)
+  setInterval(() => {
+    const token = window.getAuthToken();
+    if (!token) {
+      return; // No token, skip status check
+    }
+
+    // Check for status updates
+    if (window.api) {
+      window.api.bearerToken = token;
+      window.api.get('/auth/me')
+        .then(data => {
+          if (data.user) {
+            // Check if status has changed
+            const currentStatus = window.USER_STATUS || {};
+            const newStatus = {
+              suspended: data.user.suspended || false,
+              suspended_until: data.user.suspended_until,
+              suspended_reason: data.user.suspended_reason,
+              terminated: data.user.terminated || false,
+              terminated_at: data.user.terminated_at,
+              terminated_reason: data.user.terminated_reason,
+              muted: data.user.muted || false,
+              muted_until: data.user.muted_until,
+              muted_reason: data.user.muted_reason,
+              strikes: data.user.strikes || 0
+            };
+
+            // Check if any status has changed
+            const statusChanged = (
+              currentStatus.suspended !== newStatus.suspended ||
+              currentStatus.terminated !== newStatus.terminated ||
+              currentStatus.muted !== newStatus.muted ||
+              currentStatus.strikes !== newStatus.strikes ||
+              currentStatus.suspended_until !== newStatus.suspended_until ||
+              currentStatus.muted_until !== newStatus.muted_until
+            );
+
+            if (statusChanged) {
+              console.log('User status changed, updating UI...');
+
+              // Update global status
+              window.USER_STATUS = newStatus;
+
+              // Update account standing
+              updateAccountStanding(data.user);
+
+              // Handle mute status changes
+              if (newStatus.muted && newStatus.muted_until) {
+                const muteUntilTime = new Date(newStatus.muted_until).getTime();
+                const currentTime = Date.now();
+
+                if (muteUntilTime > currentTime && !muteExpiry) {
+                  // User was just muted
+                  const muteUntilSeconds = Math.floor(muteUntilTime / 1000);
+                  muteUser(muteUntilSeconds);
+                  muteDMInput(muteUntilSeconds);
+                }
+              } else if (!newStatus.muted && muteExpiry) {
+                // User was just unmuted
+                unmuteUser();
+                unmuteDMInput();
+              }
+
+              // Handle suspension/termination status changes
+              if (newStatus.terminated && !currentStatus.terminated) {
+                // User was just terminated
+                applyStatusRestrictions(data.user);
+                showNotification('Your account has been terminated.', 'error');
+              } else if (newStatus.suspended && !currentStatus.suspended) {
+                // User was just suspended
+                applyStatusRestrictions(data.user);
+                showNotification('Your account has been suspended.', 'error');
+              } else if (!newStatus.suspended && currentStatus.suspended) {
+                // User suspension was lifted - refresh page to restore functionality
+                showNotification('Your suspension has been lifted. The page will refresh.', 'success');
+                setTimeout(() => {
+                  window.location.reload();
+                }, 2000);
+              }
+            }
+          }
+        })
+        .catch(error => {
+          // Silently handle errors for status checks to avoid spam
+          if (error.message && (error.message.includes('401') || error.message.includes('Token has expired'))) {
+            // Token issues will be handled by the main validation above
+            return;
+          }
+          console.debug('Status check failed:', error);
+        });
+    }
+  }, 5 * 1000); // 5 seconds
+
   // Clean up polling when leaving the page
   window.addEventListener('beforeunload', function () {
     stopMessagePolling();
   });
+
+  // Global variables for user status
+  window.USER_STATUS = {
+    suspended: false,
+    suspended_until: null,
+    suspended_reason: null,
+    terminated: false,
+    terminated_at: null,
+    terminated_reason: null,
+    strikes: 0
+  };
+
+  // Function to update account standing display
+  function updateAccountStanding(userData) {
+    const currentStrikes = document.getElementById('currentStrikes');
+    const strikesDescription = document.getElementById('strikesDescription');
+    const punishmentInfo = document.getElementById('punishmentInfo');
+    const punishmentText = document.getElementById('punishmentText');
+    const punishmentDetails = document.getElementById('punishmentDetails');
+
+    if (!currentStrikes) return;
+
+    const strikes = userData.strikes || 0;
+    currentStrikes.textContent = strikes;
+
+    // Update strikes description
+    const strikePunishments = {
+      0: "Your account is in good standing",
+      1: "Warning - 1 strike on record",
+      2: "1 day mute - 2 strikes on record",
+      3: "2 week mute - 3 strikes on record",
+      4: "3 month suspension - 4 strikes on record",
+      5: "1 year suspension - 5 strikes on record",
+      6: "Account terminated - 6 strikes on record"
+    };
+
+    strikesDescription.textContent = strikePunishments[strikes] || `${strikes} strikes on record`;
+
+    // Show punishment info if user has active punishment
+    if (userData.suspended || userData.terminated || userData.muted) {
+      punishmentInfo.style.display = 'block';
+
+      if (userData.terminated) {
+        punishmentText.innerHTML = '<i class="fas fa-ban"></i> Account Terminated';
+        punishmentDetails.textContent = userData.terminated_reason || 'No reason specified';
+      } else if (userData.suspended) {
+        const suspendedUntil = new Date(userData.suspended_until);
+        punishmentText.innerHTML = '<i class="fas fa-clock"></i> Account Suspended';
+        punishmentDetails.textContent = `Until ${suspendedUntil.toLocaleDateString()} - ${userData.suspended_reason || 'No reason specified'}`;
+      } else if (userData.muted) {
+        const mutedUntil = new Date(userData.muted_until);
+        punishmentText.innerHTML = '<i class="fas fa-volume-mute"></i> Account Muted';
+        punishmentDetails.textContent = `Until ${mutedUntil.toLocaleDateString()} - ${userData.muted_reason || 'No reason specified'}`;
+      }
+    } else {
+      punishmentInfo.style.display = 'none';
+    }
+  }
+
+  // Function to show suspension notice
+  function showSuspensionNotice(userData) {
+    const suspendedUntil = new Date(userData.suspended_until);
+    const reason = userData.suspended_reason || 'No reason specified';
+
+    const noticeHtml = `
+      <div class="status-notice-screen">
+        <div class="status-notice-content">
+          <div class="status-notice-icon suspended">
+            <i class="fas fa-clock"></i>
+          </div>
+          <h2 class="suspended">Account Suspended</h2>
+          <p>Your account has been temporarily suspended and you cannot access most features of ChatFun.</p>
+          <div class="countdown-container">
+            <div class="countdown-label">Time remaining:</div>
+            <div class="countdown-time" id="suspensionCountdown">Loading...</div>
+          </div>
+          <p><strong>Reason:</strong> ${reason}</p>
+          <div class="settings-access-note">
+            <p><i class="fas fa-cog"></i> You can still access your account settings including account standing information.</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return noticeHtml;
+  }
+
+  // Function to show termination notice
+  function showTerminationNotice(userData) {
+    const terminatedAt = new Date(userData.terminated_at);
+    const reason = userData.terminated_reason || 'No reason specified';
+
+    const noticeHtml = `
+      <div class="status-notice-screen">
+        <div class="status-notice-content">
+          <div class="status-notice-icon terminated">
+            <i class="fas fa-ban"></i>
+          </div>
+          <h2 class="terminated">Account Terminated</h2>
+          <p>Your account has been permanently terminated and you can no longer access ChatFun.</p>
+          <p><strong>Terminated:</strong> ${terminatedAt.toLocaleDateString()}</p>
+          <p><strong>Reason:</strong> ${reason}</p>
+          <div class="settings-access-note">
+            <p><i class="fas fa-cog"></i> You can still access your account settings including account standing information.</p>
+          </div>
+        </div>
+      </div>
+    `;
+
+    return noticeHtml;
+  }
+
+  // Function to replace tab content with status notices
+  function applyStatusRestrictions(userData) {
+    // Store user status globally
+    window.USER_STATUS = {
+      suspended: userData.suspended || false,
+      suspended_until: userData.suspended_until,
+      suspended_reason: userData.suspended_reason,
+      terminated: userData.terminated || false,
+      terminated_at: userData.terminated_at,
+      terminated_reason: userData.terminated_reason,
+      muted: userData.muted || false,
+      muted_until: userData.muted_until,
+      muted_reason: userData.muted_reason,
+      strikes: userData.strikes || 0
+    };
+
+    // Update account standing regardless of status
+    updateAccountStanding(userData);
+
+    // Check for mute status and apply muting
+    if (userData.muted && userData.muted_until) {
+      const muteUntilTime = new Date(userData.muted_until).getTime();
+      const currentTime = Date.now();
+
+      if (muteUntilTime > currentTime) {
+        // User is currently muted
+        const muteUntilSeconds = Math.floor(muteUntilTime / 1000);
+        muteUser(muteUntilSeconds);
+      }
+    }
+
+    // If user is terminated or suspended, replace tab content
+    if (userData.terminated) {
+      const tabsToReplace = ['chat', 'achievements', 'leaderboard', 'items', 'friends', 'dms', 'reports', 'socialspy', 'server-stats', 'other-admin-stuff'];
+      const noticeHtml = showTerminationNotice(userData);
+
+      tabsToReplace.forEach(tabId => {
+        const tabElement = document.getElementById(tabId);
+        if (tabElement) {
+          tabElement.innerHTML = noticeHtml;
+        }
+      });
+    } else if (userData.suspended) {
+      const tabsToReplace = ['chat', 'achievements', 'leaderboard', 'items', 'friends', 'dms', 'reports', 'socialspy', 'server-stats', 'other-admin-stuff'];
+      const noticeHtml = showSuspensionNotice(userData);
+
+      tabsToReplace.forEach(tabId => {
+        const tabElement = document.getElementById(tabId);
+        if (tabElement) {
+          tabElement.innerHTML = noticeHtml;
+        }
+      });
+
+      // Start countdown timer for suspension
+      startSuspensionCountdown(userData.suspended_until);
+    }
+  }
+
+  // Function to start suspension countdown timer
+  function startSuspensionCountdown(suspendedUntil) {
+    const endTime = new Date(suspendedUntil).getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const timeLeft = endTime - now;
+
+      const countdownElement = document.getElementById('suspensionCountdown');
+      if (!countdownElement) return;
+
+      if (timeLeft <= 0) {
+        countdownElement.textContent = 'Suspension expired - please refresh the page';
+        return;
+      }
+
+      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+      let countdownText = '';
+      if (days > 0) {
+        countdownText += `${days}d `;
+      }
+      if (hours > 0 || days > 0) {
+        countdownText += `${hours}h `;
+      }
+      if (minutes > 0 || hours > 0 || days > 0) {
+        countdownText += `${minutes}m `;
+      }
+      countdownText += `${seconds}s`;
+
+      countdownElement.textContent = countdownText;
+    }
+
+    // Update immediately and then every second
+    updateCountdown();
+    const countdownInterval = setInterval(updateCountdown, 1000);
+
+    // Store interval so it can be cleared if needed
+    window.suspensionCountdownInterval = countdownInterval;
+  }
+
+  // Function to clear suspension countdown
+  function clearSuspensionCountdown() {
+    if (window.suspensionCountdownInterval) {
+      clearInterval(window.suspensionCountdownInterval);
+      window.suspensionCountdownInterval = null;
+    }
+  }
+
+  // Export functions to global scope for access
+  window.updateAccountStanding = updateAccountStanding;
+  window.applyStatusRestrictions = applyStatusRestrictions;
+  window.clearSuspensionCountdown = clearSuspensionCountdown;
 });
 
