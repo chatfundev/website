@@ -49,27 +49,6 @@
   --transition-duration-slow: 0.4s;
 }
 
-/* ChatFun Default Theme (Dark) */
-.chatfun-theme {
-  --primary-color: #ff9500;
-  --primary-hover: #ffb84d;
-  --primary-color-rgb: 255, 149, 0;
-  --primary-color-opacity: rgba(255, 149, 0, 0.15);
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --success-color: #2ecc71;
-  --success-hover: #27ae60;
-  --warning-color: #f39c12;
-  --warning-hover: #e67e22;
-  --background-color: #1e1e1e;
-  --text-color: #d4d4d4;
-  --text-primary: #d4d4d4;
-  --text-secondary: #808080;
-  --surface-color: #2d2d2d;
-  --surface-hover: #404040;
-  --border-color: #404040;
-}
-
 /* Catppuccin Mocha Theme */
 .catppuccin-mocha-theme {
   /* Primary colors using Catppuccin Blue */
@@ -87,22 +66,15 @@
   --warning-hover: #fab387;
 
   /* Background and surface colors */
-  --background-color: #1e1e2e;
-  /* Base */
-  --surface-color: #313244;
-  /* Surface 0 */
-  --surface-hover: #45475a;
-  /* Surface 1 */
-  --border-color: #585b70;
-  /* Surface 2 */
+  --background-color: #1e1e2e; /* Base */
+  --surface-color: #313244; /* Surface 0 */
+  --surface-hover: #45475a; /* Surface 1 */
+  --border-color: #585b70; /* Surface 2 */
 
   /* Text colors */
-  --text-color: #cdd6f4;
-  /* Text */
-  --text-primary: #cdd6f4;
-  /* Text */
-  --text-secondary: #bac2de;
-  /* Subtext 1 */
+  --text-color: #cdd6f4; /* Text */
+  --text-primary: #cdd6f4; /* Text */
+  --text-secondary: #bac2de; /* Subtext 1 */
 
   /* Additional Catppuccin colors for future use */
   --catppuccin-rosewater: #f5e0dc;
@@ -131,4 +103,31 @@
   --catppuccin-base: #1e1e2e;
   --catppuccin-mantle: #181825;
   --catppuccin-crust: #11111b;
+}
+
+.atom-one-dark-theme {
+  /* Primary colors using Atom One Dark Blue */
+  --primary-color: #61afef;
+  --primary-hover: #56b6c2;
+  --primary-color-rgb: 97, 175, 239;
+  --primary-color-opacity: rgba(97, 175, 239, 0.15);
+
+  /* Status colors using Atom One Dark palette */
+  --danger-color: #e06c75;
+  --danger-hover: #be5046;
+  --success-color: #98c379;
+  --success-hover: #79c27a;
+  --warning-color: #e6c07b;
+  --warning-hover: #d19a66;
+
+  /* Background and surface colors */
+  --background-color: #282c34; /* Background */
+  --surface-color: #3a3f4b; /* Current Line */
+  --surface-hover: #4b5261; /* Selection */
+  --border-color: #5c6370; /* Comments */
+
+  /* Text colors */
+  --text-color: #abb2bf; /* Foreground */
+  --text-primary: #abb2bf; /* Foreground */
+  --text-secondary: #7f848e; /* Comments */
 }
