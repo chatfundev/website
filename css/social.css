@@ -611,6 +611,33 @@
   transform: scale(0.95);
 }
 
+/* DM Mute Countdown */
+.dm-mute-countdown {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm);
+  background-color: var(--surface-color);
+  border: 1px solid var(--danger-color);
+  border-radius: 20px;
+  color: var(--danger-color);
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+}
+
+.dm-mute-countdown .mute-message {
+  color: var(--danger-color);
+  margin-right: var(--spacing-xs);
+}
+
+.dm-mute-countdown .mute-timer {
+  color: var(--danger-color);
+  font-weight: bold;
+  font-family: monospace;
+  font-size: var(--font-size-lg);
+}
+
 /* Empty States */
 .empty-conversations-state {
   display: flex;
