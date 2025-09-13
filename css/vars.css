@@ -126,43 +126,149 @@
   --catppuccin-crust: #11111b;
 }
 
-/* Legacy theme classes for backward compatibility */
-.light-theme {
-  --primary-color: #ff9500;
-  --primary-hover: #ffb84d;
-  --primary-color-rgb: 255, 149, 0;
-  --primary-color-opacity: rgba(255, 149, 0, 0.15);
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --success-color: #28a745;
-  --success-hover: #218838;
-  --warning-color: #ffc107;
-  --warning-hover: #e0a800;
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --surface-color: #f8f9fa;
-  --surface-hover: #e9ecef;
-  --border-color: #dee2e6;
+/* Tokyo Night Theme */
+.tokyo-night-theme {
+  --primary-color: #7aa2f7;
+  --primary-hover: #9bb5ff;
+  --primary-color-rgb: 122, 162, 247;
+  --primary-color-opacity: rgba(122, 162, 247, 0.15);
+  --danger-color: #f7768e;
+  --danger-hover: #ff9fb1;
+  --success-color: #9ece6a;
+  --success-hover: #b9f27c;
+  --warning-color: #e0af68;
+  --warning-hover: #ff9e64;
+  --background-color: #1a1b26;
+  --text-color: #c0caf5;
+  --text-primary: #c0caf5;
+  --text-secondary: #9aa5ce;
+  --surface-color: #24283b;
+  --surface-hover: #414868;
+  --border-color: #565f89;
 }
 
-.dark-theme {
-  --primary-color: #ff9500;
-  --primary-hover: #ffb84d;
-  --primary-color-rgb: 255, 149, 0;
-  --primary-color-opacity: rgba(255, 149, 0, 0.15);
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --success-color: #2ecc71;
-  --success-hover: #27ae60;
-  --warning-color: #f39c12;
-  --warning-hover: #e67e22;
-  --background-color: #1e1e1e;
-  --text-color: #d4d4d4;
-  --text-primary: #d4d4d4;
-  --text-secondary: #808080;
-  --surface-color: #2d2d2d;
-  --surface-hover: #404040;
-  --border-color: #404040;
+/* Dracula Theme */
+.dracula-theme {
+  --primary-color: #bd93f9;
+  --primary-hover: #d4b5ff;
+  --primary-color-rgb: 189, 147, 249;
+  --primary-color-opacity: rgba(189, 147, 249, 0.15);
+  --danger-color: #ff5555;
+  --danger-hover: #ff7777;
+  --success-color: #50fa7b;
+  --success-hover: #72fb9d;
+  --warning-color: #f1fa8c;
+  --warning-hover: #ffb86c;
+  --background-color: #282a36;
+  --text-color: #f8f8f2;
+  --text-primary: #f8f8f2;
+  --text-secondary: #6272a4;
+  --surface-color: #44475a;
+  --surface-hover: #6272a4;
+  --border-color: #6272a4;
+}
+
+/* Nord Theme */
+.nord-theme {
+  --primary-color: #5e81ac;
+  --primary-hover: #81a1c1;
+  --primary-color-rgb: 94, 129, 172;
+  --primary-color-opacity: rgba(94, 129, 172, 0.15);
+  --danger-color: #bf616a;
+  --danger-hover: #d08770;
+  --success-color: #a3be8c;
+  --success-hover: #8fbcbb;
+  --warning-color: #ebcb8b;
+  --warning-hover: #d08770;
+  --background-color: #2e3440;
+  --text-color: #d8dee9;
+  --text-primary: #d8dee9;
+  --text-secondary: #e5e9f0;
+  --surface-color: #3b4252;
+  --surface-hover: #434c5e;
+  --border-color: #4c566a;
+}
+
+/* One Dark Theme */
+.one-dark-theme {
+  --primary-color: #61afef;
+  --primary-hover: #84c5ff;
+  --primary-color-rgb: 97, 175, 239;
+  --primary-color-opacity: rgba(97, 175, 239, 0.15);
+  --danger-color: #e06c75;
+  --danger-hover: #ff7a85;
+  --success-color: #98c379;
+  --success-hover: #aed581;
+  --warning-color: #e5c07b;
+  --warning-hover: #d19a66;
+  --background-color: #282c34;
+  --text-color: #abb2bf;
+  --text-primary: #abb2bf;
+  --text-secondary: #5c6370;
+  --surface-color: #21252b;
+  --surface-hover: #2c313c;
+  --border-color: #3e4451;
+}
+
+/* Monokai Theme */
+.monokai-theme {
+  --primary-color: #66d9ef;
+  --primary-hover: #8be9fd;
+  --primary-color-rgb: 102, 217, 239;
+  --primary-color-opacity: rgba(102, 217, 239, 0.15);
+  --danger-color: #f92672;
+  --danger-hover: #ff4081;
+  --success-color: #a6e22e;
+  --success-hover: #bef253;
+  --warning-color: #fd971f;
+  --warning-hover: #ffab40;
+  --background-color: #272822;
+  --text-color: #f8f8f2;
+  --text-primary: #f8f8f2;
+  --text-secondary: #75715e;
+  --surface-color: #3e3d32;
+  --surface-hover: #49483e;
+  --border-color: #75715e;
+}
+
+/* Gruvbox Dark Theme */
+.gruvbox-dark-theme {
+  --primary-color: #83a598;
+  --primary-hover: #8ec07c;
+  --primary-color-rgb: 131, 165, 152;
+  --primary-color-opacity: rgba(131, 165, 152, 0.15);
+  --danger-color: #fb4934;
+  --danger-hover: #cc241d;
+  --success-color: #b8bb26;
+  --success-hover: #98971a;
+  --warning-color: #fabd2f;
+  --warning-hover: #d79921;
+  --background-color: #282828;
+  --text-color: #ebdbb2;
+  --text-primary: #ebdbb2;
+  --text-secondary: #a89984;
+  --surface-color: #3c3836;
+  --surface-hover: #504945;
+  --border-color: #665c54;
+}
+
+/* GitHub Dark Theme */
+.github-dark-theme {
+  --primary-color: #58a6ff;
+  --primary-hover: #79c0ff;
+  --primary-color-rgb: 88, 166, 255;
+  --primary-color-opacity: rgba(88, 166, 255, 0.15);
+  --danger-color: #f85149;
+  --danger-hover: #ff6b6b;
+  --success-color: #56d364;
+  --success-hover: #7dd87a;
+  --warning-color: #d29922;
+  --warning-hover: #f2cc60;
+  --background-color: #0d1117;
+  --text-color: #f0f6fc;
+  --text-primary: #f0f6fc;
+  --text-secondary: #8b949e;
+  --surface-color: #161b22;
+  --surface-hover: #21262d;
+  --border-color: #30363d;
 }

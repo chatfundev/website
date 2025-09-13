@@ -3888,6 +3888,34 @@ document.addEventListener('DOMContentLoaded', function () {
     'catppuccin-mocha': {
       name: 'Catppuccin Mocha',
       className: 'catppuccin-mocha-theme'
+    },
+    'tokyo-night': {
+      name: 'Tokyo Night',
+      className: 'tokyo-night-theme'
+    },
+    'dracula': {
+      name: 'Dracula',
+      className: 'dracula-theme'
+    },
+    'nord': {
+      name: 'Nord',
+      className: 'nord-theme'
+    },
+    'one-dark': {
+      name: 'One Dark',
+      className: 'one-dark-theme'
+    },
+    'monokai': {
+      name: 'Monokai',
+      className: 'monokai-theme'
+    },
+    'gruvbox-dark': {
+      name: 'Gruvbox Dark',
+      className: 'gruvbox-dark-theme'
+    },
+    'github-dark': {
+      name: 'GitHub Dark',
+      className: 'github-dark-theme'
     }
     // Add new themes here in the future:
     // 'theme-id': {
