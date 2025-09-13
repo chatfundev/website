@@ -180,5 +180,5 @@ class APIHandler {
 }
 
 // Export for use in other modules
-const api = new APIHandler('http://localhost:5000/api');
+const api = new APIHandler('http://api.chatfun.lol:5000/api');
 window.api = api;
