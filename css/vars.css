@@ -77,7 +77,7 @@
   --primary-hover: #74c7ec;
   --primary-color-rgb: 137, 180, 250;
   --primary-color-opacity: rgba(137, 180, 250, 0.15);
-  
+
   /* Status colors using Catppuccin palette */
   --danger-color: #f38ba8;
   --danger-hover: #eba0ac;
@@ -85,18 +85,25 @@
   --success-hover: #94e2d5;
   --warning-color: #f9e2af;
   --warning-hover: #fab387;
-  
+
   /* Background and surface colors */
-  --background-color: #1e1e2e; /* Base */
-  --surface-color: #313244;    /* Surface 0 */
-  --surface-hover: #45475a;    /* Surface 1 */
-  --border-color: #585b70;     /* Surface 2 */
-  
+  --background-color: #1e1e2e;
+  /* Base */
+  --surface-color: #313244;
+  /* Surface 0 */
+  --surface-hover: #45475a;
+  /* Surface 1 */
+  --border-color: #585b70;
+  /* Surface 2 */
+
   /* Text colors */
-  --text-color: #cdd6f4;       /* Text */
-  --text-primary: #cdd6f4;     /* Text */
-  --text-secondary: #bac2de;   /* Subtext 1 */
-  
+  --text-color: #cdd6f4;
+  /* Text */
+  --text-primary: #cdd6f4;
+  /* Text */
+  --text-secondary: #bac2de;
+  /* Subtext 1 */
+
   /* Additional Catppuccin colors for future use */
   --catppuccin-rosewater: #f5e0dc;
   --catppuccin-flamingo: #f2cdcd;
@@ -124,45 +131,4 @@
   --catppuccin-base: #1e1e2e;
   --catppuccin-mantle: #181825;
   --catppuccin-crust: #11111b;
-}
-
-/* Legacy theme classes for backward compatibility */
-.light-theme {
-  --primary-color: #ff9500;
-  --primary-hover: #ffb84d;
-  --primary-color-rgb: 255, 149, 0;
-  --primary-color-opacity: rgba(255, 149, 0, 0.15);
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --success-color: #28a745;
-  --success-hover: #218838;
-  --warning-color: #ffc107;
-  --warning-hover: #e0a800;
-  --background-color: #ffffff;
-  --text-color: #333333;
-  --text-primary: #333333;
-  --text-secondary: #666666;
-  --surface-color: #f8f9fa;
-  --surface-hover: #e9ecef;
-  --border-color: #dee2e6;
-}
-
-.dark-theme {
-  --primary-color: #ff9500;
-  --primary-hover: #ffb84d;
-  --primary-color-rgb: 255, 149, 0;
-  --primary-color-opacity: rgba(255, 149, 0, 0.15);
-  --danger-color: #dc3545;
-  --danger-hover: #c82333;
-  --success-color: #2ecc71;
-  --success-hover: #27ae60;
-  --warning-color: #f39c12;
-  --warning-hover: #e67e22;
-  --background-color: #1e1e1e;
-  --text-color: #d4d4d4;
-  --text-primary: #d4d4d4;
-  --text-secondary: #808080;
-  --surface-color: #2d2d2d;
-  --surface-hover: #404040;
-  --border-color: #404040;
 }

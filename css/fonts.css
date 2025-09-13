@@ -1,5 +1,5 @@
 /* Fonts */
 @font-face {
   font-family: 'VeraMono';
-  src: url('/fonts/VeraMono.ttf') format('truetype');
+  src: url('../fonts/VeraMono.ttf') format('truetype');
 }
