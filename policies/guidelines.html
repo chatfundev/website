@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatFun - Community Guidelines</title>
+    <link rel="icon" type="image/svg+xml" href="../images/logo.svg">
+    <link rel="stylesheet" href="../css/styles.css">
+    <link rel="stylesheet" href="../css/index.css">
+    <link rel="stylesheet" href="../css/policies.css">
+    <script src="https://kit.fontawesome.com/ac9ab6562b.js" crossorigin="anonymous"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo-container">
+          <img src="../images/logo.svg" alt="ChatFun Logo" class="logo-image">
+          <h1>chatfun</h1>
+        </div>
+        <p>community guidelines</p>
+      </div>
+
+      <div class="policy-body">
+        <p><em>Last Updated: September 13 2025</em></p>
+        <p>Chatfun is a place to connect, chat, and have fun. To keep the community safe and enjoyable, all users must
+          follow
+          these guidelines. Violations may result in warnings, mutes, suspensions, terminations, or other enforcement
+          actions as
+          described in our <strong>Terms of Service</strong>.</p>
+        <hr>
+        <h2 id="1-respect-others">1. Respect Others</h2>
+        <ul>
+          <li>Do not harass, bully, stalk, or threaten anyone.</li>
+          <li>Do not impersonate another person or misrepresent your identity.</li>
+          <li>Do not share someone else’s private information without their consent.</li>
+        </ul>
+        <hr>
+        <h2 id="2-keep-it-legal">2. Keep It Legal</h2>
+        <ul>
+          <li>Do not share, request, or promote illegal content or activity.</li>
+          <li>Do not discuss or encourage violence, terrorism, or criminal behavior.</li>
+          <li>Do not engage in scams, fraud, or phishing attempts.</li>
+        </ul>
+        <hr>
+        <h2 id="3-content-standards">3. Content Standards</h2>
+        <ul>
+          <li>Do not post or share content that is hateful, abusive, obscene, sexually explicit, or otherwise harmful.
+          </li>
+          <li>Do not spam chats, flood messages, or engage in disruptive behavior.</li>
+          <li>Do not share malware, viruses, or links to harmful websites.</li>
+          <li>Do not exploit platform features in unintended ways.</li>
+        </ul>
+        <hr>
+        <h2 id="4-global-chat-etiquette">4. Global Chat Etiquette</h2>
+        <ul>
+          <li>Global Chat is for everyone — keep it civil, safe, and appropriate.</li>
+          <li>No excessive self-promotion, advertising, or off-topic spam.</li>
+          <li>Respect moderation decisions.</li>
+        </ul>
+        <hr>
+        <h2 id="5-direct-messages">5. Direct Messages</h2>
+        <ul>
+          <li>Direct Messages are private but still subject to all rules.</li>
+          <li>Unwanted harassment, spam, or abuse in DMs will not be tolerated.</li>
+          <li>Respect other users’ boundaries.</li>
+        </ul>
+        <hr>
+        <h2 id="6-account-responsibility">6. Account Responsibility</h2>
+        <ul>
+          <li>You are responsible for anything that happens on your account.</li>
+          <li>Protect your login credentials and never share them.</li>
+          <li>Do not create multiple accounts to evade punishments or bans.</li>
+        </ul>
+        <hr>
+        <h2 id="7-enforcement-appeals">7. Enforcement &amp; Appeals</h2>
+        <ul>
+          <li>Enforcement may include <strong>mutes, suspensions, terminations, or other measures</strong>.</li>
+          <li>Decisions are made at Chatfun’s sole discretion.</li>
+          <li><strong>Suspensions and terminations are eligible for one appeal each</strong>, as outlined in the Terms
+            of
+            Service.</li>
+          <li>Repeated or severe violations may result in permanent loss of access.</li>
+        </ul>
+        <hr>
+        <h2 id="8-reporting-moderation">8. Reporting &amp; Moderation</h2>
+        <ul>
+          <li>If you encounter violations, report them through the tools provided.</li>
+          <li>Do not abuse the reporting system with false or frivolous reports.</li>
+          <li>Moderators have the final say on enforcement.</li>
+        </ul>
+        <hr>
+        <h2 id="9-final-note">9. Final Note</h2>
+        <p>These Guidelines are here to protect the community. By using Chatfun, you agree to follow them along with the
+          <strong>Terms of Service</strong> and <strong>Privacy Policy</strong>. Failure to do so may result in losing
+          access to
+          Chatfun permanently.
+        </p>
+
+      </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="backToTop" title="Back to top">
+      <i class="fas fa-chevron-up"></i>
+    </button>
+
+    <script>
+      // Back to top functionality
+      const backToTopButton = document.getElementById('backToTop');
+
+      window.addEventListener('scroll', () => {
+        if (window.pageYOffset > 300) {
+          backToTopButton.classList.add('visible');
+        } else {
+          backToTopButton.classList.remove('visible');
+        }
+      });
+
+      backToTopButton.addEventListener('click', () => {
+        window.scrollTo({
+          top: 0,
+          behavior: 'smooth'
+        });
+      });
+
+      // Smooth scrolling for anchor links
+      document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if (target) {
+            target.scrollIntoView({
+              behavior: 'smooth',
+              block: 'start'
+            });
+          }
+        });
+      });
+    </script>
+
+  </body>
+
+</html>

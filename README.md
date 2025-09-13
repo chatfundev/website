@@ -8,6 +8,8 @@
   <em>a simple, fun app that gamifies chatting</em>
 </p>
 
+<p align="center"><b>PLEASE NOTE:</b> All issues should be submitted through the <a href="https://github.com/chatfundev/issue-tracker">public issue tracker</a>.</p>
+
 <p align="center">
   <!-- License -->
   <a href="https://github.com/chatfundev/website/blob/main/LICENSE" style="text-decoration: none;">
