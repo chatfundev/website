@@ -35,9 +35,11 @@ function parseMarkdown(markdown) {
   // Regular list items
   html = html.replace(/^- (.*$)/gim, '<li>$1</li>');
   
-  // Wrap consecutive list items in ul tags
-  html = html.replace(/(<li>.*<\/li>)/gims, '<ul>$1</ul>');
-  html = html.replace(/<\/ul>\s*<ul>/gim, '');
+  // Wrap consecutive list items in ul tags (improved logic)
+  html = html.replace(/((?:<li>[\s\S]*?<\/li>\s*)+)/g, function(match) {
+    // Only wrap if there are at least one <li>
+    return `<ul>${match.trim()}</ul>`;
+  });
   
   // Split into paragraphs first
   const paragraphs = html.split(/\n\s*\n/);
