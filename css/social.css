@@ -353,7 +353,7 @@
   flex-direction: column;
   height: 100vh; /* Full viewport height */
   max-height: 100vh;
-  overflow: hidden; /* Only the messages should scroll, not the entire layout */
+  overflow: scroll;
 }
 
 #dms.tab-content.active .tab-header {
