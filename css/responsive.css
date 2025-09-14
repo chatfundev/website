@@ -263,3 +263,17 @@
     color: black;
   }
 }
+
+@media (max-height: 700px) {
+  .dm-input-container {
+    padding: var(--spacing-sm);
+  }
+  .dm-input {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+  .dm-send-button {
+    width: 32px;
+    height: 32px;
+  }
+}
