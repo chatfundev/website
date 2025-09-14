@@ -385,3 +385,26 @@ body.hide-timestamps .message-time,
   background-color: var(--hover-bg);
   transform: scale(1.1);
 }
+
+/* Markdown Styles */
+.markdown-bold {
+  font-weight: bold;
+}
+
+.markdown-italic {
+  font-style: italic;
+}
+
+.markdown-underline {
+  text-decoration: underline;
+}
+
+.markdown-code {
+  background-color: var(--background-color);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-family: var(--font-family);
+  font-size: 0.9em;
+  color: var(--text-primary);
+}
