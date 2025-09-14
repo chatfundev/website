@@ -183,8 +183,9 @@ function parseMarkdownSafe(text) {
   }
 
   return fragment;
-}/**
- * Create a safe element with markdown content
+}
+
+/**
  * @param {string} tagName - The tag name for the container element
  * @param {string} markdownText - The markdown text to parse
  * @param {string} className - Optional class name for the container
