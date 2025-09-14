@@ -337,13 +337,35 @@ document.addEventListener('DOMContentLoaded', function () {
       api.bearerToken = token;
 
       // Send message to server
-      await api.post('/messages', { content: message });
+      const response = await api.post('/messages', { content: message });
 
       // Clear input on successful send
       currentChatInput.value = '';
 
-      // Immediately fetch new messages to show the sent message
-      await fetchMessages();
+      // Check if this was an admin command response
+      if (response && (response.success || response.error)) {
+        // Only show notifications for admin commands (which return string messages)
+        // Regular messages return success: true (boolean), which we don't want to show
+        if (response.success && typeof response.success === 'string') {
+          showNotification(response.success, 'success');
+        } else if (response.error && typeof response.error === 'string') {
+          showNotification(response.error, 'error');
+        }
+
+        // For sudo and clear commands, refresh messages to see changes
+        if (message.startsWith('/sudo') || message.startsWith('/clear')) {
+          await fetchMessages();
+        }
+        // For regular commands, don't refresh since it's not a message
+        else if (message.startsWith('/')) {
+          return; // Don't fetch messages for other admin commands
+        }
+      }
+
+      // For regular messages or commands that don't prevent it, fetch new messages
+      if (!message.startsWith('/') || message.startsWith('/sudo') || message.startsWith('/clear')) {
+        await fetchMessages();
+      }
 
     } catch (error) {
       console.error('Failed to send message:', error);
