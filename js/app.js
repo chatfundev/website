@@ -26,6 +26,8 @@ document.addEventListener('DOMContentLoaded', function () {
   let currentReplyTo = null;
 
   // =====================================
+  // MARKDOWN PARSER
+  // =====================================
   // AUTHENTICATION UTILITIES
   // =====================================
 
@@ -521,8 +523,12 @@ document.addEventListener('DOMContentLoaded', function () {
         userSpan.textContent = `${message.username}:`;
       }
 
-      // Create message text span with safe content
-      const messageTextSpan = createSafeElement('span', message.content || '', 'message-text');
+      // Create message text span with markdown parsing
+      const messageTextSpan = document.createElement('span');
+      messageTextSpan.className = 'message-text';
+      if (message.content) {
+        messageTextSpan.innerHTML = parseMarkdown(message.content);
+      }
 
       // Add deleted styling if message is deleted
       const deletedTexts = [
@@ -2664,8 +2670,14 @@ document.addEventListener('DOMContentLoaded', function () {
       conversationHeader.appendChild(unreadBadge);
     }
 
-    // Create last message
-    const lastMessage = createSafeElement('div', conversation.last_message || 'No messages yet', 'last-message');
+    // Create last message with markdown support
+    const lastMessage = document.createElement('div');
+    lastMessage.className = 'last-message';
+    if (conversation.last_message) {
+      lastMessage.innerHTML = parseMarkdown(conversation.last_message);
+    } else {
+      lastMessage.textContent = 'No messages yet';
+    }
 
     // Create status text
     const conversationStatus = createSafeElement('div', conversation.other_user.status_text, 'conversation-status');
@@ -3257,7 +3269,11 @@ document.addEventListener('DOMContentLoaded', function () {
       replyContainer.className = 'dm-message-reply-preview';
 
       const replyUsername = createSafeElement('div', replyTo.sender_username, 'dm-reply-to-username');
-      const replyContent = createSafeElement('div', replyTo.content, 'dm-reply-to-content');
+      const replyContent = document.createElement('div');
+      replyContent.className = 'dm-reply-to-content';
+      if (replyTo.content) {
+        replyContent.innerHTML = parseMarkdown(replyTo.content);
+      }
 
       replyContainer.appendChild(replyUsername);
       replyContainer.appendChild(replyContent);
@@ -3321,8 +3337,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     console.log("Created user span:", userSpan.outerHTML);
 
-    // Create message text span with safe content
-    const messageTextSpan = createSafeElement('span', text, 'message-text');
+    // Create message text span with markdown parsing
+    const messageTextSpan = document.createElement('span');
+    messageTextSpan.className = 'message-text';
+    if (text) {
+      messageTextSpan.innerHTML = parseMarkdown(text);
+    }
 
     // Add deleted styling if message is deleted
     const deletedTexts = [
