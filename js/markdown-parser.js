@@ -17,7 +17,7 @@ function parseMarkdown(markdown) {
   html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
   
   // Italic
-  html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+  html = html.replace(/(?<!\*)\*(?!\*)(.*?)\*(?!\*)/gim, '<em>$1</em>');
   
   // Links
   html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank">$1</a>');
