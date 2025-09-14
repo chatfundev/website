@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       // Create message text span with safe content
-      const messageTextSpan = createSafeElement('span', message.content || '', 'message-text');
+      const messageTextSpan = createSafeElementWithMarkdown('span', message.content || '', 'message-text');
 
       // Add deleted styling if message is deleted
       const deletedTexts = [
@@ -3257,7 +3257,7 @@ document.addEventListener('DOMContentLoaded', function () {
       replyContainer.className = 'dm-message-reply-preview';
 
       const replyUsername = createSafeElement('div', replyTo.sender_username, 'dm-reply-to-username');
-      const replyContent = createSafeElement('div', replyTo.content, 'dm-reply-to-content');
+      const replyContent = createSafeElementWithMarkdown('div', replyTo.content, 'dm-reply-to-content');
 
       replyContainer.appendChild(replyUsername);
       replyContainer.appendChild(replyContent);
@@ -3322,7 +3322,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log("Created user span:", userSpan.outerHTML);
 
     // Create message text span with safe content
-    const messageTextSpan = createSafeElement('span', text, 'message-text');
+    const messageTextSpan = createSafeElementWithMarkdown('span', text, 'message-text');
 
     // Add deleted styling if message is deleted
     const deletedTexts = [
